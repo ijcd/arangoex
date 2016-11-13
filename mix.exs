@@ -14,7 +14,7 @@ defmodule Arangoex.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :httpoison, :poison]]
   end
 
   # Dependencies can be Hex packages:
@@ -28,8 +28,12 @@ defmodule Arangoex.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      {:httpoison, "> 0.0.0"},
+      {:poison, "> 0.0.0"},
+      {:exconstructor, "~> 1.0.2"},
       {:mix_test_watch, "~> 0.2", only: :dev},
       {:credo, "~> 0.4", only: [:dev, :test]},
+      {:dialyxir, "~> 0.4", only: [:dev, :test]},
     ]
   end
 end
