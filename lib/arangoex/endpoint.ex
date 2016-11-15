@@ -7,12 +7,27 @@ defmodule Arangoex.Endpoint do
     scheme: "http",
     database_name: "_system",
     arrango_version: 30_000,
-    headers: ["Accept": "*/*"],
+    headers: %{"Accept": "*/*"},
     use_auth: :basic,
     username: nil,
     password: nil,
   )
 
+  @type t :: %__MODULE__{
+    host: String.t,
+    port: pos_integer(),
+    scheme: String.t,
+    database_name: String.t,
+    arrango_version: pos_integer(), 
+    headers: Map.t,
+    use_auth: :none | :basic | :bearer,
+    username: nil | String.t,
+    password: nil | String.t,
+  }
+
+  @type httpoison_response :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
+
+  @spec url(t, String.t) :: String.t
   def url(endpoint, path) do
     %URI{
       scheme: endpoint.scheme,
@@ -22,47 +37,85 @@ defmodule Arangoex.Endpoint do
     } |> URI.to_string
   end
 
+  @spec auth_headers(t) :: Map.t
   def auth_headers(%{use_auth: :basic, username: username, password: password}) do
-    ["Authorization": "Basic " <> Base.encode64("#{username}:#{password}")]
+    %{"Authorization" => "Basic " <> Base.encode64("#{username}:#{password}")}
   end
-
   def auth_headers(%{use_auth: :bearer, password: password}) do
-    ["Authorization": "Bearer #{password}"]
-  end
-  
-  def request_headers(endpoint) do
-    Keyword.merge(auth_headers(endpoint), endpoint.headers)
+    %{"Authorization" =>  "Bearer #{password}"}
   end
 
+  @spec request_headers(t) :: Map.t
+  def request_headers(endpoint) do
+    Map.merge(auth_headers(endpoint), endpoint.headers)
+  end
+
+  @spec with_db(t, String.t) :: t
   def with_db(endpoint, db_name) do
     Map.put(endpoint, :database_name, db_name)
   end
 
+  @spec with_auth(t, atom, String.t, String.t) :: t  
   def with_auth(endpoint, :basic, username, password) do
     Map.merge(endpoint, %{use_auth: :basic, username: username, password: password})
   end
 
+  @spec with_auth(t, atom, String.t) :: t    
   def with_auth(endpoint, :bearer, token) do
     Map.merge(endpoint, %{use_auth: :bearer, password: token})
   end
 
+  @spec get(t, String.t) :: Arangoex.ok_error(any())
   def get(endpoint, resource) do
-    url = url(endpoint, resource)
+    url = url(endpoint, resource) 
     response = HTTPoison.request(:get, url, "", request_headers(endpoint))
     handle_response(response)
   end
 
+  @spec post(t, String.t, map) :: Arangoex.ok_error(any())
+  def post(endpoint, resource, data \\ %{}) do
+    url = url(endpoint, resource)
+    body = encode_data(data)
+    response = HTTPoison.request(:post, url, body, request_headers(endpoint))
+    handle_response(response)
+  end
+
+  @spec put(t, String.t, map) :: Arangoex.ok_error(any())  
+  def put(endpoint, resource, data \\ %{}) do
+    url = url(endpoint, resource)
+    body = encode_data(data)
+    response = HTTPoison.request(:put, url, body, request_headers(endpoint))
+    handle_response(response)
+  end
+  
+  @spec delete(t, String.t) :: Arangoex.ok_error(any())    
+  def delete(endpoint, resource) do
+    url = url(endpoint, resource)
+    response = HTTPoison.request(:delete, url, "", request_headers(endpoint))
+    handle_response(response)
+  end
+
+  @spec handle_response(httpoison_response) :: Arangoex.ok_error(any())
   defp handle_response(response) do
     case response do
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} when status_code >= 200 and status_code < 300 ->
         {:ok, Poison.decode!(body)}
       {:ok, %HTTPoison.Response{body: body}} ->
         {:error, Poison.decode!(body)}
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        raise %Arangoex.Error{message: reason}
+      {:error, %HTTPoison.Error{}} = http_error ->
+        http_error
     end
   end
   
   defp db_path(%{database_name: db_name}, path) when db_name != "_system", do: "/_db/#{db_name}/_api/#{path}"
-  defp db_path(_, path), do: "/_api/#{path}"    
+  defp db_path(_, path), do: "/_api/#{path}"
+
+  defp encode_data(%{} = data) when data == %{}, do: ""
+  defp encode_data(%{__struct__: _} = data), do: encode_data(Map.from_struct(data))
+  defp encode_data(%{} = data) do
+    data
+    |> Enum.filter(fn {_, v} -> v != nil end)
+    |> Enum.into(%{})
+    |> Poison.encode!
+  end
 end

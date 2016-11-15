@@ -31,6 +31,7 @@ defmodule Arangoex.Mixfile do
       {:httpoison, "> 0.0.0"},
       {:poison, "> 0.0.0"},
       {:exconstructor, "~> 1.0.2"},
+      {:faker, "> 0.0.0", only: :test},
       {:mix_test_watch, "~> 0.2", only: :dev},
       {:credo, "~> 0.4", only: [:dev, :test]},
       {:dialyxir, "~> 0.4", only: [:dev, :test]},

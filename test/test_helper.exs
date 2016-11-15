@@ -1,7 +1,7 @@
 ExUnit.start()
 
 defmodule Arangoex.TestHelper do
-  def testdb do
+  def test_endpoint do
     %Arangoex.Endpoint{
       host: System.get_env("ARANGO_HOST"),
       use_auth: :basic,
