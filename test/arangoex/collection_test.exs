@@ -7,6 +7,7 @@ defmodule CollectionTest do
   alias Arangoex.Endpoint
   alias Arangoex.Database  
   alias Arangoex.Collection
+  alias Arangoex.Wal  
 
   setup do
     new_db = %Database{name: Faker.Lorem.word}
@@ -159,7 +160,8 @@ defmodule CollectionTest do
   test "rotates a collection journal", ctx do
     # coll_name = ctx.coll.name
 
-    # {:ok, properties} = Collection.set_properties(ctx.endpoint, ctx.coll, journalSize: 1_048_576)
+    # {:ok, _} = Wal.flush(ctx.endpoint, waitForSync: true, waitForCollector: true)
+    # {:ok, _} = Collection.set_properties(ctx.endpoint, ctx.coll, journalSize: 1_048_576)
     # {:ok, rotate} = Collection.rotate(ctx.endpoint, ctx.coll)
 
     # assert %{"name" => ^coll_name, "error" => false} = rotate
@@ -174,7 +176,4 @@ defmodule CollectionTest do
   end
 end
 
-
-
-  
 

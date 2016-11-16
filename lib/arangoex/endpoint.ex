@@ -25,7 +25,7 @@ defmodule Arangoex.Endpoint do
     password: nil | String.t,
   }
 
-  @type httpoison_response :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
+  @type httpoison_response :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}  
 
   @spec url(t, String.t) :: String.t
   def url(endpoint, path) do
@@ -95,6 +95,17 @@ defmodule Arangoex.Endpoint do
     handle_response(response)
   end
 
+  @spec opts_with_defaults(keyword, keyword) :: map
+  def opts_with_defaults(opts, defaults \\ []) do
+    extra = Keyword.keys(opts) -- Keyword.keys(defaults)
+    Enum.any?(extra, &(raise "unknown key: #{&1}"))
+    
+    defaults
+    |> Keyword.merge(opts)    
+    |> Enum.filter(fn {_, v} -> v != nil end)
+    |> Enum.into(%{})
+  end    
+
   @spec handle_response(httpoison_response) :: Arangoex.ok_error(any())
   defp handle_response(response) do
     case response do
@@ -108,10 +119,12 @@ defmodule Arangoex.Endpoint do
   end
   
   defp db_path(%{database_name: db_name}, path) when db_name != "_system", do: "/_db/#{db_name}/_api/#{path}"
+  defp db_path(_, "/_admin/" <> path), do: "/_admin/#{path}"
   defp db_path(_, path), do: "/_api/#{path}"
 
   defp encode_data(%{} = data) when data == %{}, do: ""
   defp encode_data(%{__struct__: _} = data), do: encode_data(Map.from_struct(data))
+  defp encode_data(data) when is_list(data), do: encode_data(Enum.into(data, %{}))
   defp encode_data(%{} = data) do
     data
     |> Enum.filter(fn {_, v} -> v != nil end)

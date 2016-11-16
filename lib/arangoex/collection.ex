@@ -140,11 +140,7 @@ defmodule Arangoex.Collection do
   """
   @spec set_properties(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
   def set_properties(endpoint, coll, opts \\ []) do
-    properties =
-      [waitForSync: nil, journalSize: nil]
-      |> Keyword.merge(opts)    
-      |> Enum.filter(fn {_, v} -> v != nil end)
-      |> Enum.into(%{})
+    properties = Endpoint.opts_with_defaults(opts, waitForSync: nil, journalSize: nil)
     
     endpoint
     |> Endpoint.put("collection/#{coll.name}/properties", properties)
