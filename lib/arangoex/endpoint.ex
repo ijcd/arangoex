@@ -25,7 +25,7 @@ defmodule Arangoex.Endpoint do
     password: nil | String.t,
   }
 
-  @type httpoison_response :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}  
+  @type httpoison_response :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
 
   @spec url(t, String.t) :: String.t
   def url(endpoint, path) do
@@ -87,6 +87,14 @@ defmodule Arangoex.Endpoint do
     response = HTTPoison.request(:put, url, body, request_headers(endpoint))
     handle_response(response)
   end
+
+  @spec patch(t, String.t, map) :: Arangoex.ok_error(any())  
+  def patch(endpoint, resource, data \\ %{}) do
+    url = url(endpoint, resource)
+    body = encode_data(data)
+    response = HTTPoison.request(:patch, url, body, request_headers(endpoint))
+    handle_response(response)
+  end
   
   @spec delete(t, String.t) :: Arangoex.ok_error(any())    
   def delete(endpoint, resource) do
@@ -111,10 +119,12 @@ defmodule Arangoex.Endpoint do
     case response do
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} when status_code >= 200 and status_code < 300 ->
         {:ok, Poison.decode!(body)}
-      {:ok, %HTTPoison.Response{body: body}} ->
+      {:ok, %HTTPoison.Response{status_code: 400, body: body}} ->
         {:error, Poison.decode!(body)}
-      {:error, %HTTPoison.Error{}} = http_error ->
-        http_error
+      {:ok, %HTTPoison.Response{} = err} ->
+        {:error, err}
+      {:error, %HTTPoison.Error{}} = err ->
+        err
     end
   end
   

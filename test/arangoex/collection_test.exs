@@ -1,33 +1,8 @@
 defmodule CollectionTest do
-  use ExUnit.Case
+  use Arangoex.TestCase
   doctest Arangoex
 
-  import Arangoex.TestHelper
-
-  alias Arangoex.Endpoint
-  alias Arangoex.Database  
   alias Arangoex.Collection
-  alias Arangoex.Wal  
-
-  setup do
-    new_db = %Database{name: Faker.Lorem.word}
-    new_coll = %Collection{name: Faker.Lorem.word}
-    
-    {:ok, true} = Database.create(test_endpoint, new_db)
-    {:ok, coll} =
-      test_endpoint
-      |> Endpoint.with_db(new_db.name)
-      |> Collection.create(new_coll)
-    
-    on_exit fn ->
-      {:ok, _} = Database.drop(test_endpoint, new_db.name)
-    end
-    
-    %{
-      endpoint: Map.put(test_endpoint, :database_name, new_db.name),
-      coll: coll,
-    }
-  end
 
   test "lists collections" do
     {:ok, collections} = Collection.collections(test_endpoint, "_system")

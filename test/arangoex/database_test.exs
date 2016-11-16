@@ -1,23 +1,10 @@
 defmodule DatabaseTest do
-  use ExUnit.Case
+  use Arangoex.TestCase
   doctest Arangoex
 
-  import Arangoex.TestHelper
+  # import Arangoex.TestHelper
 
   alias Arangoex.Database
-
-  setup do
-    # remember original dbs
-    {:ok, original_dbs} = Database.databases(test_endpoint)
-
-    on_exit fn ->
-      # cleanup any new dbs that have appeared
-      {:ok, after_dbs} = Database.databases(test_endpoint)
-      for db_name <- (after_dbs -- original_dbs) do
-        {:ok, _} = Database.drop(test_endpoint, db_name)
-      end
-    end
-  end
 
   test "creates a database" do
     new_dbname = Faker.Lorem.word

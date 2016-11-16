@@ -1,23 +1,8 @@
 defmodule WalTest do
-  use ExUnit.Case
+  use Arangoex.TestCase
   doctest Arangoex
 
-  import Arangoex.TestHelper
-
-  alias Arangoex.Database  
   alias Arangoex.Wal
-
-  setup do
-    new_db = %Database{name: Faker.Lorem.word}
-    {:ok, true} = Database.create(test_endpoint, new_db)
-    {:ok, _} = Wal.set_properties(test_endpoint, %Wal{})
-    
-    on_exit fn ->
-      {:ok, _} = Database.drop(test_endpoint, new_db.name)
-    end
-    
-    %{endpoint: Map.put(test_endpoint, :database_name, new_db.name)}
-  end
 
   test "flushes the WAL", ctx do
     assert {:ok, %{"error" => false}} = ctx.endpoint |> Wal.flush
@@ -36,7 +21,7 @@ defmodule WalTest do
       throttleWait: 14890,
       throttleWhenPending: 2
     }
-    {:ok, _} = Wal.set_properties(test_endpoint, expected_wal)
+    {:ok, _} = Wal.set_properties(ctx.endpoint, expected_wal)
     
     assert{:ok, ^expected_wal} = ctx.endpoint |> Wal.properties
   end

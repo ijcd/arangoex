@@ -28,6 +28,8 @@ defmodule Arangoex.Database do
 
   @doc """
   Create database
+
+  POST /_api/database
   """
   @spec create(Endpoint.t, Database.t) :: Arangoex.ok_error(any())
   def create(endpoint, db) do
@@ -39,6 +41,8 @@ defmodule Arangoex.Database do
 
   @doc """
   Drop database
+
+  DELETE /_api/database/{database-name}  
   """
   @spec drop(%Arangoex.Endpoint{}, String.t) :: Arangoex.ok_error(true)
   def drop(endpoint, db) do
@@ -50,6 +54,8 @@ defmodule Arangoex.Database do
 
   @doc """
   Information about a database
+
+  GET /_api/database/current
   """
   @spec database(Endpont.t, String.t) :: Arangoex.ok_error(t)
   def database(endpoint, db) do
@@ -61,6 +67,8 @@ defmodule Arangoex.Database do
 
   @doc """
   List of databases
+
+  GET /_api/database
   """
   @spec databases(Endpont.t) :: Arangoex.ok_error([String.t])
   def databases(endpoint) do
@@ -72,6 +80,8 @@ defmodule Arangoex.Database do
 
   @doc """
   List of accessible databases
+
+  GET /_api/database/user
   """
   @spec user_databases(Endpont.t) :: Arangoex.ok_error([String.t])
   def user_databases(endpoint) do

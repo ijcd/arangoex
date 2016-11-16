@@ -23,9 +23,11 @@ defmodule Arangoex.Wal do
     throttleWait: pos_integer,
     throttleWhenPending: non_neg_integer,
   }
-    
+
   @doc """
   Flushes the write-ahead log
+
+  PUT /_admin/wal/flush
   """
   @spec flush(Endpoint.t, keyword) :: Arangoex.ok_error(map)
   def flush(endpoint, opts \\ []) do
@@ -38,6 +40,8 @@ defmodule Arangoex.Wal do
   
   @doc """  
   Retrieves the configuration of the write-ahead log  
+
+  GET /_admin/wal/properties
   """
   @spec properties(Endpoint.t) :: Arangoex.ok_error(t)
   def properties(endpoint) do
@@ -49,6 +53,8 @@ defmodule Arangoex.Wal do
 
   @doc """
   Configures the write-ahead log
+
+  PUT /_admin/wal/properties
   """
   @spec set_properties(Endpoint.t, t | keyword) :: Arangoex.ok_error(t)
   def set_properties(endpoint, %__MODULE__{} = properties), do: set_properties(endpoint, properties |> Map.from_struct |> Enum.into([]))
@@ -64,6 +70,8 @@ defmodule Arangoex.Wal do
 
   @doc """
   Returns information about the currently running transactions
+
+  GET /_admin/wal/transactions
   """
   @spec transactions(Endpoint.t, keyword) :: Arangoex.ok_error(map)
   def transactions(endpoint, opts \\ []) do
@@ -74,4 +82,5 @@ defmodule Arangoex.Wal do
 
   @spec to_wal(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())  
   defp to_wal({:ok, result}), do: {:ok, new(result)}
+  defp to_wal({:error, _} = e), do: e
 end

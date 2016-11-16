@@ -43,6 +43,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Reads all collections
+
+  GET /_api/collection
   """
   @spec collections(Endpoint.t, String.t | nil) :: Arangoex.ok_error(t)
   def collections(endpoint, db \\ nil) do
@@ -54,6 +56,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Create collection
+
+  POST /_api/collection
   """
   @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)  
   def create(endpoint, coll) do
@@ -64,6 +68,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Drops collection
+
+  DELETE /_api/collection/{collection-name}
   """
   @spec drop(Endpoint.t, t) :: Arangoex.ok_error(map)
   def drop(endpoint, coll) do
@@ -73,6 +79,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Return information about a collection
+
+  GET /_api/collection/{collection-name}
   """
   @spec collection(Endpoint.t, t) :: Arangoex.ok_error(t)  
   def collection(endpoint, coll) do
@@ -83,6 +91,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Load collection
+
+  PUT /_api/collection/{collection-name}/load
   """
   @spec load(Endpoint.t, t) :: Arangoex.ok_error(map)
   def load(endpoint, coll, count \\ true) do
@@ -92,6 +102,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Unload collection
+
+  PUT /_api/collection/{collection-name}/unload
   """
   @spec unload(Endpoint.t, t) :: Arangoex.ok_error(map)
   def unload(endpoint, coll) do
@@ -101,6 +113,9 @@ defmodule Arangoex.Collection do
 
   @doc """
   Return checksum for the collection
+
+
+  GET /_api/collection/{collection-name}/checksum
   """
   @spec checksum(Endpoint.t, t) :: Arangoex.ok_error(map)
   def checksum(endpoint, coll) do
@@ -110,6 +125,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Return number of documents in a collection
+
+  GET /_api/collection/{collection-name}/count
   """
   @spec count(Endpoint.t, t) :: Arangoex.ok_error(map)
   def count(endpoint, coll) do
@@ -119,6 +136,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Return statistics for a collection
+
+  GET /_api/collection/{collection-name}/figures
   """
   @spec figures(Endpoint.t, t) :: Arangoex.ok_error(map)
   def figures(endpoint, coll) do
@@ -128,6 +147,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Read properties of a collection
+
+  GET /_api/collection/{collection-name}/properties
   """
   @spec properties(Endpoint.t, t) :: Arangoex.ok_error(map)
   def properties(endpoint, coll) do
@@ -137,6 +158,8 @@ defmodule Arangoex.Collection do
 
   @doc """  
   Change properties of a collection
+
+  PUT /_api/collection/{collection-name}/properties
   """
   @spec set_properties(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
   def set_properties(endpoint, coll, opts \\ []) do
@@ -148,6 +171,8 @@ defmodule Arangoex.Collection do
   
   @doc """
   Rename collection
+
+  PUT /_api/collection/{collection-name}/rename
   """
   @spec rename(Endpoint.t, t, String.t) :: Arangoex.ok_error(map)
   def rename(endpoint, coll, new_name) do
@@ -157,6 +182,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Return collection revision id
+
+  GET /_api/collection/{collection-name}/revision
   """
   @spec revision(Endpoint.t, t) :: Arangoex.ok_error(map)
   def revision(endpoint, coll) do
@@ -166,6 +193,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Rotate journal of a collection
+
+  PUT /_api/collection/{collection-name}/rotate
   """
   @spec rotate(Endpoint.t, t) :: Arangoex.ok_error(map)
   def rotate(endpoint, coll) do
@@ -175,6 +204,8 @@ defmodule Arangoex.Collection do
 
   @doc """
   Truncate collection
+
+  PUT /_api/collection/{collection-name}/truncate
   """
   @spec truncate(Endpoint.t, t) :: Arangoex.ok_error(map)
   def truncate(endpoint, coll) do
@@ -185,4 +216,5 @@ defmodule Arangoex.Collection do
   @spec to_collection(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())  
   defp to_collection({:ok, %{"result" => result}}) when is_list(result), do: {:ok, Enum.map(result, &new(&1))}
   defp to_collection({:ok, result}), do: {:ok, new(result)}
+  defp to_collection({:error, _} = e), do: e
 end
