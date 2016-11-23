@@ -3,6 +3,8 @@ defmodule CollectionTest do
   doctest Arangoex
 
   alias Arangoex.Collection
+  alias Arangoex.Document
+  alias Arangoex.Wal
 
   test "lists collections" do
     {:ok, collections} = Collection.collections(test_endpoint, "_system")
@@ -133,14 +135,9 @@ defmodule CollectionTest do
   end
 
   test "rotates a collection journal", ctx do
-    # coll_name = ctx.coll.name
-
-    # {:ok, _} = Wal.flush(ctx.endpoint, waitForSync: true, waitForCollector: true)
-    # {:ok, _} = Collection.set_properties(ctx.endpoint, ctx.coll, journalSize: 1_048_576)
-    # {:ok, rotate} = Collection.rotate(ctx.endpoint, ctx.coll)
-
-    # assert %{"name" => ^coll_name, "error" => false} = rotate
-    # assert Map.has_key?(rotate, "rotate")
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{name: "RotateMe"})
+    {:ok, _} = Wal.flush(ctx.endpoint, waitForSync: true, waitForCollector: true)
+    assert {:ok, %{"result" => true, "error" => false, "code" => 200}} = Collection.rotate(ctx.endpoint, ctx.coll)
   end
   
   test "truncates a collection", ctx do
@@ -150,5 +147,3 @@ defmodule CollectionTest do
     assert %{"name" => ^coll_name, "error" => false} = truncate
   end
 end
-
-

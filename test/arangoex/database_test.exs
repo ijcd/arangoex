@@ -5,6 +5,7 @@ defmodule DatabaseTest do
   # import Arangoex.TestHelper
 
   alias Arangoex.Database
+  alias Arangoex.User  
 
   test "creates a database" do
     new_dbname = Faker.Lorem.word
@@ -37,9 +38,14 @@ defmodule DatabaseTest do
 
     # assert metadata
     {:ok, _db_info} = Database.database(test_endpoint, new_dbname)
-    # TODO: assert that the users are there (after we build out /users
+
+    # assert users
+    {:ok, %User{user: "admin"}} = User.user(test_endpoint, %User{user: "admin"})
+    {:ok, %User{user: "tester"}} = User.user(test_endpoint, %User{user: "tester"})
+    {:ok, %User{user: "eddie"}} = User.user(test_endpoint, %User{user: "eddie"})    
   end
-  
+
+  @tag :wip
   test "fails to create a database" do
     new_dbname = "#$%^&"
     {:error, %{"error" => true, "errorMessage" => "database name invalid"}} = Database.create(test_endpoint, %Database{name: new_dbname})

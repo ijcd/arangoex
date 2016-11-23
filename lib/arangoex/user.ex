@@ -2,6 +2,7 @@ defmodule Arangoex.User do
   @moduledoc "ArangoDB User methods"
 
   alias Arangoex.Endpoint
+  alias Arangoex.Utils  
 
   defstruct [
     user: nil,
@@ -19,18 +20,6 @@ defmodule Arangoex.User do
     changePassword: boolean,
   }
   
-  @doc """
-  List available Users
-
-  GET /_api/user/ 
-  """
-  @spec users(Endpoint.t) :: Arangoex.ok_error([t])
-  def users(endpoint) do
-    endpoint
-    |> Endpoint.get("user")
-    |> to_user
-  end
-
   @doc """
   Create User
   
@@ -55,6 +44,18 @@ defmodule Arangoex.User do
   end
 
   @doc """
+  List available Users
+
+  GET /_api/user/ 
+  """
+  @spec users(Endpoint.t) :: Arangoex.ok_error([t])
+  def users(endpoint) do
+    endpoint
+    |> Endpoint.get("user")
+    |> to_user
+  end
+
+  @doc """
   Fetch User
   
   GET /_api/user/{user} 
@@ -73,7 +74,7 @@ defmodule Arangoex.User do
   """
   @spec update(Endpoint.t, t) :: Arangoex.ok_error(map)
   def update(endpoint, user, opts \\ []) do
-    properties = Endpoint.opts_with_defaults(opts, passwd: nil, active: nil, extra: nil)
+    properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
     
     endpoint
     |> Endpoint.patch("user/#{user.user}", properties)
@@ -87,7 +88,7 @@ defmodule Arangoex.User do
   """
   @spec replace(Endpoint.t, t) :: Arangoex.ok_error(map)
   def replace(endpoint, user, opts \\ []) do
-    properties = Endpoint.opts_with_defaults(opts, passwd: nil, active: nil, extra: nil)
+    properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
     
     endpoint
     |> Endpoint.put("user/#{user.user}", properties)
@@ -114,7 +115,7 @@ defmodule Arangoex.User do
   @spec grant(Endpont.t, t, Database.t) :: Arangoex.ok_error([String.t])
   def grant(endpoint, user, database) do
     endpoint
-    |> Endpoint.put("user/#{user.user}/database/#{database.name}", grant: "rw")
+    |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "rw"})
   end
   
   @doc """
@@ -125,7 +126,7 @@ defmodule Arangoex.User do
   @spec revoke(Endpont.t, t, Database.t) :: Arangoex.ok_error([String.t])
   def revoke(endpoint, user, database) do
     endpoint
-    |> Endpoint.put("user/#{user.user}/database/#{database.name}", grant: "none")
+    |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "none"})
   end
   
   @spec to_user(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())  

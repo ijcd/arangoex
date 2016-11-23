@@ -14,18 +14,6 @@ defmodule Arangoex.Database do
     users: [String.t],
   }
 
-  @type create_database :: %{
-    name: String.t,
-    users: [
-      %{
-        required(:username) => String.t,
-        optional(:password) => String.t,
-        optional(:active) => boolean,
-        optional(:extra) => %{},
-      }
-    ]
-  }
-
   @doc """
   Create database
 

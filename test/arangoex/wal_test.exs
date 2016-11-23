@@ -15,15 +15,15 @@ defmodule WalTest do
     expected_wal = %Arangoex.Wal{
       allowOversizeEntries: false,
       historicLogfiles: 9,
-      logfileSize: 635544,
+      logfileSize: 635_544,
       reserveLogfiles: 5,
       syncInterval: 100,
-      throttleWait: 14890,
+      throttleWait: 14_890,
       throttleWhenPending: 2
     }
     {:ok, _} = Wal.set_properties(ctx.endpoint, expected_wal)
     
-    assert{:ok, ^expected_wal} = ctx.endpoint |> Wal.properties
+    assert {:ok, ^expected_wal} = ctx.endpoint |> Wal.properties
   end
 
   test "sets wal properties", ctx do

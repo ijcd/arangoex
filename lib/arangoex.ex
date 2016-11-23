@@ -8,5 +8,5 @@ defmodule Arangoex do
  
   defmodule Error do
     defexception message: "ArangoDB error"
-  end  
+  end
 end

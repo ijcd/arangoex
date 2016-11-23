@@ -2,6 +2,7 @@ defmodule Arangoex.Collection do
   @moduledoc "ArangoDB Collection methods"
 
   alias Arangoex.Endpoint
+  alias Arangoex.Utils  
 
   defstruct [
     id: nil,
@@ -163,7 +164,7 @@ defmodule Arangoex.Collection do
   """
   @spec set_properties(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
   def set_properties(endpoint, coll, opts \\ []) do
-    properties = Endpoint.opts_with_defaults(opts, waitForSync: nil, journalSize: nil)
+    properties = Utils.opts_to_vars(opts, [:waitForSync, :journalSize])
     
     endpoint
     |> Endpoint.put("collection/#{coll.name}/properties", properties)

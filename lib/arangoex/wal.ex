@@ -2,6 +2,7 @@ defmodule Arangoex.Wal do
   @moduledoc "ArangoDB Wal methods"
 
   alias Arangoex.Endpoint
+  alias Arangoex.Utils  
 
   defstruct [
     :allowOversizeEntries,
@@ -31,7 +32,7 @@ defmodule Arangoex.Wal do
   """
   @spec flush(Endpoint.t, keyword) :: Arangoex.ok_error(map)
   def flush(endpoint, opts \\ []) do
-    flush_opts = Endpoint.opts_with_defaults(opts, [waitForSync: nil, waitForCollector: nil])
+    flush_opts = Utils.opts_to_vars(opts, [:waitForSync, :waitForCollector])
     
     endpoint
     |> Endpoint.with_db("_system")
@@ -59,8 +60,8 @@ defmodule Arangoex.Wal do
   @spec set_properties(Endpoint.t, t | keyword) :: Arangoex.ok_error(t)
   def set_properties(endpoint, %__MODULE__{} = properties), do: set_properties(endpoint, properties |> Map.from_struct |> Enum.into([]))
   def set_properties(endpoint, properties) do
-    defaults = %__MODULE__{} |> Map.from_struct |> Enum.into([])
-    wal_properties = Endpoint.opts_with_defaults(properties, defaults)
+    defaults = %__MODULE__{} |> Map.from_struct |> Map.keys
+    wal_properties = Utils.opts_to_vars(properties, defaults)
     
     endpoint
     |> Endpoint.with_db("_system")

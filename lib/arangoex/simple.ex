@@ -1,7 +1,6 @@
 defmodule Arangoex.Simple do
   @moduledoc "ArangoDB Simple methods"
 
-  
   # PUT /_api/simple/all Return all documents
   # PUT /_api/simple/any Return a random document
   # PUT /_api/simple/by-example Simple query by-example
