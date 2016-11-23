@@ -89,26 +89,30 @@ defmodule Arangoex.Endpoint do
     handle_response(response)
   end
 
-  @spec put(t, String.t, map) :: Arangoex.ok_error(any())  
-  def put(endpoint, resource, data \\ %{}) do
+  @spec put(t, String.t, map | [map]) :: Arangoex.ok_error(any())  
+  def put(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
-    response = HTTPoison.request(:put, url, body, request_headers(endpoint))
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+    response = HTTPoison.request(:put, url, body, headers)
     handle_response(response)
   end
 
-  @spec patch(t, String.t, map) :: Arangoex.ok_error(any())  
+  @spec patch(t, String.t, map | [map]) :: Arangoex.ok_error(any())  
   def patch(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
-    response = HTTPoison.request(:patch, url, body, Map.merge(request_headers(endpoint), Enum.into(headers, %{})))
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+    response = HTTPoison.request(:patch, url, body, headers)
     handle_response(response)
   end
   
   @spec delete(t, String.t) :: Arangoex.ok_error(any())    
-  def delete(endpoint, resource) do
+  def delete(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
-    response = HTTPoison.request(:delete, url, "", request_headers(endpoint))
+    body = encode_data(data)
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+    response = HTTPoison.request(:delete, url, body, headers)
     handle_response(response)
   end
   

@@ -84,11 +84,11 @@ defmodule Arangoex.Document do
   PATCH /_api/document/{collection}
   """
   @spec update(Endpoint.t, Collection.t, [map], keyword) :: Arangoex.ok_error([map])
-  def update(endpoint, coll, docs, opts) when is_list(docs) do
+  def update(endpoint, coll, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
     endpoint
-    |> Endpoint.patch("document/#{coll.name}#{query}", docs)
+    |> Endpoint.patch("document/#{coll.name}#{query}", new_docs)
     |> to_result
   end
 
@@ -107,43 +107,68 @@ defmodule Arangoex.Document do
     |> Endpoint.patch("document/#{doc._id}#{query}", new_doc, headers)
     |> to_result
   end
+
+  def replace(endpoint, coll, docs, opts \\ [])
   
+  @doc """
+  Replace documents
 
-  # # # @doc """
-  # # # Replace document
+  PATCH /_api/document/{collection}
+  """
+  @spec replace(Endpoint.t, Collection.t, [map], keyword) :: Arangoex.ok_error([map])
+  def replace(endpoint, coll, new_docs, opts) when is_list(new_docs) do
+    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-  # # # PUT /_api/document/{document-handle} 
-  # # # """
-  # # @spec replace(Endpoint.t, Collection.t, map | [map]) :: Arangoex.ok_error(t | [t])
-  # # def replace(endpoint, coll, doc, opts \\ []) do
-  # # end
+    endpoint
+    |> Endpoint.put("document/#{coll.name}#{query}", new_docs)
+    |> to_result
+  end
 
-  # # # @doc """
-  # # # Replace documents
+  @doc """
+  Replace document
 
-  # # # PUT /_api/document/{collection} 
-  # # # """
-  # # @spec replaces(Endpoint.t, Collection.t, map | [map]) :: Arangoex.ok_error(t | [t])
-  # # def replaces(endpoint, coll, doc, opts \\ []) do
-  # # end
+  PUT /_api/document/{document-handle} 
+  """
+  @spec replace(Endpoint.t, t, map) :: Arangoex.ok_error(t | [t])
+  def replace(endpoint, doc, new_doc, opts) do
+    {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
+    headers = Utils.opts_to_headers(header_opts, [:ifMatch])
+    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-  # # # @doc """
-  # # # Removes a document
+    endpoint
+    |> Endpoint.put("document/#{doc._id}#{query}", new_doc, headers)
+    |> to_result
+  end
 
-  # # # DELETE /_api/document/{document-handle} 
-  # # # """
-  # # @spec remove(Endpoint.t, Collection.t, map | [map]) :: Arangoex.ok_error(t | [t])
-  # # def remove(endpoint, coll, doc, opts \\ []) do
-  # # end
+  @doc """
+  Removes multiple documents
 
-  # # # @doc """
-  # # # Removes multiple documents
+  DELETE /_api/document/{collection}
+  """
+  @spec delete_multi(Endpoint.t, Collection.t, [map], keyword) :: Arangoex.ok_error(t | [t])
+  def delete_multi(endpoint, coll, docs, opts \\ []) when is_list(docs) do
+    query = Utils.opts_to_query(opts, [:waitForSync, :ignoreRevs, :returnOld])
 
-  # # # DELETE /_api/document/{collection}
-  # # # """
-  # # @spec removes(Endpoint.t, Collection.t, map | [map]) :: Arangoex.ok_error(t | [t])
-  # # def removes(endpoint, coll, doc, opts \\ []) do
-  # # end
+    endpoint
+    |> Endpoint.delete("document/#{coll.name}#{query}", docs)
+    |> to_result
+  end
+
+  @doc """
+  Removes a document
+
+  DELETE /_api/document/{document-handle} 
+  """
+  @spec delete(Endpoint.t, t, keyword) :: Arangoex.ok_error(t | [t])
+  def delete(endpoint, doc, opts \\ []) do
+    {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
+    headers = Utils.opts_to_headers(header_opts, [:ifMatch])
+    query = Utils.opts_to_query(query_opts, [:waitForSync, :returnOld])
+
+    endpoint
+    |> Endpoint.delete("document/#{doc._id}#{query}", "", headers)
+    |> to_result
+  end
   
   @spec to_result(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
   defp to_result({:ok, result}) when is_list(result), do: Enum.map(result, &to_document(&1))
@@ -153,12 +178,11 @@ defmodule Arangoex.Document do
   @spec to_document(map) :: Arangoex.ok_error(t| map)
   defp to_document(%{} = result) do
     case result do
-      %{"error" => true, "errorMessage" => em, "errorNum" => en} -> {:error, result}
-      %{"old" => old, "new" => new} -> {:ok, {Docref.new(result), old, new}}
+      %{"error" => true, "errorMessage" => _em, "errorNum" => _en} -> {:error, result}
       %{"old" => old, "new" => new} -> {:ok, {Docref.new(result), old, new}}
       %{"old" => old} -> {:ok, {Docref.new(result), old}}
       %{"new" => new} -> {:ok, {Docref.new(result), new}}
-      %{"_id" => id} -> {:ok, Docref.new(result)}
+      %{"_id" => _id} -> {:ok, Docref.new(result)}
     end
   end
 end

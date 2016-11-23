@@ -45,7 +45,6 @@ defmodule DatabaseTest do
     {:ok, %User{user: "eddie"}} = User.user(test_endpoint, %User{user: "eddie"})    
   end
 
-  @tag :wip
   test "fails to create a database" do
     new_dbname = "#$%^&"
     {:error, %{"error" => true, "errorMessage" => "database name invalid"}} = Database.create(test_endpoint, %Database{name: new_dbname})
