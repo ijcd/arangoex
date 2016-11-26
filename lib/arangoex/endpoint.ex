@@ -65,53 +65,70 @@ defmodule Arangoex.Endpoint do
     Map.merge(endpoint, %{use_auth: :bearer, password: token})
   end
 
-  @spec get(t, String.t) :: Arangoex.ok_error(any())
-  def get(endpoint, resource, opts \\ []) do
+  @spec get(t, String.t, keyword) :: Arangoex.ok_error(any())
+  def get(endpoint, resource, headers \\ []) do
     url = url(endpoint, resource)
-    headers = Map.merge(request_headers(endpoint), opts[:headers] || %{})    
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+    
     response = HTTPoison.request(:get, url, "", headers)
     handle_response(response)
   end
 
-  @spec head(t, String.t) :: Arangoex.ok_error(any())
-  def head(endpoint, resource, opts \\ []) do
+  @spec head(t, String.t, keyword) :: Arangoex.ok_error(any())
+  def head(endpoint, resource, headers \\ []) do
     url = url(endpoint, resource)
-    headers = Map.merge(request_headers(endpoint), opts[:headers] || %{})
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+
     response = HTTPoison.request(:head, url, "", headers)
     handle_response(response)
   end
   
-  @spec post(t, String.t, map) :: Arangoex.ok_error(any())
-  def post(endpoint, resource, data \\ %{}) do
+  @spec post(t, String.t, map, keyword) :: Arangoex.ok_error(any())
+  def post(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
-    response = HTTPoison.request(:post, url, body, request_headers(endpoint))
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+
+    response = HTTPoison.request(:post, url, body, headers)
     handle_response(response)
   end
 
-  @spec put(t, String.t, map | [map]) :: Arangoex.ok_error(any())  
+  @spec post_raw(t, String.t, String.t, keyword) :: Arangoex.ok_error(any())
+  def post_raw(endpoint, resource, data \\ "", headers \\ []) do
+    url = url(endpoint, resource)
+    body = data
+    headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+
+    response = HTTPoison.request(:post, url, body, headers)
+    handle_response(response)
+  end
+
+  @spec put(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())  
   def put(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
     headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+
     response = HTTPoison.request(:put, url, body, headers)
     handle_response(response)
   end
 
-  @spec patch(t, String.t, map | [map]) :: Arangoex.ok_error(any())  
+  @spec patch(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())  
   def patch(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
     headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+
     response = HTTPoison.request(:patch, url, body, headers)
     handle_response(response)
   end
   
-  @spec delete(t, String.t) :: Arangoex.ok_error(any())    
+  @spec delete(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())    
   def delete(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
     headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
+
     response = HTTPoison.request(:delete, url, body, headers)
     handle_response(response)
   end
@@ -145,7 +162,7 @@ defmodule Arangoex.Endpoint do
   defp decode_headers(headers) do
     headers = Enum.into(headers, %{})
     etag = headers["Etag"]
-    headers = if etag do
+    if etag do
       Map.merge(headers, %{"Etag" => Poison.decode!(etag)})
     else
       headers

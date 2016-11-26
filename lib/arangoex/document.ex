@@ -27,6 +27,7 @@ defmodule Arangoex.Document do
   @spec create(Endpoint.t, Collection.t, map | [map]) :: Arangoex.ok_error(map | [map])
   def create(endpoint, coll, doc, opts \\ []) do
     query = Utils.opts_to_query(opts, [:waitForSync, :returnNew])
+
     endpoint
     |> Endpoint.post("document/#{coll.name}#{query}", doc)
     |> to_result
@@ -40,8 +41,9 @@ defmodule Arangoex.Document do
   @spec header(Endpoint.t, map, keyword) :: Arangoex.ok_error(map)
   def header(endpoint, doc, opts \\ []) do
     headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch])
+
     endpoint
-    |> Endpoint.head("document/#{doc._id}", headers: headers)
+    |> Endpoint.head("document/#{doc._id}", headers)
   end
 
   @doc """
@@ -52,8 +54,9 @@ defmodule Arangoex.Document do
   @spec document(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
   def document(endpoint, doc, opts \\ []) do
     headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch]) 
+
     endpoint
-    |> Endpoint.get("document/#{doc._id}", headers: headers)
+    |> Endpoint.get("document/#{doc._id}", headers)
   end
   
   @doc """
@@ -166,7 +169,7 @@ defmodule Arangoex.Document do
     query = Utils.opts_to_query(query_opts, [:waitForSync, :returnOld])
 
     endpoint
-    |> Endpoint.delete("document/#{doc._id}#{query}", "", headers)
+    |> Endpoint.delete("document/#{doc._id}#{query}", %{}, headers)
     |> to_result
   end
   

@@ -100,7 +100,7 @@ defmodule Arangoex.User do
    
   GET /_api/user/{user}/database
   """
-  @spec databases(Endpont.t, t) :: Arangoex.ok_error([String.t])
+  @spec databases(Endpoint.t, t) :: Arangoex.ok_error([String.t])
   def databases(endpoint, user) do
     endpoint
     |> Endpoint.get("user/#{user.user}/database")
@@ -112,7 +112,7 @@ defmodule Arangoex.User do
   
   PUT /_api/user/{user}/database/{dbname} 
   """
-  @spec grant(Endpont.t, t, Database.t) :: Arangoex.ok_error([String.t])
+  @spec grant(Endpoint.t, t, Database.t) :: Arangoex.ok_error([String.t])
   def grant(endpoint, user, database) do
     endpoint
     |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "rw"})
@@ -123,7 +123,7 @@ defmodule Arangoex.User do
   
   PUT /_api/user/{user}/database/{dbname} 
   """
-  @spec revoke(Endpont.t, t, Database.t) :: Arangoex.ok_error([String.t])
+  @spec revoke(Endpoint.t, t, Database.t) :: Arangoex.ok_error([String.t])
   def revoke(endpoint, user, database) do
     endpoint
     |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "none"})

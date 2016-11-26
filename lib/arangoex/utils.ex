@@ -1,12 +1,12 @@
 defmodule Arangoex.Utils do
   @moduledoc false
 
-  @spec opts_to_headers(keyword, [atom]) :: map
+  @spec opts_to_headers(keyword, [atom]) :: keyword
   def opts_to_headers(opts, permitted \\ []) do
     opts
     |> ensure_permitted(permitted)
-    |> Enum.map(fn {k, v} -> {atom_to_header(k), v} end)
-    |> Enum.into(%{})
+    |> Enum.map(fn {k, v} -> {to_header_name(k), v} end)
+    |> Enum.into([])
   end
 
   @spec opts_to_query(keyword, [atom]) :: String.t
@@ -30,8 +30,14 @@ defmodule Arangoex.Utils do
     |> Enum.into(%{})
   end
 
+  @doc """ 
+  Filters keywords for permitted attributes given as a keyword list in
+  permitted. If a single atom of :* is passed in, all attributes are
+  returned. Permitted defaults to an empty keyword list.
+  """
   @spec ensure_permitted(keyword, [atom]) :: keyword
-  def ensure_permitted(opts, permitted \\ []) do
+  def ensure_permitted(opts, [:*]), do: opts
+  def ensure_permitted(opts, permitted) do
     extra = Keyword.keys(opts) -- permitted
     Enum.any?(extra, &(raise "unknown key: #{&1}"))
     opts
@@ -39,10 +45,10 @@ defmodule Arangoex.Utils do
     |> Keyword.take(permitted)
   end
 
-  @spec atom_to_header(atom) :: String.t
-  def atom_to_header(atom) do
-    atom
-    |> Atom.to_string
+  @spec to_header_name(atom | String.t) :: String.t
+  def to_header_name(a) when is_atom(a), do: to_header_name(Atom.to_string(a))
+  def to_header_name(a) do
+    a
     |> Macro.underscore
     |> String.split("_")
     |> Enum.map(&String.capitalize/1)

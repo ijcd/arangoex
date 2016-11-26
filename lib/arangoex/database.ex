@@ -45,7 +45,7 @@ defmodule Arangoex.Database do
 
   GET /_api/database/current
   """
-  @spec database(Endpont.t, String.t) :: Arangoex.ok_error(t)
+  @spec database(Endpoint.t, String.t) :: Arangoex.ok_error(t)
   def database(endpoint, db) do
     endpoint
     |> Endpoint.with_db(db)
@@ -58,7 +58,7 @@ defmodule Arangoex.Database do
 
   GET /_api/database
   """
-  @spec databases(Endpont.t) :: Arangoex.ok_error([String.t])
+  @spec databases(Endpoint.t) :: Arangoex.ok_error([String.t])
   def databases(endpoint) do
     endpoint
     |> Endpoint.with_db("_system")
@@ -71,7 +71,7 @@ defmodule Arangoex.Database do
 
   GET /_api/database/user
   """
-  @spec user_databases(Endpont.t) :: Arangoex.ok_error([String.t])
+  @spec user_databases(Endpoint.t) :: Arangoex.ok_error([String.t])
   def user_databases(endpoint) do
     endpoint
     |> Endpoint.with_db("_system")
