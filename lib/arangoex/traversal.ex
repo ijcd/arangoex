@@ -1,6 +1,15 @@
 defmodule Arangoex.Traversal do
   @moduledoc "ArangoDB Traversal methods"
 
-  # POST /_api/traversal executes a traversal
+  # @doc """
+  # Executes a traversal
+
+  # POST /_api/traversal
+  # """
+  # @spec traversal(Endpoint.t) :: Arangoex.ok_error(map)
+  # def traversal(endpoint) do
+  #   endpoint
+  #   |> Endpoint.post("")
+  # end
 end
   
