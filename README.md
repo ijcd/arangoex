@@ -30,7 +30,6 @@ system password.
 
 ## TODO
 
-transaction_test 1
 cursor_test 3
 
 bulk_test 4
