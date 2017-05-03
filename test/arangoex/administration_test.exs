@@ -6,8 +6,8 @@ defmodule AdministrationTest do
 
   test "returns target_version", ctx do
     assert {
-      :ok, %{"code" => 200, "error" => false, "version" => "30010"}
-    } == Administration.target_version(ctx.endpoint)
+      :ok, %{"code" => 200, "error" => false, "version" => _}
+    }  = Administration.target_version(ctx.endpoint)
   end
 
   test "returns echo", ctx do
@@ -19,7 +19,6 @@ defmodule AdministrationTest do
         "headers" => %{
           "accept" => "*/*",
           "authorization" => _,
-          "content-length" => "0",
           "host" => _,
           "user-agent" => _,
           "my-header" => "3",
@@ -62,7 +61,6 @@ defmodule AdministrationTest do
     } == Administration.execute(ctx.endpoint, "return {a: 1, b: 2};", returnAsJson: true)
   end
 
-  @tag :wip
   test "reads global logs from the server", ctx do
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
@@ -132,35 +130,37 @@ defmodule AdministrationTest do
     assert is_list(timestamp)    
   end
 
-  # test "returns long_echo", ctx do
-  #   assert {
-  #     :ok, %{
-  #       "client" => _,
-  #       "cookies" => %{},
-  #       "database" => "_system",
-  #       "headers" => %{
-  #         "accept" => "*/*",
-  #         "authorization" => _,
-  #         "content-length" => "0",
-  #         "host" => _,
-  #         "user-agent" => _,
-  #         "my-header" => "3",
-  #         "your-header" => "4",
-  #       },
-  #       "internals" => %{},
-  #       "parameters" => %{"bar" => "2", "foo" => "1"},
-  #       "path" => "/",
-  #       "prefix" => "/",
-  #       "protocol" => "http",
-  #       "rawRequestBody" => [],
-  #       "requestType" => "GET",
-  #       "server" => _,
-  #       "suffix" => [],
-  #       "url" => "/_admin/long_echo?bar=2&foo=1",
-  #       "user" => "root"
-  #     }
-  #   } = Administration.long_echo(ctx.endpoint, %{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4})
-  # end
+  @tag :skip
+  # times out
+  test "returns long_echo", ctx do
+    assert {
+      :ok, %{
+        "client" => _,
+        "cookies" => %{},
+        "database" => "_system",
+        "headers" => %{
+          "accept" => "*/*",
+          "authorization" => _,
+          "content-length" => "0",
+          "host" => _,
+          "user-agent" => _,
+          "my-header" => "3",
+          "your-header" => "4",
+        },
+        "internals" => %{},
+        "parameters" => %{"bar" => "2", "foo" => "1"},
+        "path" => "/",
+        "prefix" => "/",
+        "protocol" => "http",
+        "rawRequestBody" => [],
+        "requestType" => "GET",
+        "server" => _,
+        "suffix" => [],
+        "url" => "/_admin/long_echo?bar=2&foo=1",
+        "user" => "root"
+      }
+    } = Administration.long_echo(ctx.endpoint, %{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4})
+  end
 
   test "reloads routing", ctx do
     assert {
@@ -471,10 +471,11 @@ defmodule AdministrationTest do
       :ok, %{
         "code" => 200,
         "error" => false,
-        "command" => "(function(params) { require('@arangodb').print(params); })(params)",
+        "command" => "(function (params) { (function(params) { require('@arangodb').print(params); })(params) } )(params);",
         "created" => _,
         "database" => "_system",
         "id" => _,
+        "offset" => _,        
         "name" => "SampleTask",
         "period" => 2,
         "type" => "periodic"
@@ -486,17 +487,12 @@ defmodule AdministrationTest do
      {:ok, tasks} = Administration.tasks(ctx.endpoint)
      assert [
         %{
-          "command" => "(function () {\n        require('@arangodb/foxx/queues/manager').manage();\n      })(params)",
-          "created" => _,
           "database" => "_system",
-          "id" => "149",
           "name" => "user-defined task",
           "period" => 1,
           "type" => "periodic"
         },
         %{
-          "command" => "require('@arangodb/statistics').garbageCollector();",
-          "created" => _,
           "database" => "_system",
           "id" => "statistics-gc",
           "name" => "statistics-gc",
@@ -504,8 +500,6 @@ defmodule AdministrationTest do
           "type" => "periodic"
         },
         %{
-          "command" => "require('@arangodb/statistics').historian();",
-          "created" => _,
           "database" => "_system",
           "id" => "statistics-collector",
           "name" => "statistics-collector",
@@ -513,8 +507,6 @@ defmodule AdministrationTest do
           "type" => "periodic"
         },
         %{
-          "command" => "require('@arangodb/statistics').historianAverage();",
-          "created" => _,
           "database" => "_system",
           "id" => "statistics-average-collector",
           "name" => "statistics-average-collector",
@@ -553,7 +545,7 @@ defmodule AdministrationTest do
   test "fetch a task by id", ctx do
     task = %Administration.Task{ 
       name: "SampleTask", 
-      command: "(function(params) { require('@arangodb').print(params); })(params)", 
+      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)", 
       params: %{ 
         foo: "fooey",
         bar: "barey"
@@ -562,11 +554,13 @@ defmodule AdministrationTest do
     }
     {:ok, %{"id" => task_id}} = Administration.task_create(ctx.endpoint, task)
 
+    task = Administration.task(ctx.endpoint, task_id)
+    {:ok, result} = task
     assert {
       :ok, %{
         "code" => 200,
         "error" => false,
-        "command" => "(function(params) { require('@arangodb').print(params); })(params)",
+        "command" => _,
         "created" => _,
         "database" => "_system",
         "id" => ^task_id,
@@ -574,13 +568,14 @@ defmodule AdministrationTest do
         "period" => 2,
         "type" => "periodic"
       }
-    } = Administration.task(ctx.endpoint, task_id)    
+    } = task
+    assert Regex.match?(~r/myparams/, result["command"])
   end
 
   test "create a task by id", ctx do
     task = %Administration.Task{ 
       name: "SampleTask", 
-      command: "(function(params) { require('@arangodb').print(params); })(params)", 
+      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)", 
       params: %{ 
         foo: "fooey",
         bar: "barey"
@@ -589,11 +584,13 @@ defmodule AdministrationTest do
     }
     assert {:ok, _} = Administration.task_create_with_id(ctx.endpoint, "foobar", task)
 
+    task = Administration.task(ctx.endpoint, "foobar")
+    {:ok, result} = task
     assert {
       :ok, %{
         "code" => 200,
         "error" => false,
-        "command" => "(function(params) { require('@arangodb').print(params); })(params)",
+        "command" => _,
         "created" => _,
         "database" => "_system",
         "id" => "foobar",
@@ -601,7 +598,8 @@ defmodule AdministrationTest do
         "period" => 2,
         "type" => "periodic"
       }
-    } = Administration.task(ctx.endpoint, "foobar")
+    } = task
+    assert Regex.match?(~r/myparams/, result["command"])
   end
 
   test "fetches the server version", ctx do

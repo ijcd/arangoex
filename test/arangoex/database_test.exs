@@ -10,9 +10,9 @@ defmodule DatabaseTest do
   test "creates a database" do
     new_dbname = Faker.Lorem.word
 
-    {:ok, original_dbs} = Database.databases(test_endpoint)
-    {:ok, true} = Database.create(test_endpoint, %Database{name: new_dbname})
-    {:ok, after_dbs} = Database.databases(test_endpoint)
+    {:ok, original_dbs} = Database.databases(test_endpoint())
+    {:ok, true} = Database.create(test_endpoint(), %Database{name: new_dbname})
+    {:ok, after_dbs} = Database.databases(test_endpoint())
     
     assert (after_dbs -- original_dbs) == [new_dbname]
   end
@@ -20,8 +20,8 @@ defmodule DatabaseTest do
   test "creates a database with users" do
     new_dbname = Faker.Lorem.word
 
-    {:ok, original_dbs} = Database.databases(test_endpoint)
-    {:ok, true} = Database.create(test_endpoint,
+    {:ok, original_dbs} = Database.databases(test_endpoint())
+    {:ok, true} = Database.create(test_endpoint(),
       %Database{
         name: new_dbname,
         users: [
@@ -33,51 +33,51 @@ defmodule DatabaseTest do
     )
 
     # assert created
-    {:ok, after_dbs} = Database.databases(test_endpoint)
+    {:ok, after_dbs} = Database.databases(test_endpoint())
     assert (after_dbs -- original_dbs) == [new_dbname]
 
     # assert metadata
-    {:ok, _db_info} = Database.database(test_endpoint, new_dbname)
+    {:ok, _db_info} = Database.database(test_endpoint(), new_dbname)
 
     # assert users
-    {:ok, %User{user: "admin"}} = User.user(test_endpoint, %User{user: "admin"})
-    {:ok, %User{user: "tester"}} = User.user(test_endpoint, %User{user: "tester"})
-    {:ok, %User{user: "eddie"}} = User.user(test_endpoint, %User{user: "eddie"})    
+    {:ok, %User{user: "admin"}} = User.user(test_endpoint(), %User{user: "admin"})
+    {:ok, %User{user: "tester"}} = User.user(test_endpoint(), %User{user: "tester"})
+    {:ok, %User{user: "eddie"}} = User.user(test_endpoint(), %User{user: "eddie"})    
   end
 
   test "fails to create a database" do
     new_dbname = "#$%^&"
-    {:error, %{"error" => true, "errorMessage" => "database name invalid"}} = Database.create(test_endpoint, %Database{name: new_dbname})
+    {:error, %{"error" => true, "errorMessage" => "database name invalid"}} = Database.create(test_endpoint(), %Database{name: new_dbname})
   end
 
   test "drops a database" do
     new_dbname = Faker.Lorem.word    
 
     # create one to drop
-    {:ok, true} = Database.create(test_endpoint, %Database{name: new_dbname})
-    {:ok, dbs} = Database.databases(test_endpoint)
+    {:ok, true} = Database.create(test_endpoint(), %Database{name: new_dbname})
+    {:ok, dbs} = Database.databases(test_endpoint())
 
     assert new_dbname in dbs
 
     # drop and make sure it's gone
-    {:ok, true} = Database.drop(test_endpoint, new_dbname)
-    {:ok, dbs} = Database.databases(test_endpoint)
+    {:ok, true} = Database.drop(test_endpoint(), new_dbname)
+    {:ok, dbs} = Database.databases(test_endpoint())
       
     refute new_dbname in dbs
   end
 
   test "looks up database information" do
-    {:ok, db} = Database.database(test_endpoint, "_system")
+    {:ok, db} = Database.database(test_endpoint(), "_system")
     %Arangoex.Database{id: "1", isSystem: true, name: "_system", path: "/var/lib/arangodb3/databases/database-1", users: nil} = db
 
     new_dbname = Faker.Lorem.word
-    {:ok, true} = Database.create(test_endpoint, %Database{name: new_dbname})
-    {:ok, db} = Database.database(test_endpoint, new_dbname)
+    {:ok, true} = Database.create(test_endpoint(), %Database{name: new_dbname})
+    {:ok, db} = Database.database(test_endpoint(), new_dbname)
     %Arangoex.Database{id: _, isSystem: false, name: ^new_dbname, path: _, users: nil} = db
   end
 
   test "lists existing databases" do
-    {:ok, dbs} = Database.databases(test_endpoint)
+    {:ok, dbs} = Database.databases(test_endpoint())
 
     assert is_list(dbs)
     assert length(dbs) > 0
@@ -87,8 +87,8 @@ defmodule DatabaseTest do
   test "lists accessible databases" do
     new_dbname = Faker.Lorem.word
 
-    {:ok, true} = Database.create(test_endpoint, %Database{name: new_dbname})
-    {:ok, dbs} = Database.user_databases(test_endpoint)
+    {:ok, true} = Database.create(test_endpoint(), %Database{name: new_dbname})
+    {:ok, dbs} = Database.user_databases(test_endpoint())
 
     assert is_list(dbs)
     assert "_system" in dbs

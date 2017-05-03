@@ -51,7 +51,6 @@ defmodule UtilsTest do
     end
   end
 
-  @tag :wip
   test "to_header_name" do
     assert "One" = Utils.to_header_name(:one)
     assert "One-Two" = Utils.to_header_name(:one_two)

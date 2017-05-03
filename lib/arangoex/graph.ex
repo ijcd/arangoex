@@ -1,234 +1,306 @@
 defmodule Arangoex.Graph do
   @moduledoc "ArangoDB Graph methods"
 
-  # @doc """
-  # List all graphs
+  alias Arangoex.Endpoint
 
-  # GET /_api/gharial
-  # """
-  # @spec graphs(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graphs(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  defmodule EdgeDefinition do
+    @moduledoc false
+    
+    defstruct [:collection, :from, :to]
 
-  # @doc """
-  # Create a graph
+    @type t :: %__MODULE__{
+      # The name of the collection
+      collection: String.t,
 
-  # POST /_api/gharial
-  # """
-  # @spec graph_create(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_create(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+      # The vertex types an edge can come from
+      from: list(String.t),
 
-  # 0@doc """
-  # Drop a graph
+      # The vertex types an edge can go to      
+      to: list(String.t),      
+    }
+  end
 
-  # DELETE /_api/gharial/{graph-name}
-  # """
-  # @spec graph_drop(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_drop(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  defmodule Edge do
+    @moduledoc false
 
-  # @doc """
-  # Get a graph
+    defstruct [:type, :from, :to, :data]
 
-  # GET /_api/gharial/{graph-name}
-  # """
-  # @spec graph(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+    @type t :: %__MODULE__{
+      # The edge type
+      type: String.t,
 
-  # @doc """
-  # List edge definitions
+      # The from document
+      from: String.t,
 
-  # GET /_api/gharial/{graph-name}/edge
-  # """
-  # @spec graph_edges(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edges(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+      # The to document
+      to: String.t,
 
-  # @doc """
-  # Add edge definition
+      data: map
+    }
+  end
 
-  # POST /_api/gharial/{graph-name}/edge
-  # """
-  # @spec graph_edge_define(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_define(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  # TODO: do we need a struct for structs with a single value?
+  defmodule VertexCollection do
+    @moduledoc false
+    
+    defstruct [:collection]
 
-  # @doc """
-  # Create an edge
+    @type t :: %__MODULE__{
+      # The name of the collection
+      collection: String.t,
+    }
+  end  
 
-  # POST /_api/gharial/{graph-name}/edge/{collection-name}
-  # """
-  # @spec graph_edge_create(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_create(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  List all graphs
 
-  # @doc """
-  # Remove an edge
+  GET /_api/gharial
+  """
+  @spec graphs(Endpoint.t) :: Arangoex.ok_error(map)
+  def graphs(endpoint) do
+    endpoint
+    |> Endpoint.get("gharial")
+  end
 
-  # DELETE /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
-  # """
-  # @spec graph_edge_delete(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_delete(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Create a graph
 
-  # @doc """
-  # Get an edge
+  POST /_api/gharial
+  """
+  @spec create(Endpoint.t, String.t, list(EdgeDefinition.t), list(String.t)) :: Arangoex.ok_error(map)
+  def create(endpoint, graph_name, edge_definitions \\ [], orphan_collections \\ []) do
+    body = %{
+      "name" => graph_name,
+      "edgeDefinitions" => edge_definitions,
+      "orphanCollections" => orphan_collections
+    }
 
-  # GET /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
-  # """
-  # @spec graph_edge(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+    endpoint
+    |> Endpoint.post("gharial", body)
+  end
 
-  # @doc """
-  # Modify an edge
+  @doc """
+  Drop a graph
 
-  # PATCH /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
-  # """
-  # @spec graph_edge_update(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_update(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  DELETE /_api/gharial/{graph-name}
+  """
+  @spec drop(Endpoint.t, String.t) :: Arangoex.ok_error(map)
+  def drop(endpoint, graph_name) do
+    endpoint
+    |> Endpoint.delete("gharial/#{graph_name}")
+  end
 
-  # @doc """
-  # Replace an edge
+  @doc """
+  Get a graph
 
-  # PUT /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
-  # """
-  # @spec graph_edge_replace(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_replace(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  GET /_api/gharial/{graph-name}
+  """
+  @spec graph(Endpoint.t, String.t) :: Arangoex.ok_error(map)
+  def graph(endpoint, graph_name) do
+    endpoint
+    |> Endpoint.get("gharial/#{graph_name}")
+  end
 
-  # @doc """
-  # Remove an edge definition from the graph
+  @doc """
+  List edge definitions
 
-  # DELETE /_api/gharial/{graph-name}/edge/{definition-name}
-  # """
-  # @spec graph_edge_delete(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_delete(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  GET /_api/gharial/{graph-name}/edge
+  """
+  @spec edges(Endpoint.t, String.t) :: Arangoex.ok_error(map)
+  def edges(endpoint, graph_name) do
+    endpoint
+    |> Endpoint.get("gharial/#{graph_name}/edge")
+  end
 
-  # @doc """
-  # Replace an edge definition
+  @doc """
+  Add edge definition
 
-  # PUT /_api/gharial/{graph-name}/edge/{definition-name}
-  # """
-  # @spec graph_edge_definition_replace(Endpoint.t) :: Arangoex.ok_error(map)
-  # def graph_edge_definition_replace(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  POST /_api/gharial/{graph-name}/edge
+  """
+  @spec extend_edge_definintions(Endpoint.t, String.t, EdgeDefinition.t) :: Arangoex.ok_error(map)
+  def extend_edge_definintions(endpoint, graph_name, edge_definition) do
+    body = Map.from_struct(edge_definition)
 
-  # @doc """
-  # List vertex collections
+    endpoint
+    |> Endpoint.post("gharial/#{graph_name}/edge", body)
+  end
 
-  # GET /_api/gharial/{graph-name}/vertex
-  # """
-  # @spec vertexes(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertexes(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Create an edge
 
-  # @doc """
-  # Add vertex collection
+  POST /_api/gharial/{graph-name}/edge/{collection-name}
+  """
+  @spec edge_create(Endpoint.t, String.t, String.t, Edge.t) :: Arangoex.ok_error(map)
+  def edge_create(endpoint, graph_name, collection_name, edge) do
+    body = %{
+      "type" => edge.type,
+      "_from" => edge.from,
+      "_to" => edge.to,
+    } |> Map.merge(edge.data || %{})
+    
+    endpoint
+    |> Endpoint.post("gharial/#{graph_name}/edge/#{collection_name}", body)
+  end
 
-  # POST /_api/gharial/{graph-name}/vertex
-  # """
-  # @spec vertexes_add(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertexes_add(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Remove an edge
 
-  # @doc """
-  # Remove vertex collection
+  DELETE /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
+  """
+  @spec edge_delete(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def edge_delete(endpoint, graph_name, collection_name, edge_key) do
+    endpoint
+    |> Endpoint.delete("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}")
+  end
 
-  # DELETE /_api/gharial/{graph-name}/vertex/{collection-name}
-  # """
-  # @spec vertexes_delete(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertexes_delete(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Get an edge
 
-  # @doc """
-  # Create a vertex
+  GET /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
+  """
+  @spec edge(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def edge(endpoint, graph_name, collection_name, edge_key) do
+    endpoint
+    |> Endpoint.get("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}")
+  end
 
-  # POST /_api/gharial/{graph-name}/vertex/{collection-name}
-  # """
-  # @spec vertex_create(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertex_create(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Modify an edge
 
-  # @doc """
-  # Remove a vertex
+  PATCH /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
+  """
+  @spec edge_update(Endpoint.t, String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def edge_update(endpoint, graph_name, collection_name, edge_key, edge_body) do
+    endpoint
+    |> Endpoint.patch("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}", edge_body)
+  end
 
-  # DELETE /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
-  # """
-  # @spec vertex_delete(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertex_delete(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Replace an edge
 
-  # @doc """
-  # Get a vertex
+  PUT /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
+  """
+  @spec edge_replace(Endpoint.t, String.t, String.t, String.t, Edge.t) :: Arangoex.ok_error(map)
+  def edge_replace(endpoint, graph_name, collection_name, edge_key, edge) do
+    body = %{
+      "type" => edge.type,
+      "_from" => edge.from,
+      "_to" => edge.to,
+    } |> Map.merge(edge.data || %{})
+    
+    endpoint
+    |> Endpoint.put("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}", body)
+  end
 
-  # GET /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
-  # """
-  # @spec vertex(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertex(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Remove an edge definition from the graph
 
-  # @doc """
-  # Modify a vertex
+  DELETE /_api/gharial/{graph-name}/edge/{definition-name}
+  """
+  @spec edge_definition_delete(Endpoint.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def edge_definition_delete(endpoint, graph_name, edge_definition_name) do
+    endpoint
+    |> Endpoint.delete("gharial/#{graph_name}/edge/#{edge_definition_name}")
+  end
 
-  # PATCH /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
-  # """
-  # @spec vertex_update(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertex_update(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  Replace an edge definition
 
-  # @doc """
-  # Replace a vertex
+  PUT /_api/gharial/{graph-name}/edge/{definition-name}
+  """
+  @spec edge_definition_replace(Endpoint.t, String.t, String.t, EdgeDefinition.t) :: Arangoex.ok_error(map)
+  def edge_definition_replace(endpoint, graph_name, edge_definition_name, edge_definition) do
+    endpoint
+    |> Endpoint.put("gharial/#{graph_name}/edge/#{edge_definition_name}", edge_definition)
+  end
 
-  # PUT /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
-  # """
-  # @spec vertex_replace(Endpoint.t) :: Arangoex.ok_error(map)
-  # def vertex_replace(endpoint) do
-  #   endpoint
-  #   |> Endpoint.get("")
-  # end
+  @doc """
+  List vertex collections
+
+  GET /_api/gharial/{graph-name}/vertex
+  """
+  @spec vertex_collections(Endpoint.t, String.t) :: Arangoex.ok_error(map)
+  def vertex_collections(endpoint, graph_name) do
+    endpoint
+    |> Endpoint.get("gharial/#{graph_name}/vertex")
+  end
+
+  @doc """
+  Add vertex collection
+
+  POST /_api/gharial/{graph-name}/vertex
+  """
+  @spec vertex_collection_create(Endpoint.t, String.t, VertexCollection.t) :: Arangoex.ok_error(map)
+  def vertex_collection_create(endpoint, graph_name, vertex_collection) do
+    body = Map.from_struct(vertex_collection)
+    
+    endpoint
+    |> Endpoint.post("gharial/#{graph_name}/vertex", body)
+  end
+
+  @doc """
+  Remove vertex collection
+
+  DELETE /_api/gharial/{graph-name}/vertex/{collection-name}
+  """
+  @spec vertex_collection_delete(Endpoint.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def vertex_collection_delete(endpoint, graph_name, collection_name) do
+    endpoint
+    |> Endpoint.delete("gharial/#{graph_name}/vertex/#{collection_name}")
+  end
+
+  @doc """
+  Create a vertex
+
+  POST /_api/gharial/{graph-name}/vertex/{collection-name}
+  """
+  @spec vertex_create(Endpoint.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def vertex_create(endpoint, graph_name, collection_name, vertex_body) do
+    endpoint
+    |> Endpoint.post("gharial/#{graph_name}/vertex/#{collection_name}", vertex_body)
+  end
+
+  @doc """
+  Remove a vertex
+
+  DELETE /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
+  """
+  @spec vertex_delete(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def vertex_delete(endpoint, graph_name, collection_name, vertex_key) do
+    endpoint
+    |> Endpoint.delete("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}")
+  end
+
+  @doc """
+  Get a vertex
+
+  GET /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
+  """
+  @spec vertex(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def vertex(endpoint, graph_name, collection_name, vertex_key) do
+    endpoint
+    |> Endpoint.get("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}")
+  end
+
+  @doc """
+  Modify a vertex
+
+  PATCH /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
+  """
+  @spec vertex_update(Endpoint.t, String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def vertex_update(endpoint, graph_name, collection_name, vertex_key, vertex_body) do
+    endpoint
+    |> Endpoint.patch("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}", vertex_body)
+  end
+
+  @doc """
+  Replace a vertex
+
+  PUT /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
+  """
+  @spec vertex_replace(Endpoint.t, String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def vertex_replace(endpoint, graph_name, collection_name, vertex_key, vertex_body) do
+    endpoint
+    |> Endpoint.put("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}", vertex_body)
+  end
 end

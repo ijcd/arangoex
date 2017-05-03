@@ -7,7 +7,7 @@ defmodule CollectionTest do
   alias Arangoex.Wal
 
   test "lists collections" do
-    {:ok, collections} = Collection.collections(test_endpoint, "_system")
+    {:ok, collections} = Collection.collections(test_endpoint(), "_system")
     names =
       collections
       |> Enum.map(fn c -> c.name end)

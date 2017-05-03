@@ -173,7 +173,7 @@ id)
         "type" => "hash",
         "unique" => false,
       }
-    } = Index.create_hash(ctx.endpoint, ctx.coll.name, ["foo", "bar", "bang"])
+    } = Index.create_hash(ctx.endpoint, ctx.coll.name, ["bang", "bar", "foo"])
 
     assert {
       :ok, %{
@@ -186,7 +186,7 @@ id)
         "type" => "hash",
         "unique" => true,
       }
-    } = Index.create_hash(ctx.endpoint, ctx.coll.name, ["foo", "bar", "bang"], unique: true, sparse: true)
+    } = Index.create_hash(ctx.endpoint, ctx.coll.name, ["bang", "bar", "foo"], unique: true, sparse: true)
   end
 
   test "Create a persistent index", ctx do
