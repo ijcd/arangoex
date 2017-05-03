@@ -30,9 +30,9 @@ system password.
 
 ## TODO
 
-edge_test 1
+graph_edge_test 1
+graph_traversal_test 1
 transaction_test 1
-traversal_test 1
 cursor_test 3
 
 bulk_test 4

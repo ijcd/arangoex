@@ -1,4 +1,4 @@
-defmodule Arangoex.Traversal do
+defmodule Arangoex.GraphTraversal do
   @moduledoc "ArangoDB Traversal methods"
 
   # @doc """

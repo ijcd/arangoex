@@ -1,4 +1,4 @@
-defmodule TraversalTest do
+defmodule GraphTraversalTest do
   use Arangoex.TestCase
   doctest Arangoex
 
