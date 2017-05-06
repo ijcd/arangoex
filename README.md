@@ -26,16 +26,3 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 Use ./reset_docker.sh to setup docker and get a copy of the ArangoDB
 system password.
-
-
-## TODO
-
-cursor_test 3
-
-bulk_test 4
-job_test 5
-
-aql_test 14
-
-cluster_test 8
-replication_test 18
