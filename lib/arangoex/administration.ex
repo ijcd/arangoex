@@ -20,10 +20,10 @@ defmodule Arangoex.Administration do
       params: map,
 
       # Number of seconds between the executions
-      period: pos_integer,
+      period: non_neg_integer,
 
       # Number of seconds initial delay      
-      offset: nil | pos_integer,      
+      offset: nil | non_neg_integer,      
     }
   end
   

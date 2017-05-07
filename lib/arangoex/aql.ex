@@ -236,7 +236,7 @@ defmodule Arangoex.Aql do
       |> Map.merge(if (max_query_string_length), do: %{"maxQuerystringlength" => max_query_string_length}, else: %{})    
     
     endpoint
-    |> Endpoint.put("query/properties")
+    |> Endpoint.put("query/properties", opts)
   end
 
   # @doc """

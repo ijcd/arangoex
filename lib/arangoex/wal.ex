@@ -18,8 +18,8 @@ defmodule Arangoex.Wal do
   @type t :: %__MODULE__{
     allowOversizeEntries: boolean,
     logfileSize: pos_integer,
-    historicLogfiles: pos_integer,
-    reserveLogfiles: pos_integer,
+    historicLogfiles: non_neg_integer,
+    reserveLogfiles: non_neg_integer,
     syncInterval: pos_integer,
     throttleWait: pos_integer,
     throttleWhenPending: non_neg_integer,

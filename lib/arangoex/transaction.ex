@@ -48,7 +48,7 @@ defmodule Arangoex.Transaction do
       # for waiting on collection locks. If not specified, a default
       # value will be used. Setting lockTimeout to 0 will make
       # ArangoDB not time out waiting for a lock.
-      lock_timeout: pos_integer,
+      lock_timeout: non_neg_integer,
 
       # an optional boolean flag that, if set, will force the
       # transaction to write all data to disk before returning.
