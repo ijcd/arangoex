@@ -1,0 +1,730 @@
+{
+    "paths": {
+        "/_admin/cluster-test": {
+            "delete": {
+                "operationId": "deleteClusterRoundtrip"
+            },
+            "get": {
+                "operationId": "executeClusterRoundrip"
+            },
+            "head": {
+                "operationId": "executeClusterRoundripHead"
+            },
+            "patch": {
+                "operationId": "updateClusterRoundtrip"
+            },
+            "post": {
+                "operationId": "executeClusterRoundtripViaPost"
+            },
+            "put": {
+                "operationId": "executeClusterRoundtripViaPut"
+            }
+        },
+        "/_admin/clusterCheckPort": {
+            "get": {
+                "operationId": "checkClusterPort"
+            }
+        },
+        "/_admin/clusterStatistics": {
+            "get": {
+                "operationId": "getClusterStatistics"
+            }
+        },
+        "/_admin/database/target-version": {
+            "get": {
+                "operationId": "getDatabaseTargetVersion"
+            }
+        },
+        "/_admin/echo": {
+            "get": {
+                "operationId": "echoCurrentRequest"
+            }
+        },
+        "/_admin/execute": {
+            "post": {
+                "operationId": "executeProgram"
+            }
+        },
+        "/_admin/log": {
+            "get": {
+                "operationId": "getGlobalLogs"
+            }
+        },
+        "/_admin/log/level": {
+            "get": {
+                "operationId": "getLogLevel"
+            },
+            "put": {
+                "operationId": "setLogLevel"
+            }
+        },
+        "/_admin/long_echo": {
+            "get": {
+                "operationId": "longEchoCurrentRequest"
+            }
+        },
+        "/_admin/routing/reload": {
+            "post": {
+                "operationId": "reloadRouting"
+            }
+        },
+        "/_admin/server/id": {
+            "get": {
+                "operationId": "getServerId"
+            }
+        },
+        "/_admin/server/role": {
+            "get": {
+                "operationId": "getServerRole"
+            }
+        },
+        "/_admin/shutdown": {
+            "operationId": "shutdownServer" 
+        },
+        "/_admin/sleep": {
+            "get": {
+                "operationId": "sleep"
+            }
+        },
+        "/_admin/statistics": {
+            "get": {
+                "operationId": "getStatistics"
+            }
+        },
+        "/_admin/statistics-description": {
+            "get": {
+                "operationId": "getStatisticsDescription"
+            }
+        },
+        "/_admin/test": {
+            "post": {
+                "operationId": "runServerTests"
+            }
+        },
+        "/_admin/time": {
+            "get": {
+                "operationId": "getSystemTime"
+            }
+        },
+        "/_admin/wal/flush": {
+            "put": {
+                "operationId": "flushWal"
+            }
+        },
+        "/_admin/wal/properties": {
+            "get": {
+                "operationId": "getWalProperties"
+            },
+            "put": {
+                "operationId": "setWalProperties"
+            }
+        },
+        "/_admin/wal/transactions": {
+            "get": {
+                "operationId": "getWalTransactions"
+            }
+        },
+        "/_api/aqlfunction": {
+            "get": {
+                "operationId": "listFunctions"
+            },
+            "post": {
+                "operationId": "createFunction"
+            }
+        },
+        "/_api/aqlfunction/{name}": {
+            "delete": {
+                "operationId": "deleteFunction"
+            }
+        },
+        "/_api/batch": {
+            "post": {
+                "operationId": "executeBatch"
+            }
+        },
+        "/_api/cluster/endpoints": {
+            "get": {
+                "operationId": "getClusterEndpoint"
+            }
+        },
+        "/_api/collection": {
+            "get": {
+                "operationId": "listCollections"
+            },
+            "post": {
+                "operationId": "createCollection"
+            }
+        },
+        "/_api/collection/{collection-name}": {
+            "delete": {
+                "operationId": "dropCollection"
+            },
+            "get": {
+                "operationId": "getCollection"
+            }
+        },
+        "/_api/collection/{collection-name}/checksum": {
+            "get": {
+                "operationId": "getCollectionChecksum"
+            }
+        },
+        "/_api/collection/{collection-name}/count": {
+            "get": {
+                "operationId": "getCollectionCount"
+            }
+        },
+        "/_api/collection/{collection-name}/figures": {
+            "get": {
+                "operationId": "getCollectionStatistics"
+            }
+        },
+        "/_api/collection/{collection-name}/load": {
+            "put": {
+                "operationId": "loadCollection"
+            }
+        },
+        "/_api/collection/{collection-name}/properties": {
+            "get": {
+                "operationId": "getCollectionProperties"
+            },
+            "put": {
+                "operationId": "setCollectionProperties"
+            }
+        },
+        "/_api/collection/{collection-name}/rename": {
+            "put": {
+                "operationId": "renameCollection"
+            }
+        },
+        "/_api/collection/{collection-name}/revision": {
+            "get": {
+                "operationId": "getCollectionRevision"
+            }
+        },
+        "/_api/collection/{collection-name}/rotate": {
+            "put": {
+                "operationId": "rotateCollectionJournal"
+            }
+        },
+        "/_api/collection/{collection-name}/truncate": {
+            "put": {
+                "operationId": "truncateCollection"
+            }
+        },
+        "/_api/collection/{collection-name}/unload": {
+            "put": {
+                "operationId": "unloadCollectionn"
+            }
+        },
+        "/_api/cursor": {
+            "post": {
+                "operationId": "createCursor"                
+            }
+        },
+        "/_api/cursor/{cursor-identifier}": {
+            "delete": {
+                "operationId": "deleteCursorBatch"
+            },
+            "put": {
+                "operationId": "getCursorBatch"
+            }
+        },
+        "/_api/database": {
+            "get": {
+                "operationId": "listDatabases"
+            },
+            "post": {
+                "operationId": "createDatabases"                
+            }
+        },
+        "/_api/database/current": {
+            "get": {
+                "operationId": "getCurrentDatabase"
+            }
+        },
+        "/_api/database/user": {
+            "get": {
+                "operationId": "getUserDatabases"
+            }
+        },
+        "/_api/database/{database-name}": {
+            "delete": "dropDatabase"            
+        },
+        "/_api/document/{collection}": {
+            "delete": {
+                "operationId": "deleteDocuments"
+            },
+            "patch": {
+                "operationId": "updateDocuments"
+            },
+            "post": {
+                "operationId": "createDocument"
+            },
+            "put": {
+                "operationId": "replaceDocuments"
+            }
+        },
+        "/_api/document/{document-handle}": {
+            "get": {
+                "operationId": "getDocument"
+            },
+            "head": {
+                "operationId": "getDocumentHeader"
+            },
+            "patch": {
+                "operationId": "updateDocuments"
+            },
+            "put": {
+                "operationId": "replaceDocument"
+            }
+        },
+        "/_api/edges/{collection-id}": {
+            "get": {
+                "operationId": "getEdges"
+            }
+        },
+        "/_api/endpoint": {
+            "get": {
+                "operationId": "returnEndpoints"
+            }
+        },
+        "/_api/explain": {
+            "post": {
+                "operationId": "explainQuery"
+            }            
+        },
+        "/_api/export": {
+            "post": {
+                "operationId": "createExportCursor"
+            }
+        },
+        "/_api/gharial": {
+            "get": {
+                "operationId": "listGraphs"
+            },
+            "post": {
+                "operationId": "createGraph"
+            }
+        },
+        "/_api/gharial/{graph-name}": {
+            "get": {
+                "operationId": "getGraph"
+            }
+        },
+        "/_api/gharial/{graph-name}/edge": {
+            "get": {
+                "operationId": "listEdges"
+            },
+            "post": {
+                "operationId": "createEdgeDefinition"
+            }
+        },
+        "/_api/gharial/{graph-name}/edge/{collection-name}": {
+            "post": {
+                "operationId": "createEdge"
+            }
+        },
+        "/_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}": {
+            "get": {
+                "operationId": "getEdge"
+            },
+            "patch": {
+                "operationId": "updateEdge"
+            },
+            "put": {
+                "operationId": "replaceEdge"
+            }
+        },
+        "/_api/gharial/{graph-name}/edge/{definition-name}": {
+            "delete": {
+                "operationId": "deleteEdgeDefinition"
+            },
+            "put": {
+                "operationId": "replaceEdgeDefinition"
+            }
+        },
+        "/_api/gharial/{graph-name}/vertex": {
+            "get": {
+                "operationId": "listVertexCollections"
+            },
+            "post": {
+                "operationId": "createVertexCollection"
+            }
+        },
+        "/_api/gharial/{graph-name}/vertex/{collection-name}": {
+            "delete": {
+                "operationId": "deleteVertexCollection"
+            },
+            "post": {
+                "operationId": "createVertex"
+            }
+        },
+        "/_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}": {
+            "delete": {
+                "operationId": "removeVertex"
+            },
+            "get": {
+                "operationId": "getVertex"
+            },
+            "patch": {
+                "operationId": "updateVertex"
+            },
+            "put": {
+                "operationId": "replaceVertex"
+            }
+        },
+        "/_api/import#document": {
+            "post": {
+                "operationId": "importDocumentValues"
+            }
+        },
+        "/_api/import#json": {
+            "post": {
+                "operationId": "importDocumentValuesFromJson"
+            }
+        },
+        "/_api/index": {
+            "get": {
+                "operationId": "listIndexes"
+            }
+        },
+        "/_api/index#fulltext": {
+            "post": {
+                "operationId": "createFulltextIndex"
+            }
+        },
+        "/_api/index#general": {
+            "post": {
+                "operationId": "createIndex"
+            }
+        },
+        "/_api/index#geo": {
+            "post": {
+                "operationId": "createGeoIndex"
+            }
+        },
+        "/_api/index#hash": {
+            "post": {
+                "operationId": "createHashIndex"
+            }
+        },
+        "/_api/index#persistent": {
+            "post": {
+                "operationId": "createPersistentIndex"
+            }
+        },
+        "/_api/index#skiplist": {
+            "post": {
+                "operationId": "createSkipListIndex"
+            }
+        },
+        "/_api/index/{index-handle}": {
+            "delete": {
+                "operationId": "deleteIndex"
+            },
+            "get": {
+                "operationId": "getIndex"
+            }
+        },
+        "/_api/job/{job-id}": {
+            "get": {
+                "operationId": "getAsyncJob"
+            },
+            "put": {
+                "operationId": "getAsyncJobResult"
+            }
+        },
+        "/_api/job/{job-id}/cancel": {
+            "put": {
+                "operationId": "cancelAsyncJob"
+            }
+        },
+        "/_api/job/{type}": {
+            "delete": {
+                "operationId": "deleteAsyncJob"
+            },
+            "get": {
+                "operationId": "listAsyncJobs"
+            }
+        },
+        "/_api/query": {
+            "post": {
+                "operationId": "validateQuery"
+            }
+        },
+        "/_api/query-cache": {
+            "delete": {
+                "operationId": "clearQueryCache"
+            }
+        },
+        "/_api/query-cache/properties": {
+            "get": {
+                "operationId": "getQueryCacheProperties"
+            },
+            "put": {
+                "operationId": "setQueryCacheProperties"
+            }
+        },
+        "/_api/query/current": {
+            "get": {
+                "operationId": "getCurrentQueries"
+            }
+        },
+        "/_api/query/properties": {
+            "get": {
+                "operationId": "getQueryProperties"
+            },
+            "put": {
+                "operationId": "setQueryProperties"
+            }
+        },
+        "/_api/query/slow": {
+            "delete": {
+                "operationId": "clearSlowQueries"
+            },
+            "get": {
+                "operationId": "listSlowQueries"
+            }
+        },
+        "/_api/query/{query-id}": {
+            "delete": {
+                "operationId": "killQueries"
+            }
+        },
+        "/_api/replication/applier-config": {
+            "get": {
+                "operationId": "getReplicationApplierConfig"
+            },
+            "put": {
+                "operationId": "setReplicationApplierConfig"
+            }
+        },
+        "/_api/replication/applier-start": {
+            "put": {
+                "operationId": "startReplicationApplier"
+            }
+        },
+        "/_api/replication/applier-state": {
+            "get": {
+                "operationId": "getReplicationApplierState"
+            }
+        },
+        "/_api/replication/applier-stop": {
+            "put": {
+                "operationId": "stopReplicationApplier"
+            }
+        },
+        "/_api/replication/batch": {
+            "post": {
+                "operationId": "createDumpBatch"                
+            }
+        },
+        "/_api/replication/batch/{id}": {
+            "delete": {
+                "operationId": "deleteDumpBatch"
+            },
+            "put": {
+                "operationId": "extendDumpBatch"
+            }
+        },
+        "/_api/replication/clusterInventory": {
+            "get": {
+                "operationId": "getClusterInventory"
+            }
+        },
+        "/_api/replication/dump": {
+            "get": {
+                "operationId": "getCollectionData"
+            }
+        },
+        "/_api/replication/inventory": {
+            "get": {
+                "operationId": "getInventory"
+            }
+        },
+        "/_api/replication/logger-first-tick": {
+            "get": {
+                "operationId": "getLoggerFirstTick"
+            }
+        },
+        "/_api/replication/logger-follow": {
+            "get": {
+                "operationId": "listLogEntries"
+            }
+        },
+        "/_api/replication/logger-state": {
+            "get": {
+                "operationId": "getLoggerState"
+            }
+        },
+        "/_api/replication/logger-tick-ranges": {
+            "get": {
+                "operationId": "getLoggerTickRangies"
+            }
+        },
+        "/_api/replication/make-slave": {
+            "put": {
+                "operationId": "makeSlave"
+            }
+        },
+        "/_api/replication/server-id": {
+            "get": {
+                "operationId": "getServerId"
+            }
+        },
+        "/_api/replication/sync": {
+            "put": {
+                "operationId": "startDataSync"
+            }
+        },
+        "/_api/simple/all": {
+            "put": {
+                "operationId": "simpleListAllDocuments"
+            }
+        },
+        "/_api/simple/all-keys": {
+            "put": {
+                "operationId": "simpleListAllDocumentKeys"
+            }
+        },
+        "/_api/simple/any": {
+            "put": {
+                "operationId": "simpleRandomDocument"
+            }
+        },
+        "/_api/simple/by-example": {
+            "put": {
+                "operationId": "simpleQueryByExample"
+            }
+        },
+        "/_api/simple/first-example": {
+            "put": {
+                "operationId": "simpleQueryFirstByExample"
+            }
+        },
+        "/_api/simple/fulltext": {
+            "put": {
+                "operationId": "simpleFulltextQuery"
+            }
+        },
+        "/_api/simple/lookup-by-keys": {
+            "put": {
+                "operationId": "simpleQueryByKeys"
+            }
+        },
+        "/_api/simple/near": {
+            "put": {
+                "operationId": "simpleQueryByNear"
+            }
+        },
+        "/_api/simple/range": {
+            "put": {
+                "operationId": "simpleQueryByRange"
+            }
+        },
+        "/_api/simple/remove-by-example": {
+            "put": {
+                "operationId": "simpleRemoveByExample"
+            }
+        },
+        "/_api/simple/remove-by-keys": {
+            "put": {
+                "operationId": "simpleRemoveByKeys"
+            }
+        },
+        "/_api/simple/replace-by-example": {
+            "put": {
+                "operationId": "simpleReplaceByExample"
+            }
+        },
+        "/_api/simple/update-by-example": {
+            "put": {
+                "operationId": "simpleUpdateByExample"
+            }
+        },
+        "/_api/simple/within": {
+            "put": {
+                "operationId": "simpleQueryByWithin"
+            }
+        },
+        "/_api/simple/within-rectangle": {
+            "put": {
+                "operationId": "simpleQueryByRectangle"
+            }
+        },
+        "/_api/tasks": {
+            "post": {
+                "operationId": "createTask"
+            }
+        },
+        "/_api/tasks/": {
+            "delete": {
+                "operationId": "deleteTask"
+            },
+            "get": {
+                "operationId": "listTasks"
+            }
+        },
+        "/_api/tasks/{id}": {
+            "delete": {
+                "operationId": "deleteTask"
+            },
+            "get": {
+                "operationId": "getTask"
+            },
+            "put": {
+                "operationId": "createTaskById"
+            }
+        },
+        "/_api/transaction": {
+            "post": {
+                "operationId": "executeTransaction"
+            }
+        },
+        "/_api/traversal": {
+            "post": {
+                "operationId": "executeTraversal"
+            }
+        },
+        "/_api/user": {
+            "post": {
+                "operationId": "createUser"
+            }
+        },
+        "/_api/user/": {
+            "get": {
+                "operationId": "listUsers"
+            }
+        },
+        "/_api/user/{user}": {
+            "delete": {
+                "operationId": "deleteUser"
+            },
+            "get": {
+                "operationId": "getUser"
+            },
+            "patch": {
+                "operationId": "updateUser"
+            },
+            "put": {
+                "operationId": "replaceUser"
+            }
+        },
+        "/_api/user/{user}/database/": {
+            "get": {
+                "operationId": "listUserDatabases"
+            }
+        },
+        "/_api/user/{user}/database/{dbname}": {
+            "put": {
+                "operationId": "setDatabaseAccess"
+            }
+        },
+        "/_api/version": {
+            "get": {
+                "operationId": "getServerVersion"
+            }
+        }
+    }
+}
+

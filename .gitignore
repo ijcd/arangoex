@@ -17,3 +17,13 @@ erl_crash.dump
 *.ez
 
 .envrc
+
+/gen
+
+/GPATH
+/GRTAGS
+/GTAGS
+
+/methods.txt
+/swagger.json
+/swagger_with_additions.json
