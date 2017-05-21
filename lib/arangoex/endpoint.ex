@@ -55,16 +55,6 @@ defmodule Arangoex.Endpoint do
     Map.put(endpoint, :database_name, db_name)
   end
 
-  @spec with_auth(t, atom, String.t, String.t) :: t  
-  def with_auth(endpoint, :basic, username, password) do
-    Map.merge(endpoint, %{use_auth: :basic, username: username, password: password})
-  end
-
-  @spec with_auth(t, atom, String.t) :: t    
-  def with_auth(endpoint, :bearer, token) do
-    Map.merge(endpoint, %{use_auth: :bearer, password: token})
-  end
-
   @spec get(t, String.t, keyword) :: Arangoex.ok_error(any())
   def get(endpoint, resource, headers \\ []) do
     url = url(endpoint, resource)
