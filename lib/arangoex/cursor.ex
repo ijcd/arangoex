@@ -9,6 +9,7 @@ defmodule Arangoex.Cursor do
     @enforce_keys [:query]
     defstruct [
       :query,
+      :bind_vars,
       :count,
       :batch_size,
       :cache,
@@ -26,9 +27,9 @@ defmodule Arangoex.Cursor do
       # query: contains the query string to be executed
       query: String.t,
 
-      # bind_vars: a keyword list containing the bounded variables with
-      # their respective values.
-      bind_vars: Keyword.t,
+      # bind_vars: a map or keyword list containing the bounded variables
+      # with their respective values.
+      bind_vars: Keyword.t | Map.t,
 
       # count: indicates whether the number of documents in the result
       # set should be returned in the "count" attribute of the
