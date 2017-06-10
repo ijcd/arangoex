@@ -2,13 +2,14 @@ defmodule Arangoex.Cursor do
   @moduledoc "ArangoDB Cursor methods"
 
   alias Arangoex.Endpoint
-  
+
   defmodule Cursor do
     @moduledoc false
 
     @enforce_keys [:query]
     defstruct [
       :query,
+      :bind_vars,
       :count,
       :batch_size,
       :cache,
@@ -23,10 +24,12 @@ defmodule Arangoex.Cursor do
     ]
 
     @type t :: %__MODULE__{
-      # query: contains the query string to be executed bindVars
-      # (object): key/value pairs representing the bind parameters.
-      # options:
+      # query: contains the query string to be executed
       query: String.t,
+
+      # bind_vars: a map or keyword list containing the bounded variables
+      # with their respective values.
+      bind_vars: Keyword.t | Map.t,
 
       # count: indicates whether the number of documents in the result
       # set should be returned in the "count" attribute of the
@@ -112,28 +115,31 @@ defmodule Arangoex.Cursor do
   @spec cursor_create(Endpoint.t, Cursor.t) :: Arangoex.ok_error(map)
   def cursor_create(endpoint, cursor) do
     query = Map.get(cursor, :query)
+    bind_vars = Map.get(cursor, :bind_vars)
     count = Map.get(cursor, :count)
     batch_size = Map.get(cursor, :batch_size)
     full_count = Map.get(cursor, :full_count)
     max_plans = Map.get(cursor, :max_plans)
     optimizer_rules = Map.get(cursor, :optimizer_rules)
-    
+
     top_level =
       %{}
       |> Map.merge(if (query), do: %{"query" => query}, else: %{})
-      |> Map.merge(if (count), do: %{"count" => count}, else: %{})    
+      |> Map.merge(if (bind_vars), do: %{"bindVars" => Enum.into(bind_vars, %{})}, else: %{})
+      |> Map.merge(if (count), do: %{"count" => count}, else: %{})
       |> Map.merge(if (batch_size), do: %{"batchSize" => batch_size}, else: %{})
 
     options =
       %{}
-      |> Map.merge(if (full_count), do: %{"fullCount" => full_count}, else: %{})    
+      |> Map.merge(if (full_count), do: %{"fullCount" => full_count}, else: %{})
       |> Map.merge(if (max_plans), do: %{"maxPlans" => max_plans}, else: %{})
-      |> Map.merge(if (optimizer_rules), do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})    
-    
+      |> Map.merge(if (optimizer_rules), do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})
+
     cursor_request =
       top_level
-      |> Map.merge(if (Enum.any?(options)), do: %{"options" => options}, else: %{})    
+      |> Map.merge(if (Enum.any?(options)), do: %{"options" => options}, else: %{})
 
+    IO.puts inspect(cursor_request)
     endpoint
     |> Endpoint.post("cursor", cursor_request)
   end

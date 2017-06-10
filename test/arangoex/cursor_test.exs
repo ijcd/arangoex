@@ -4,7 +4,7 @@ defmodule CursorTest do
 
   alias Arangoex.Cursor
   alias Arangoex.Collection
-  alias Arangoex.Document  
+  alias Arangoex.Document
 
   setup ctx do
     {:ok, coll} = Collection.create(ctx.endpoint, %Collection{name: "products"})
@@ -19,9 +19,9 @@ defmodule CursorTest do
 
   test "Create cursor (execute a query and extract the result in a single go)", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR p IN products LIMIT 2 RETURN p", 
-      count: true, 
-      batch_size: 2 
+      query: "FOR p IN products LIMIT 2 RETURN p",
+      count: true,
+      batch_size: 2
     }
 
     assert {
@@ -50,9 +50,9 @@ defmodule CursorTest do
 
   test "Create cursor (execute a query and extract a part of the result)", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR p IN products LIMIT 5 RETURN p", 
-      count: true, 
-      batch_size: 2 
+      query: "FOR p IN products LIMIT 5 RETURN p",
+      count: true,
+      batch_size: 2
     }
 
     assert {
@@ -79,117 +79,148 @@ defmodule CursorTest do
     assert Enum.count(result) == 2
   end
 
+  test "Create cursor (execute a query with bind_vars)", ctx do
+    cursor = %Cursor.Cursor{
+      query: "FOR p IN products FILTER p.age == @age RETURN p.name",
+      count: true,
+      batch_size: 2,
+      bind_vars: [age: 11]
+    }
+
+    assert {
+      :ok, %{
+        "cached" => false,
+        "code" => 201,
+        "error" => false,
+        "count" => 1,
+        "hasMore" => false,
+        "result" => ["Alice"],
+        "extra" => %{
+          "stats" => %{
+            "executionTime" => _,
+            "filtered" => 5,
+            "scannedFull" => 6,
+            "scannedIndex" => 0,
+            "writesExecuted" => 0,
+            "writesIgnored" => 0
+          },
+          "warnings" => []
+        },
+      }
+    } = Cursor.cursor_create(ctx.endpoint, cursor)
+  end
+
   test "Create cursor (using the query option \"fullCount\")", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR i IN 1..1000 FILTER i > 500 LIMIT 10 RETURN i", 
+      query: "FOR i IN 1..1000 FILTER i > 500 LIMIT 10 RETURN i",
       count: true,
       full_count: true
     }
-    
+
     assert {
       :ok, %{
         "code" => 201,
-        "error" => false, 
-        "hasMore" => false, 
-        "count" => 10, 
-        "cached" => false, 
-        "result" => [501, 502, 503, 504, 505, 506, 507, 508, 509, 510], 
-        "extra" => %{ 
-          "stats" => %{ 
-            "writesExecuted" => 0, 
-            "writesIgnored" => 0, 
-            "scannedFull" => 0, 
-            "scannedIndex" => 0, 
-            "filtered" => 500, 
-            "fullCount" => 500, 
+        "error" => false,
+        "hasMore" => false,
+        "count" => 10,
+        "cached" => false,
+        "result" => [501, 502, 503, 504, 505, 506, 507, 508, 509, 510],
+        "extra" => %{
+          "stats" => %{
+            "writesExecuted" => 0,
+            "writesIgnored" => 0,
+            "scannedFull" => 0,
+            "scannedIndex" => 0,
+            "filtered" => 500,
+            "fullCount" => 500,
             "executionTime" => _
-          }, 
-          "warnings" => [] 
+          },
+          "warnings" => []
         }
-      }        
+      }
     } = Cursor.cursor_create(ctx.endpoint, cursor)
   end
 
   test "Create cursor (enabling and disabling optimizer rules)", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR i IN 1..10 LET a = 1 LET b = 2 FILTER a + b == 3 RETURN i", 
+      query: "FOR i IN 1..10 LET a = 1 LET b = 2 FILTER a + b == 3 RETURN i",
       count: true,
       max_plans: 1,
-      optimizer_rules: ["-all", "+remove-unnecessary-filters"] 
+      optimizer_rules: ["-all", "+remove-unnecessary-filters"]
     }
-    
+
     assert {
       :ok, %{
         "code" => 201,
-        "error" => false, 
-        "hasMore" => false, 
-        "count" => 10, 
-        "cached" => false, 
-        "result" => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 
-        "extra" => %{ 
-          "stats" => %{ 
-            "writesExecuted" => 0, 
-            "writesIgnored" => 0, 
-            "scannedFull" => 0, 
-            "scannedIndex" => 0, 
-            "filtered" => 0, 
+        "error" => false,
+        "hasMore" => false,
+        "count" => 10,
+        "cached" => false,
+        "result" => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        "extra" => %{
+          "stats" => %{
+            "writesExecuted" => 0,
+            "writesIgnored" => 0,
+            "scannedFull" => 0,
+            "scannedIndex" => 0,
+            "filtered" => 0,
             "executionTime" => _,
-          }, 
-          "warnings" => [] 
-        }, 
-      }        
+          },
+          "warnings" => []
+        },
+      }
     } = Cursor.cursor_create(ctx.endpoint, cursor)
   end
-  
+
   test "Create cursor (execute a data-modification query and retrieve the number of modified documents)", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR p IN products REMOVE p IN products", 
+      query: "FOR p IN products REMOVE p IN products",
     }
-    
+
     assert {
       :ok, %{
         "code" => 201,
-        "error" => false, 
-        "hasMore" => false, 
+        "error" => false,
+        "hasMore" => false,
         "cached" => false,
-        "result" => [],         
-        "extra" => %{ 
-          "stats" => %{ 
-            "writesExecuted" => 6, 
-            "writesIgnored" => 0, 
-            "scannedFull" => 6, 
-            "scannedIndex" => 0, 
-            "filtered" => 0, 
+        "result" => [],
+        "extra" => %{
+          "stats" => %{
+            "writesExecuted" => 6,
+            "writesIgnored" => 0,
+            "scannedFull" => 6,
+            "scannedIndex" => 0,
+            "filtered" => 0,
             "executionTime" => _,
-          }, 
-          "warnings" => [] 
+          },
+          "warnings" => []
         }
       }
     } = Cursor.cursor_create(ctx.endpoint, cursor)
   end
-  
+
   test "Create cursor (execute a data-modification query with option ignoreErrors)", ctx do
     cursor = %Cursor.Cursor{
       query: "REMOVE 'bar' IN products OPTIONS { ignoreErrors: true }",
     }
-    
+
     assert {
-      :ok, %{ 
+      :ok, %{
         "code" => 201,
-        "error" => false, 
-        "hasMore" => false, 
-        "cached" => false, 
-        "result" => [], 
-        "extra" => %{ 
-          "stats" => %{ 
-            "writesExecuted" => 0, 
-            "writesIgnored" => 1, 
-            "scannedFull" => 0, 
-            "scannedIndex" => 0, 
-            "filtered" => 0, 
+        "error" => false,
+        "hasMore" => false,
+        "cached" => false,
+        "result" => [],
+        "extra" => %{
+          "stats" => %{
+            "writesExecuted" => 0,
+            "writesIgnored" => 1,
+            "scannedFull" => 0,
+            "scannedIndex" => 0,
+            "filtered" => 0,
             "executionTime" => _
-          }, 
-          "warnings" => [] 
+          },
+          "warnings" => []
         }
       }
     } = Cursor.cursor_create(ctx.endpoint, cursor)
@@ -199,7 +230,7 @@ defmodule CursorTest do
     cursor = %Cursor.Cursor{
       query: "",
     }
-    
+
     assert {
       :error, %{
         "code" => 400,
@@ -212,17 +243,17 @@ defmodule CursorTest do
 
   test "Create cursor (bad query - unknown collection)", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR u IN unknowncoll LIMIT 2 RETURN u", 
-      count: true, 
-      batch_size: 2 
+      query: "FOR u IN unknowncoll LIMIT 2 RETURN u",
+      count: true,
+      batch_size: 2
     }
-    
+
     assert {
-      :error, %{ 
-        "code" => 404, 
-        "error" => true, 
-        "errorMessage" => "collection not found (unknowncoll)", 
-        "errorNum" => 1203 
+      :error, %{
+        "code" => 404,
+        "error" => true,
+        "errorMessage" => "collection not found (unknowncoll)",
+        "errorNum" => 1203
       }
     } == Cursor.cursor_create(ctx.endpoint, cursor)
   end
@@ -231,12 +262,12 @@ defmodule CursorTest do
     cursor = %Cursor.Cursor{
       query: "REMOVE 'foo' IN products"
     }
-    
+
     assert {
-     :error, %{ 
-        "code" => 404, 
-        "error" => true, 
-        "errorMessage" => "document not found (while executing)", 
+     :error, %{
+        "code" => 404,
+        "error" => true,
+        "errorMessage" => "document not found (while executing)",
         "errorNum" => 1202
       }
     } == Cursor.cursor_create(ctx.endpoint, cursor)
@@ -244,11 +275,11 @@ defmodule CursorTest do
 
   test "Delete cursor", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR p IN products LIMIT 5 RETURN p", 
-      count: true, 
-      batch_size: 2 
+      query: "FOR p IN products LIMIT 5 RETURN p",
+      count: true,
+      batch_size: 2
     }
-    
+
     {:ok, %{"id" => id}} = Cursor.cursor_create(ctx.endpoint, cursor)
 
     # delete the cursor
@@ -266,70 +297,70 @@ defmodule CursorTest do
         "code" => 404,
         "error" => true,
         "errorMessage" => "cursor not found",
-        "errorNum" => 1600        
+        "errorNum" => 1600
       }
     } == Cursor.cursor_delete(ctx.endpoint, id)
   end
 
   test "Read next batch from cursor", ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR p IN products LIMIT 5 RETURN p", 
-      count: true, 
-      batch_size: 2 
+      query: "FOR p IN products LIMIT 5 RETURN p",
+      count: true,
+      batch_size: 2
     }
-    
+
     {:ok, %{
         "id" => id,
         "result" => result,
      }
     } = Cursor.cursor_create(ctx.endpoint, cursor)
-    assert Enum.count(result) == 2    
+    assert Enum.count(result) == 2
 
     # get another batch
     assert {
-      :ok, %{ 
-        "code" => 200, 
-        "error" => false, 
-        "hasMore" => true, 
-        "id" => id, 
-        "count" => 5, 
+      :ok, %{
+        "code" => 200,
+        "error" => false,
+        "hasMore" => true,
+        "id" => id,
+        "count" => 5,
         "cached" => false,
         "result" => result,
-        "extra" => %{ 
-          "stats" => %{ 
-            "writesExecuted" => 0, 
-            "writesIgnored" => 0, 
-            "scannedFull" => 5, 
-            "scannedIndex" => 0, 
-            "filtered" => 0, 
+        "extra" => %{
+          "stats" => %{
+            "writesExecuted" => 0,
+            "writesIgnored" => 0,
+            "scannedFull" => 5,
+            "scannedIndex" => 0,
+            "filtered" => 0,
             "executionTime" => _
-          }, 
-          "warnings" => [] 
+          },
+          "warnings" => []
         }
       }
     } = Cursor.cursor_next(ctx.endpoint, id)
-    assert Enum.count(result) == 2    
+    assert Enum.count(result) == 2
 
     # get another batch
     assert {
-      :ok, %{ 
-        "code" => 200, 
-        "error" => false, 
-        "hasMore" => false, 
-        # "id" => id, 
-        "count" => 5, 
+      :ok, %{
+        "code" => 200,
+        "error" => false,
+        "hasMore" => false,
+        # "id" => id,
+        "count" => 5,
         "cached" => false,
         "result" => result,
-        "extra" => %{ 
-          "stats" => %{ 
-            "writesExecuted" => 0, 
-            "writesIgnored" => 0, 
-            "scannedFull" => 5, 
-            "scannedIndex" => 0, 
-            "filtered" => 0, 
+        "extra" => %{
+          "stats" => %{
+            "writesExecuted" => 0,
+            "writesIgnored" => 0,
+            "scannedFull" => 5,
+            "scannedIndex" => 0,
+            "filtered" => 0,
             "executionTime" => _
-          }, 
-          "warnings" => [] 
+          },
+          "warnings" => []
         }
       }
     } = Cursor.cursor_next(ctx.endpoint, id)
