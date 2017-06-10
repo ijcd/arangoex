@@ -222,7 +222,7 @@ end
     # with no queries running
     assert {
       :ok, []
-    } == Aql.query_current(ctx.endpoint)
+    } == Aql.current_queries(ctx.endpoint)
   end
 
   @tag :skip
@@ -230,7 +230,7 @@ end
     # run some queries and check
     assert {
       :ok, []
-    } == Aql.query_current(ctx.endpoint)
+    } == Aql.current_queries(ctx.endpoint)
   end
   
   test "Returns the properties for the AQL query tracking", ctx do

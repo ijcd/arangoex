@@ -120,13 +120,13 @@ defmodule Arangoex.Aql do
     
     opts =
       %{}
-      |> Map.merge(if (max_number_of_plans), do: %{"maxNumberOfPlans" => max_number_of_plans}, else: %{})
-      |> Map.merge(if (all_plans), do: %{"allPlans" => all_plans}, else: %{})
-      |> Map.merge(if (optimizer_rules), do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})
+      |> Map.merge(if max_number_of_plans, do: %{"maxNumberOfPlans" => max_number_of_plans}, else: %{})
+      |> Map.merge(if all_plans, do: %{"allPlans" => all_plans}, else: %{})
+      |> Map.merge(if optimizer_rules, do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})
     
     explain_request =
       %{query: query}
-      |> Map.merge(if (Enum.any?(opts)), do: %{"options" => opts}, else: %{})
+      |> Map.merge(if Enum.any?(opts), do: %{"options" => opts}, else: %{})
 
     endpoint
     |> Endpoint.post("/explain", explain_request)
@@ -180,8 +180,8 @@ defmodule Arangoex.Aql do
     
     opts =
       %{}
-      |> Map.merge(if (max_results), do: %{"maxResults" => max_results}, else: %{})
-      |> Map.merge(if (mode), do: %{"mode" => mode}, else: %{})
+      |> Map.merge(if max_results, do: %{"maxResults" => max_results}, else: %{})
+      |> Map.merge(if mode, do: %{"mode" => mode}, else: %{})
     
     endpoint
     |> Endpoint.put("query-cache/properties", opts)
@@ -193,8 +193,8 @@ defmodule Arangoex.Aql do
   #
   # GET /_api/query/current
   # """
-  @spec query_current(Endpoint.t) :: Arangoex.ok_error(map)
-  def query_current(endpoint) do
+  @spec current_queries(Endpoint.t) :: Arangoex.ok_error(map)
+  def current_queries(endpoint) do
     endpoint
     |> Endpoint.get("query/current")
   end
@@ -228,11 +228,11 @@ defmodule Arangoex.Aql do
     
     opts =
       %{}
-      |> Map.merge(if (enabled), do: %{"enabled" => enabled}, else: %{})
-      |> Map.merge(if (slow_query_threshold), do: %{"slowQuerythreshold" => slow_query_threshold}, else: %{})
-      |> Map.merge(if (max_slow_queries), do: %{"maxSlowqueries" => max_slow_queries}, else: %{})
-      |> Map.merge(if (track_slow_queries), do: %{"trackSlowqueries" => track_slow_queries}, else: %{})
-      |> Map.merge(if (max_query_string_length), do: %{"maxQuerystringlength" => max_query_string_length}, else: %{})    
+      |> Map.merge(if enabled, do: %{"enabled" => enabled}, else: %{})
+      |> Map.merge(if slow_query_threshold, do: %{"slowQuerythreshold" => slow_query_threshold}, else: %{})
+      |> Map.merge(if max_slow_queries, do: %{"maxSlowqueries" => max_slow_queries}, else: %{})
+      |> Map.merge(if track_slow_queries, do: %{"trackSlowqueries" => track_slow_queries}, else: %{})
+      |> Map.merge(if max_query_string_length, do: %{"maxQuerystringlength" => max_query_string_length}, else: %{})    
     
     endpoint
     |> Endpoint.put("query/properties", opts)

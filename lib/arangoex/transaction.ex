@@ -65,15 +65,15 @@ defmodule Arangoex.Transaction do
   def transaction(endpoint, t) do
     collections =
       %{}
-      |> Map.merge(if (t.read_collections), do: %{"read" => t.read_collections}, else: %{})
-      |> Map.merge(if (t.write_collections), do: %{"write" => t.write_collections}, else: %{})
-      |> Map.merge(if (t.allow_implicit == false), do: %{"allowImplicit" => false}, else: %{})
+      |> Map.merge(if t.read_collections, do: %{"read" => t.read_collections}, else: %{})
+      |> Map.merge(if t.write_collections, do: %{"write" => t.write_collections}, else: %{})
+      |> Map.merge(if t.allow_implicit == false, do: %{"allowImplicit" => false}, else: %{})
 
     body =
       %{collections: collections, action: t.action}
-      |> Map.merge(if (t.params), do: %{"params" => t.params}, else: %{})
-      |> Map.merge(if (t.lock_timeout), do: %{"lockTimeout" => t.lock_timeout}, else: %{})
-      |> Map.merge(if (t.wait_for_sync), do: %{"waitForSync" => t.wait_for_sync}, else: %{})    
+      |> Map.merge(if t.params, do: %{"params" => t.params}, else: %{})
+      |> Map.merge(if t.lock_timeout, do: %{"lockTimeout" => t.lock_timeout}, else: %{})
+      |> Map.merge(if t.wait_for_sync, do: %{"waitForSync" => t.wait_for_sync}, else: %{})    
     
     endpoint
     |> Endpoint.post("/transaction", body)

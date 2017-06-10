@@ -4,36 +4,13 @@ defmodule Arangoex.Administration do
   alias Arangoex.Endpoint
   alias Arangoex.Utils
 
-  defmodule Task do
-    @moduledoc false
-    
-    defstruct [:name, :command, :params, :period, :offset]
-
-    @type t :: %__MODULE__{
-      # The name of the task
-      name: String.t,
-
-      # The JavaScript code to be executed      
-      command: String.t,
-
-      # The parameters to be passed into command
-      params: map,
-
-      # Number of seconds between the executions
-      period: non_neg_integer,
-
-      # Number of seconds initial delay      
-      offset: nil | non_neg_integer,      
-    }
-  end
-  
   @doc """
   Return the required version of the database
   
   GET /_admin/database/target-version
   """
-  @spec target_version(Endpoint.t) :: Arangoex.ok_error(map)
-  def target_version(endpoint) do
+  @spec database_version(Endpoint.t) :: Arangoex.ok_error(map)
+  def database_version(endpoint) do
     endpoint
     |> Endpoint.with_db("_system")    
     |> Endpoint.get("/_admin/database/target-version")
@@ -102,8 +79,8 @@ defmodule Arangoex.Administration do
   
   POST /_admin/routing/reload
   """
-  @spec routing_reload(Endpoint.t) :: Arangoex.ok_error(map)
-  def routing_reload(endpoint) do
+  @spec reload_routing(Endpoint.t) :: Arangoex.ok_error(map)
+  def reload_routing(endpoint) do
     endpoint
     |> Endpoint.with_db("_system")    
     |> Endpoint.post("/_admin/routing/reload")
@@ -218,67 +195,7 @@ defmodule Arangoex.Administration do
     |> Endpoint.with_db("_system")    
     |> Endpoint.get("endpoint")
   end
-  
-  @doc """
-  Creates a task
-  
-  POST /_api/tasks
-  """
-  @spec task_create(Endpoint.t, Task.t) :: Arangoex.ok_error(map)
-  def task_create(endpoint, task) do
-    endpoint
-    |> Endpoint.with_db("_system")    
-    |> Endpoint.post("tasks", task)
-  end
-  
-  @doc """
-  Fetch all tasks or one task
-  
-  GET /_api/tasks
-  """
-  @spec tasks(Endpoint.t) :: Arangoex.ok_error(map)
-  def tasks(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")    
-    |> Endpoint.get("tasks")
-  end
-  
-  @doc """
-  Deletes the task with id
-  
-  DELETE /_api/tasks/{id}
-  """
-  @spec task_delete(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def task_delete(endpoint, task_id) do
-    endpoint
-    |> Endpoint.with_db("_system")    
-    |> Endpoint.delete("tasks/#{task_id}")
-  end
-  
-  @doc """
-  Fetch one task with id
-  
-  GET /_api/tasks/{id}
-  """
-  @spec task(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def task(endpoint, task_id) do
-    endpoint
-    |> Endpoint.with_db("_system")    
-    |> Endpoint.get("tasks/#{task_id}")
-  end
-  
-  @doc """
-  Creates a task with id
-  
-  PUT /_api/tasks/{id}
-  """
-  @spec task_create_with_id(Endpoint.t, String.t, Task.t) :: Arangoex.ok_error(map)
-  def task_create_with_id(endpoint, task_id, task) do
-    endpoint
-    |> Endpoint.with_db("_system")    
-    |> Endpoint.put("tasks/#{task_id}", task)
-  end
-  
+
   @doc """
   Return server version
   

@@ -124,22 +124,21 @@ defmodule Arangoex.Cursor do
 
     top_level =
       %{}
-      |> Map.merge(if (query), do: %{"query" => query}, else: %{})
-      |> Map.merge(if (bind_vars), do: %{"bindVars" => Enum.into(bind_vars, %{})}, else: %{})
-      |> Map.merge(if (count), do: %{"count" => count}, else: %{})
-      |> Map.merge(if (batch_size), do: %{"batchSize" => batch_size}, else: %{})
+      |> Map.merge(if query, do: %{"query" => query}, else: %{})
+      |> Map.merge(if bind_vars, do: %{"bindVars" => Enum.into(bind_vars, %{})}, else: %{})
+      |> Map.merge(if count, do: %{"count" => count}, else: %{})
+      |> Map.merge(if batch_size, do: %{"batchSize" => batch_size}, else: %{})
 
     options =
       %{}
-      |> Map.merge(if (full_count), do: %{"fullCount" => full_count}, else: %{})
-      |> Map.merge(if (max_plans), do: %{"maxPlans" => max_plans}, else: %{})
-      |> Map.merge(if (optimizer_rules), do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})
+      |> Map.merge(if full_count, do: %{"fullCount" => full_count}, else: %{})
+      |> Map.merge(if max_plans, do: %{"maxPlans" => max_plans}, else: %{})
+      |> Map.merge(if optimizer_rules, do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})
 
     cursor_request =
       top_level
-      |> Map.merge(if (Enum.any?(options)), do: %{"options" => options}, else: %{})
+      |> Map.merge(if Enum.any?(options), do: %{"options" => options}, else: %{})
 
-    IO.puts inspect(cursor_request)
     endpoint
     |> Endpoint.post("cursor", cursor_request)
   end

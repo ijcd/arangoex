@@ -4,10 +4,10 @@ defmodule AdministrationTest do
 
   alias Arangoex.Administration
 
-  test "returns target_version", ctx do
+  test "returns database version", ctx do
     assert {
       :ok, %{"code" => 200, "error" => false, "version" => _}
-    }  = Administration.target_version(ctx.endpoint)
+    }  = Administration.database_version(ctx.endpoint)
   end
 
   test "returns echo", ctx do
@@ -165,7 +165,7 @@ defmodule AdministrationTest do
   test "reloads routing", ctx do
     assert {
       :ok, %{"code" => 200, "error" => false}
-    } == Administration.routing_reload(ctx.endpoint)
+    } == Administration.reload_routing(ctx.endpoint)
   end
 
   test "gets the server id", ctx do
@@ -456,155 +456,9 @@ defmodule AdministrationTest do
     } = Administration.endpoints(ctx.endpoint)
   end
 
-  test "creates a task", ctx do
-    task = %Administration.Task{ 
-      name: "SampleTask", 
-      command: "(function(params) { require('@arangodb').print(params); })(params)", 
-      params: %{ 
-        foo: "fooey",
-        bar: "barey"
-      }, 
-      period: 2 
-    }
-    
-    assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "command" => "(function (params) { (function(params) { require('@arangodb').print(params); })(params) } )(params);",
-        "created" => _,
-        "database" => "_system",
-        "id" => _,
-        "offset" => _,        
-        "name" => "SampleTask",
-        "period" => 2,
-        "type" => "periodic"
-      }
-    } = Administration.task_create(ctx.endpoint, task)
-  end
-
-  test "lists a task or tasks", ctx do
-     {:ok, tasks} = Administration.tasks(ctx.endpoint)
-     assert [
-        %{
-          "database" => "_system",
-          "name" => "user-defined task",
-          "period" => 1,
-          "type" => "periodic"
-        },
-        %{
-          "database" => "_system",
-          "id" => "statistics-gc",
-          "name" => "statistics-gc",
-          "period" => 450,
-          "type" => "periodic"
-        },
-        %{
-          "database" => "_system",
-          "id" => "statistics-collector",
-          "name" => "statistics-collector",
-          "period" => 10,
-          "type" => "periodic"
-        },
-        %{
-          "database" => "_system",
-          "id" => "statistics-average-collector",
-          "name" => "statistics-average-collector",
-          "period" => 900,
-          "type" => "periodic"
-        },
-      ] = Enum.sort(tasks)
-  end
-
-  test "deletes a task", ctx do
-    assert {
-      :error, %{
-        "code" => 404,
-        "error" => true,
-        "errorNum" => 1852,
-        "errorMessage" => "task not found"
-      }
-    } = Administration.task_delete(ctx.endpoint, "1234")
-    
-    task = %Administration.Task{ 
-      name: "SampleTask", 
-      command: "(function(params) { require('@arangodb').print(params); })(params)", 
-      params: %{ 
-        foo: "fooey",
-        bar: "barey"
-      }, 
-      period: 2 
-    }
-    {:ok, %{"id" => task_id}} = Administration.task_create(ctx.endpoint, task)
-
-    assert {
-      :ok, %{"code" => 200, "error" => false}
-    } = Administration.task_delete(ctx.endpoint, task_id)
-  end
-
-  test "fetch a task by id", ctx do
-    task = %Administration.Task{ 
-      name: "SampleTask", 
-      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)", 
-      params: %{ 
-        foo: "fooey",
-        bar: "barey"
-      }, 
-      period: 2 
-    }
-    {:ok, %{"id" => task_id}} = Administration.task_create(ctx.endpoint, task)
-
-    task = Administration.task(ctx.endpoint, task_id)
-    {:ok, result} = task
-    assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "command" => _,
-        "created" => _,
-        "database" => "_system",
-        "id" => ^task_id,
-        "name" => "SampleTask",
-        "period" => 2,
-        "type" => "periodic"
-      }
-    } = task
-    assert Regex.match?(~r/myparams/, result["command"])
-  end
-
-  test "create a task by id", ctx do
-    task = %Administration.Task{ 
-      name: "SampleTask", 
-      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)", 
-      params: %{ 
-        foo: "fooey",
-        bar: "barey"
-      }, 
-      period: 2 
-    }
-    assert {:ok, _} = Administration.task_create_with_id(ctx.endpoint, "foobar", task)
-
-    task = Administration.task(ctx.endpoint, "foobar")
-    {:ok, result} = task
-    assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "command" => _,
-        "created" => _,
-        "database" => "_system",
-        "id" => "foobar",
-        "name" => "SampleTask",
-        "period" => 2,
-        "type" => "periodic"
-      }
-    } = task
-    assert Regex.match?(~r/myparams/, result["command"])
-  end
-
   test "fetches the server version", ctx do
     assert {
       :ok, %{"server" => "arango", "version" => _}
     } = Administration.version(ctx.endpoint)    
   end  
- end
+end
