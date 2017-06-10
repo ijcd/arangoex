@@ -2,7 +2,6 @@ defmodule Arangoex.Aql do
   @moduledoc "ArangoDB AQL methods"
 
   alias Arangoex.Endpoint
-  alias Arangoex.Aql
 
   defmodule Function do
     @moduledoc false

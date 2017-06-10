@@ -74,8 +74,8 @@ defmodule Arangoex.Wal do
 
   GET /_admin/wal/transactions
   """
-  @spec transactions(Endpoint.t, keyword) :: Arangoex.ok_error(map)
-  def transactions(endpoint, opts \\ []) do
+  @spec transactions(Endpoint.t) :: Arangoex.ok_error(map)
+  def transactions(endpoint) do
     endpoint
     |> Endpoint.with_db("_system")
     |> Endpoint.get("/_admin/wal/transactions")
