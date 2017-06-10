@@ -7,7 +7,16 @@ defmodule Arangoex.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+
+     # Docs
+     # name: "MyApp",
+     source_url: "https://github.com/ijcd/arangoex",
+     # homepage_url: "http://YOUR_PROJECT_HOMEPAGE",
+     # docs: [main: "MyApp", # The main page in the docs
+     #        logo: "path/to/logo.png",
+     #        extras: ["README.md"]]]     
+    ]
   end
 
   # Configuration for the OTP application
@@ -35,6 +44,7 @@ defmodule Arangoex.Mixfile do
       {:mix_test_watch, "~> 0.2", only: :dev},
       {:credo, "~> 0.4", only: [:dev, :test]},
       {:dialyxir, "~> 0.4", only: [:dev, :test]},
+      {:ex_doc, "~> 0.14", only: :dev, runtime: false},
     ]
   end
 end
