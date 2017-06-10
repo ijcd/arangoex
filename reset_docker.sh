@@ -8,3 +8,4 @@ sed -i.bak "s/export ARANGO_PASSWORD=.*/export ARANGO_PASSWORD=$newpw/" ../.envr
 cat ../.envrc
 direnv allow 
 echo "New password has been copied to the clipboard."
+echo "Arango is running with admin at http://localhost:8529 (provided you are using Docker for Mac)"
