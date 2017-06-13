@@ -18,7 +18,7 @@ defmodule Arangoex.Endpoint do
     port: pos_integer(),
     scheme: String.t,
     database_name: String.t,
-    arrango_version: pos_integer(), 
+    arrango_version: pos_integer(),
     headers: Map.t,
     use_auth: :none | :basic | :bearer,
     username: nil | String.t,
@@ -59,7 +59,7 @@ defmodule Arangoex.Endpoint do
   def get(endpoint, resource, headers \\ []) do
     url = url(endpoint, resource)
     headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
-    
+
     response = HTTPoison.request(:get, url, "", headers)
     handle_response(response)
   end
@@ -72,7 +72,7 @@ defmodule Arangoex.Endpoint do
     response = HTTPoison.request(:head, url, "", headers)
     handle_response(response)
   end
-  
+
   @spec post(t, String.t, map, keyword) :: Arangoex.ok_error(any())
   def post(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
@@ -93,7 +93,7 @@ defmodule Arangoex.Endpoint do
     handle_response(response)
   end
 
-  @spec put(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())  
+  @spec put(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())
   def put(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
@@ -103,7 +103,7 @@ defmodule Arangoex.Endpoint do
     handle_response(response)
   end
 
-  @spec patch(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())  
+  @spec patch(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())
   def patch(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
@@ -112,8 +112,8 @@ defmodule Arangoex.Endpoint do
     response = HTTPoison.request(:patch, url, body, headers)
     handle_response(response)
   end
-  
-  @spec delete(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())    
+
+  @spec delete(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())
   def delete(endpoint, resource, data \\ %{}, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
@@ -122,29 +122,29 @@ defmodule Arangoex.Endpoint do
     response = HTTPoison.request(:delete, url, body, headers)
     handle_response(response)
   end
-  
+
   @spec handle_response(httpoison_response) :: Arangoex.ok_error(any())
   defp handle_response(response) do
     case response do
       {:ok, %HTTPoison.Response{status_code: status_code, body: body} = embedded_response} when status_code >= 200 and status_code < 300 ->
-        try do
-          {:ok, Poison.decode!(body)}
-        rescue
-          _ -> {:ok, decode_headers(embedded_response.headers)}
-        end
+	try do
+	  {:ok, Poison.decode!(body)}
+	rescue
+	  _ -> {:ok, decode_headers(embedded_response.headers)}
+	end
       {:ok, %HTTPoison.Response{body: body} = response} ->
-        try do
-          {:error, Poison.decode!(body)}
-        rescue 
-        _ -> {:error, response}
-        end
+	try do
+	  {:error, Poison.decode!(body)}
+	rescue
+	_ -> {:error, response}
+	end
       {:ok, %HTTPoison.Response{} = err} ->
-        {:error, err}
+	{:error, err}
       {:error, %HTTPoison.Error{}} = err ->
-        err
+	err
     end
   end
-  
+
   defp db_path(%{database_name: db_name}, path) when db_name != "_system", do: "/_db/#{db_name}/_api/#{path}"
   defp db_path(_, "/_admin/" <> path), do: "/_admin/#{path}"
   defp db_path(_, path), do: "/_api/#{path}"
@@ -164,7 +164,7 @@ defmodule Arangoex.Endpoint do
     data
     |> Map.from_struct
     |> Enum.filter(fn {_, v} -> v != nil end)
-    |> Enum.into(%{})    
+    |> Enum.into(%{})
     |> encode_data
   end
   defp encode_data(data), do: Poison.encode!(data)

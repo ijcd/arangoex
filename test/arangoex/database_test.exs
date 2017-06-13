@@ -23,12 +23,12 @@ defmodule DatabaseTest do
     {:ok, original_dbs} = Database.databases(test_endpoint())
     {:ok, true} = Database.create(test_endpoint(),
       %Database{
-        name: new_dbname,
-        users: [
+	name: new_dbname,
+	users: [
           %{username: "admin", passwd: "secret", active: true},
           %{username: "tester", passwd: "test001", active: false},
           %{username: "eddie", passwd: "eddie001", active: false, extra: %{foo: 1, bar: 2}},
-        ]
+	]
       }
     )
 
@@ -42,7 +42,7 @@ defmodule DatabaseTest do
     # assert users
     {:ok, %User{user: "admin"}} = User.user(test_endpoint(), %User{user: "admin"})
     {:ok, %User{user: "tester"}} = User.user(test_endpoint(), %User{user: "tester"})
-    {:ok, %User{user: "eddie"}} = User.user(test_endpoint(), %User{user: "eddie"})    
+    {:ok, %User{user: "eddie"}} = User.user(test_endpoint(), %User{user: "eddie"})
   end
 
   test "fails to create a database" do

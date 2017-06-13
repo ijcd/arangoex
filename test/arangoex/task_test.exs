@@ -6,15 +6,15 @@ defmodule TaskTest do
 
   test "creates a task", ctx do
     task = %Task{
-      name: "SampleTask", 
-      command: "(function(params) { require('@arangodb').print(params); })(params)", 
-      params: %{ 
+      name: "SampleTask",
+      command: "(function(params) { require('@arangodb').print(params); })(params)",
+      params: %{
         foo: "fooey",
         bar: "barey"
-      }, 
-      period: 2 
+      },
+      period: 2
     }
-    
+
     assert {
       :ok, %{
         "code" => 200,
@@ -23,7 +23,7 @@ defmodule TaskTest do
         "created" => _,
         "database" => "_system",
         "id" => _,
-        "offset" => _,        
+        "offset" => _,
         "name" => "SampleTask",
         "period" => 2,
         "type" => "periodic"
@@ -73,15 +73,15 @@ defmodule TaskTest do
         "errorMessage" => "task not found"
       }
     } = Task.delete(ctx.endpoint, "1234")
-    
-    task = %Task{ 
-      name: "SampleTask", 
-      command: "(function(params) { require('@arangodb').print(params); })(params)", 
-      params: %{ 
+
+    task = %Task{
+      name: "SampleTask",
+      command: "(function(params) { require('@arangodb').print(params); })(params)",
+      params: %{
         foo: "fooey",
         bar: "barey"
-      }, 
-      period: 2 
+      },
+      period: 2
     }
     {:ok, %{"id" => task_id}} = Task.create(ctx.endpoint, task)
 
@@ -91,14 +91,14 @@ defmodule TaskTest do
   end
 
   test "fetch a task by id", ctx do
-    task = %Task{ 
-      name: "SampleTask", 
-      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)", 
-      params: %{ 
+    task = %Task{
+      name: "SampleTask",
+      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)",
+      params: %{
         foo: "fooey",
         bar: "barey"
-      }, 
-      period: 2 
+      },
+      period: 2
     }
     {:ok, %{"id" => task_id}} = Task.create(ctx.endpoint, task)
 
@@ -121,14 +121,14 @@ defmodule TaskTest do
   end
 
   test "create a task by id", ctx do
-    task = %Task{ 
-      name: "SampleTask", 
-      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)", 
-      params: %{ 
+    task = %Task{
+      name: "SampleTask",
+      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)",
+      params: %{
         foo: "fooey",
         bar: "barey"
-      }, 
-      period: 2 
+      },
+      period: 2
     }
     assert {:ok, _} = Task.create_with_id(ctx.endpoint, "foobar", task)
 

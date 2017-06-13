@@ -142,7 +142,7 @@ defmodule GraphTest do
     {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
-    
+
     assert {
       :ok, %{
         "code" => 202,
@@ -160,13 +160,13 @@ defmodule GraphTest do
     {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
-    
+
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
         "edge" => %{
-          "_key" => edge_key   
+          "_key" => edge_key
         }
       }
     } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"})
@@ -184,8 +184,8 @@ defmodule GraphTest do
     {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Nancy", name: "Nancy"})    
-    
+    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Nancy", name: "Nancy"})
+
     # create an edge with extra data
     assert {
       :ok, %{
@@ -203,14 +203,14 @@ defmodule GraphTest do
         "error" => false,
         "edge" => %{
           "_key" => ^edge_key,
-          "_from" => "males/Glenn", 
+          "_from" => "males/Glenn",
           "_to" => "females/Maria",
           "type" => "friends"
         },
       }
     } = Graph.edge(ctx.endpoint, "social", "friends", edge_key)
 
-    # create an edge with extra data    
+    # create an edge with extra data
     assert {
       :ok, %{
         "code" => 202,
@@ -227,7 +227,7 @@ defmodule GraphTest do
         "error" => false,
         "edge" => %{
           "_key" => ^edge_key,
-          "_from" => "males/Glenn", 
+          "_from" => "males/Glenn",
           "_to" => "females/Nancy",
           "type" => "friends",
           "random" => "string"
@@ -270,7 +270,7 @@ defmodule GraphTest do
         "error" => false,
         "edge" => %{
           "_key" => ^edge_key,
-          "_from" => "males/Glenn", 
+          "_from" => "males/Glenn",
           "_to" => "females/Maria",
           "type" => "friends",
           "since" => "then"
@@ -283,8 +283,8 @@ defmodule GraphTest do
     {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
     {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Nancy", name: "Nancy"})    
-    
+    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Nancy", name: "Nancy"})
+
     assert {
       :ok, %{
         "code" => 202,
@@ -311,7 +311,7 @@ defmodule GraphTest do
         "error" => false,
         "edge" => %{
           "_key" => ^edge_key,
-          "_from" => "males/Glenn", 
+          "_from" => "males/Glenn",
           "_to" => "females/Nancy",
           "type" => "friends",
           "after" => "tomorrow"
@@ -404,7 +404,7 @@ defmodule GraphTest do
 
   test "List vertex collections", ctx do
     Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
-    
+
     assert {
       :ok, %{
         "code" => 200,
@@ -417,7 +417,7 @@ defmodule GraphTest do
 
   test "Add vertex collection", ctx do
     Graph.create(ctx.endpoint, "social", [])
-    
+
     assert {
       :ok, %{
         "code" => 200,
@@ -429,7 +429,7 @@ defmodule GraphTest do
     assert {
       :ok, %{
         "graph" => %{
-          "name" => "social",      
+          "name" => "social",
           "edgeDefinitions" => [],
           "orphanCollections" => ["cats"]
         }
@@ -549,7 +549,7 @@ defmodule GraphTest do
           "_rev" => _,
           "name" => "meowington",
           "size" => "medium",
-          "age" => 9,          
+          "age" => 9,
         }
       }
     } = Graph.vertex(ctx.endpoint, "social", "dogs", "mton")
@@ -583,7 +583,7 @@ defmodule GraphTest do
           "_id" => _,
           "_key" => "mton",
           "_rev" => _,
-          "age" => 9,          
+          "age" => 9,
         }
       }
     } = Graph.vertex(ctx.endpoint, "social", "dogs", "mton")

@@ -22,7 +22,7 @@ defmodule WalTest do
       throttleWhenPending: 2
     }
     {:ok, _} = Wal.set_properties(ctx.endpoint, expected_wal)
-    
+
     assert {:ok, ^expected_wal} = ctx.endpoint |> Wal.properties
   end
 
@@ -37,7 +37,7 @@ defmodule WalTest do
 
   test "looks up running transactions", ctx do
     {:ok, transactions} = Wal.transactions(ctx.endpoint)
-    
+
     assert %{"minLastCollected" => nil, "minLastSealed" => nil, "runningTransactions" => 0} = transactions
   end
 end

@@ -6,7 +6,7 @@ defmodule IndexTest do
 
   test "Read index", ctx do
     id = "#{ctx.coll.name}/0"
-    
+
     assert {
       :ok, %{
         "code" => 200,
@@ -23,7 +23,7 @@ defmodule IndexTest do
 
   test "Fails to read an index", ctx do
     id = "#{ctx.coll.name}/123"
-    
+
     assert {
       :error, %{
         "code" => 404,
@@ -33,11 +33,11 @@ defmodule IndexTest do
       }
     } = Index.index(ctx.endpoint,
 id)
-  end  
+  end
 
   test "Read all indexes of a collection", ctx do
     id = "#{ctx.coll.name}/0"
-    
+
     assert {
       :ok, %{
         "code" => 200,
@@ -81,7 +81,7 @@ id)
       }
     } = Index.create_general(ctx.endpoint, ctx.coll.name, %{"type" => "fulltext", "fields" => ["bar"], "minLength" => 3})
   end
-  
+
   test "Create fulltext index", ctx do
     assert {
       :ok, %{
@@ -124,7 +124,7 @@ id)
         "type" => "geo2",
         "unique" => false,
         "constraint" => false,
-        "ignoreNull" => true        
+        "ignoreNull" => true
       }
     } = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat", "long"])
 

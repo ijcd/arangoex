@@ -95,7 +95,7 @@ defmodule AdministrationTest do
     assert is_list(lid)
     assert is_list(text)
     assert is_list(timestamp)
-   
+
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
     } = Administration.log(ctx.endpoint, size: 2)
@@ -104,7 +104,7 @@ defmodule AdministrationTest do
     assert is_list(text)
     assert is_list(timestamp)
     assert length(level) <= 2
-    
+
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
     } = Administration.log(ctx.endpoint, offset: 2)
@@ -112,7 +112,7 @@ defmodule AdministrationTest do
     assert is_list(lid)
     assert is_list(text)
     assert is_list(timestamp)
-        
+
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
     } = Administration.log(ctx.endpoint, search: "foo")
@@ -127,7 +127,7 @@ defmodule AdministrationTest do
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
-    assert is_list(timestamp)    
+    assert is_list(timestamp)
   end
 
   @tag :skip
@@ -459,6 +459,6 @@ defmodule AdministrationTest do
   test "fetches the server version", ctx do
     assert {
       :ok, %{"server" => "arango", "version" => _}
-    } = Administration.version(ctx.endpoint)    
-  end  
+    } = Administration.version(ctx.endpoint)
+  end
 end

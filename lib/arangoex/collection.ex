@@ -2,7 +2,7 @@ defmodule Arangoex.Collection do
   @moduledoc "ArangoDB Collection methods"
 
   alias Arangoex.Endpoint
-  alias Arangoex.Utils  
+  alias Arangoex.Utils
 
   defstruct [
     id: nil,
@@ -60,7 +60,7 @@ defmodule Arangoex.Collection do
 
   POST /_api/collection
   """
-  @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)  
+  @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)
   def create(endpoint, coll) do
     endpoint
     |> Endpoint.post("collection", coll)
@@ -83,7 +83,7 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection/{collection-name}
   """
-  @spec collection(Endpoint.t, t) :: Arangoex.ok_error(t)  
+  @spec collection(Endpoint.t, t) :: Arangoex.ok_error(t)
   def collection(endpoint, coll) do
     endpoint
     |> Endpoint.get("collection/#{coll.name}")
@@ -157,7 +157,7 @@ defmodule Arangoex.Collection do
     |> Endpoint.get("collection/#{coll.name}/properties")
   end
 
-  @doc """  
+  @doc """
   Change properties of a collection
 
   PUT /_api/collection/{collection-name}/properties
@@ -165,11 +165,11 @@ defmodule Arangoex.Collection do
   @spec set_properties(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
   def set_properties(endpoint, coll, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:waitForSync, :journalSize])
-    
+
     endpoint
     |> Endpoint.put("collection/#{coll.name}/properties", properties)
   end
-  
+
   @doc """
   Rename collection
 
@@ -214,7 +214,7 @@ defmodule Arangoex.Collection do
     |> Endpoint.put("collection/#{coll.name}/truncate")
   end
 
-  @spec to_collection(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())  
+  @spec to_collection(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
   defp to_collection({:ok, %{"result" => result}}) when is_list(result), do: {:ok, Enum.map(result, &new(&1))}
   defp to_collection({:ok, result}), do: {:ok, new(result)}
   defp to_collection({:error, _} = e), do: e

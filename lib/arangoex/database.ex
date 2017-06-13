@@ -30,7 +30,7 @@ defmodule Arangoex.Database do
   @doc """
   Drop database
 
-  DELETE /_api/database/{database-name}  
+  DELETE /_api/database/{database-name}
   """
   @spec drop(%Arangoex.Endpoint{}, String.t) :: Arangoex.ok_error(true)
   def drop(endpoint, db) do

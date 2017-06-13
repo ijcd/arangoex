@@ -5,7 +5,7 @@ defmodule Arangoex.Graph do
 
   defmodule EdgeDefinition do
     @moduledoc false
-    
+
     defstruct [:collection, :from, :to]
 
     @type t :: %__MODULE__{
@@ -15,8 +15,8 @@ defmodule Arangoex.Graph do
       # The vertex types an edge can come from
       from: list(String.t),
 
-      # The vertex types an edge can go to      
-      to: list(String.t),      
+      # The vertex types an edge can go to
+      to: list(String.t),
     }
   end
 
@@ -42,14 +42,14 @@ defmodule Arangoex.Graph do
   # TODO: do we need a struct for structs with a single value?
   defmodule VertexCollection do
     @moduledoc false
-    
+
     defstruct [:collection]
 
     @type t :: %__MODULE__{
       # The name of the collection
       collection: String.t,
     }
-  end  
+  end
 
   @doc """
   List all graphs
@@ -137,7 +137,7 @@ defmodule Arangoex.Graph do
       "_from" => edge.from,
       "_to" => edge.to,
     } |> Map.merge(edge.data || %{})
-    
+
     endpoint
     |> Endpoint.post("gharial/#{graph_name}/edge/#{collection_name}", body)
   end
@@ -187,7 +187,7 @@ defmodule Arangoex.Graph do
       "_from" => edge.from,
       "_to" => edge.to,
     } |> Map.merge(edge.data || %{})
-    
+
     endpoint
     |> Endpoint.put("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}", body)
   end
@@ -233,7 +233,7 @@ defmodule Arangoex.Graph do
   @spec vertex_collection_create(Endpoint.t, String.t, VertexCollection.t) :: Arangoex.ok_error(map)
   def vertex_collection_create(endpoint, graph_name, vertex_collection) do
     body = Map.from_struct(vertex_collection)
-    
+
     endpoint
     |> Endpoint.post("gharial/#{graph_name}/vertex", body)
   end

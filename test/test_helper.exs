@@ -19,14 +19,14 @@ defmodule Arangoex.TestCase do
   alias Arangoex.User
   alias Arangoex.Database
   alias Arangoex.Collection
-  alias Arangoex.Task  
+  alias Arangoex.Task
 
   using do
     quote do
       import Arangoex.TestHelper
     end
   end
-  
+
   setup do
     # remember original dbs, users, tasks
     {:ok, original_dbs} = Database.databases(test_endpoint())
@@ -45,13 +45,13 @@ defmodule Arangoex.TestCase do
       # cleanup any new dbs that have appeared
       {:ok, after_dbs} = Database.databases(test_endpoint())
       for db_name <- (after_dbs -- original_dbs) do
-        {:ok, _} = Database.drop(test_endpoint(), db_name)
+	{:ok, _} = Database.drop(test_endpoint(), db_name)
       end
 
       # cleanup any new users that have appeared
       {:ok, after_users} = User.users(test_endpoint())
       for user <- (after_users -- original_users) do
-        {:ok, _} = User.remove(test_endpoint(), user)
+	{:ok, _} = User.remove(test_endpoint(), user)
       end
 
       # cleanup any new tasks that have appeared
@@ -59,7 +59,7 @@ defmodule Arangoex.TestCase do
       original_task_ids = original_tasks |> Enum.map(& &1["id"])
       after_task_ids = after_tasks |> Enum.map(& &1["id"])
       for task_id <- (after_task_ids -- original_task_ids) do
-        {:ok, _} = Task.delete(test_endpoint(), task_id)
+	{:ok, _} = Task.delete(test_endpoint(), task_id)
       end
     end
 

@@ -2,7 +2,7 @@ defmodule Arangoex.Wal do
   @moduledoc "ArangoDB Wal methods"
 
   alias Arangoex.Endpoint
-  alias Arangoex.Utils  
+  alias Arangoex.Utils
 
   defstruct [
     :allowOversizeEntries,
@@ -33,24 +33,24 @@ defmodule Arangoex.Wal do
   @spec flush(Endpoint.t, keyword) :: Arangoex.ok_error(map)
   def flush(endpoint, opts \\ []) do
     flush_opts = Utils.opts_to_vars(opts, [:waitForSync, :waitForCollector])
-    
+
     endpoint
     |> Endpoint.with_db("_system")
     |> Endpoint.put("/_admin/wal/flush", flush_opts)
   end
-  
-  @doc """  
-  Retrieves the configuration of the write-ahead log  
+
+  @doc """
+  Retrieves the configuration of the write-ahead log
 
   GET /_admin/wal/properties
   """
   @spec properties(Endpoint.t) :: Arangoex.ok_error(t)
   def properties(endpoint) do
     endpoint
-    |> Endpoint.with_db("_system")    
+    |> Endpoint.with_db("_system")
     |> Endpoint.get("/_admin/wal/properties")
     |> to_wal
-  end  
+  end
 
   @doc """
   Configures the write-ahead log
@@ -62,12 +62,12 @@ defmodule Arangoex.Wal do
   def set_properties(endpoint, properties) do
     defaults = %__MODULE__{} |> Map.from_struct |> Map.keys
     wal_properties = Utils.opts_to_vars(properties, defaults)
-    
+
     endpoint
     |> Endpoint.with_db("_system")
     |> Endpoint.put("/_admin/wal/properties", wal_properties)
     |> to_wal
-  end  
+  end
 
   @doc """
   Returns information about the currently running transactions
@@ -81,7 +81,7 @@ defmodule Arangoex.Wal do
     |> Endpoint.get("/_admin/wal/transactions")
   end
 
-  @spec to_wal(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())  
+  @spec to_wal(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
   defp to_wal({:ok, result}), do: {:ok, new(result)}
   defp to_wal({:error, _} = e), do: e
 end

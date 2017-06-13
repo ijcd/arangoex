@@ -2,8 +2,8 @@ defmodule Arangoex.Simple do
   @moduledoc "ArangoDB Simple methods"
 
   alias Arangoex.Endpoint
-  alias Arangoex.Utils  
-  alias Arangoex.Collection  
+  alias Arangoex.Utils
+  alias Arangoex.Collection
 
   @doc """
   Return all documents
@@ -68,7 +68,7 @@ defmodule Arangoex.Simple do
       "attribute" => attribute_name,     # not strictly necessary if you have :index
       "query" => query
     }, vars)
-    
+
     endpoint
     |> Endpoint.put("simple/fulltext", body)
   end
@@ -84,7 +84,7 @@ defmodule Arangoex.Simple do
       "collection" => collection.name,
       "keys" => keys
     }
-    
+
     endpoint
     |> Endpoint.put("simple/lookup-by-keys", body)
   end
@@ -156,7 +156,7 @@ defmodule Arangoex.Simple do
     body = %{
       "collection" => collection.name,
       "example" => example,
-      "newValue" => new_value, 
+      "newValue" => new_value,
       "options" => Map.merge(%{}, vars)
     }
 
@@ -175,7 +175,7 @@ defmodule Arangoex.Simple do
     body = %{
       "collection" => collection.name,
       "example" => example,
-      "newValue" => new_value, 
+      "newValue" => new_value,
       "options" => Map.merge(%{}, vars)
     }
 
@@ -197,7 +197,7 @@ defmodule Arangoex.Simple do
       "latitude" => latitude,
       "longitude" => longitude,
     }, vars)
- 
+
    endpoint
     |> Endpoint.put("simple/near", body)
   end

@@ -43,7 +43,7 @@ defmodule CollectionTest do
     # drop and make sure it's gone
     {:ok, _} = Collection.drop(ctx.endpoint, new_coll)
     {:ok, colls} = Collection.collections(ctx.endpoint)
-      
+
     refute new_coll.name in Enum.map(colls, & &1.name)
   end
 
@@ -51,12 +51,12 @@ defmodule CollectionTest do
     {:ok, new_coll} = Collection.collection(ctx.endpoint, ctx.coll)
     assert new_coll == ctx.coll
   end
-  
+
   test "loads a collection", ctx do
-    coll_name = ctx.coll.name    
+    coll_name = ctx.coll.name
     {:ok, info} = Collection.load(ctx.endpoint, ctx.coll)
 
-    assert %{"name" => ^coll_name, "error" => false} = info    
+    assert %{"name" => ^coll_name, "error" => false} = info
     assert Map.has_key?(info, "count")
 
     {:ok, info} = Collection.load(ctx.endpoint, ctx.coll, false)
@@ -64,23 +64,23 @@ defmodule CollectionTest do
     assert %{"name" => ^coll_name, "error" => false} = info
     refute Map.has_key?(info, "count")
   end
-  
+
   test "unloads a collection", ctx do
     coll_name = ctx.coll.name
     {:ok, info} = Collection.unload(ctx.endpoint, ctx.coll)
 
     assert %{"name" => ^coll_name, "error" => false} = info
   end
-  
+
   test "looks up collection checksum", ctx do
     coll_name = ctx.coll.name
     {:ok, checksum} = Collection.checksum(ctx.endpoint, ctx.coll)
 
     assert %{"name" => ^coll_name, "error" => false} = checksum
     assert Map.has_key?(checksum, "checksum")
-    assert Map.has_key?(checksum, "revision")    
+    assert Map.has_key?(checksum, "revision")
   end
-  
+
   test "counts documents in a collection", ctx do
     coll_name = ctx.coll.name
     {:ok, count} = Collection.count(ctx.endpoint, ctx.coll)
@@ -88,7 +88,7 @@ defmodule CollectionTest do
     assert %{"name" => ^coll_name, "error" => false} = count
     assert Map.has_key?(count, "count")
   end
-  
+
   test "looks up statistics of a collection", ctx do
     coll_name = ctx.coll.name
     {:ok, figures} = Collection.figures(ctx.endpoint, ctx.coll)
@@ -96,7 +96,7 @@ defmodule CollectionTest do
     assert %{"name" => ^coll_name, "error" => false} = figures
     assert Map.has_key?(figures, "figures")
   end
-  
+
   test "looks up collection properties", ctx do
     coll_name = ctx.coll.name
     {:ok, properties} = Collection.properties(ctx.endpoint, ctx.coll)
@@ -107,25 +107,25 @@ defmodule CollectionTest do
     assert Map.has_key?(properties, "journalSize")
     assert Map.has_key?(properties, "isVolatile")
   end
-  
+
   test "sets collection properties", ctx do
     coll_name = ctx.coll.name
 
     {:ok, properties} = Collection.set_properties(ctx.endpoint, ctx.coll, waitForSync: true)
-    assert %{"name" => ^coll_name, "error" => false, "waitForSync" => true} = properties    
+    assert %{"name" => ^coll_name, "error" => false, "waitForSync" => true} = properties
 
     {:ok, properties} = Collection.set_properties(ctx.endpoint, ctx.coll, journalSize: 1_048_576)
-    assert %{"name" => ^coll_name, "error" => false, "journalSize" => 1_048_576} = properties    
+    assert %{"name" => ^coll_name, "error" => false, "journalSize" => 1_048_576} = properties
 
     {:ok, properties} = Collection.set_properties(ctx.endpoint, ctx.coll, journalSize: 2_048_576, waitForSync: false)
     assert %{"name" => ^coll_name, "error" => false, "waitForSync" => false, "journalSize" => 2_048_576} = properties
   end
-  
+
   test "renames collection", ctx do
     {:ok, properties} = Collection.rename(ctx.endpoint, ctx.coll, "foobar")
     assert %{"name" => "foobar", "error" => false} = properties
   end
-  
+
   test "looks up collection revision id", ctx do
     coll_name = ctx.coll.name
     {:ok, revision} = Collection.revision(ctx.endpoint, ctx.coll)
@@ -139,7 +139,7 @@ defmodule CollectionTest do
     {:ok, _} = Wal.flush(ctx.endpoint, waitForSync: true, waitForCollector: true)
     assert {:ok, %{"result" => true, "error" => false, "code" => 200}} = Collection.rotate(ctx.endpoint, ctx.coll)
   end
-  
+
   test "truncates a collection", ctx do
     coll_name = ctx.coll.name
     {:ok, truncate} = Collection.truncate(ctx.endpoint, ctx.coll)

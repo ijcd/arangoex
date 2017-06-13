@@ -37,8 +37,8 @@ defmodule Arangoex.Index do
   def create_fulltext(endpoint, collection_name, field_name, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:minLength])
     query = Utils.opts_to_query([collection: collection_name], [:collection])
-    body = %{ 
-      "type" => "fulltext", 
+    body = %{
+      "type" => "fulltext",
       "fields" => [field_name],
       "minLength" => properties["minLength"] || 0
     }
@@ -69,8 +69,8 @@ defmodule Arangoex.Index do
   def create_geo(endpoint, collection_name, field_names, opts \\ []) when is_list(field_names) do
     properties = Utils.opts_to_vars(opts, [:geoJson])
     query = Utils.opts_to_query([collection: collection_name], [:collection])
-    body = %{ 
-      "type" => "geo", 
+    body = %{
+      "type" => "geo",
       "fields" => field_names,
       "geoJson" => properties["geoJson"] || false
     }
@@ -141,4 +141,3 @@ defmodule Arangoex.Index do
     |> Endpoint.delete("index/#{index_handle}")
   end
 end
-  

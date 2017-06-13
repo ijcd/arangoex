@@ -7,7 +7,7 @@ defmodule Arangoex.Document do
 
   defmodule Docref do
     @moduledoc false
-    
+
     defstruct [:_key, :_id, :_rev, :_oldRev]
     use ExConstructor
   end
@@ -16,10 +16,10 @@ defmodule Arangoex.Document do
     _key: String.t,
     _id: String.t,
     _rev: String.t,
-    _oldRev: String.t,    
+    _oldRev: String.t,
   }
 
-  @doc """  
+  @doc """
   Create document
 
   POST /_api/document/{collection}
@@ -36,7 +36,7 @@ defmodule Arangoex.Document do
   @doc """
   Read document header
 
-  HEAD /_api/document/{document-handle} 
+  HEAD /_api/document/{document-handle}
   """
   @spec header(Endpoint.t, map, keyword) :: Arangoex.ok_error(map)
   def header(endpoint, doc, opts \\ []) do
@@ -49,20 +49,20 @@ defmodule Arangoex.Document do
   @doc """
   Read document
 
-  GET /_api/document/{document-handle} 
+  GET /_api/document/{document-handle}
   """
   @spec document(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
   def document(endpoint, doc, opts \\ []) do
-    headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch]) 
+    headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch])
 
     endpoint
     |> Endpoint.get("document/#{doc._id}", headers)
   end
-  
+
   @doc """
   Read all documents
 
-  PUT /_api/simple/all-keys 
+  PUT /_api/simple/all-keys
   """
   @spec documents(Endpoint.t, Collection.t, keyword) :: Arangoex.ok_error(t | [t])
   def documents(endpoint, coll, opts \\ []) do
@@ -74,13 +74,13 @@ defmodule Arangoex.Document do
       type == nil   -> %{"collection" => coll.name}
       true -> raise "unknown type: #{type}"
     end
-    
+
     endpoint
     |> Endpoint.put("simple/all-keys", body)
   end
 
   def update(endpoint, coll, docs, opts \\ [])
-  
+
   @doc """
   Update documents
 
@@ -98,7 +98,7 @@ defmodule Arangoex.Document do
   @doc """
   Update document
 
-  PATCH /_api/document/{document-handle} 
+  PATCH /_api/document/{document-handle}
   """
   @spec update(Endpoint.t, map, map, keyword) :: Arangoex.ok_error(map)
   def update(endpoint, doc, new_doc, opts) do
@@ -112,7 +112,7 @@ defmodule Arangoex.Document do
   end
 
   def replace(endpoint, coll, docs, opts \\ [])
-  
+
   @doc """
   Replace documents
 
@@ -130,7 +130,7 @@ defmodule Arangoex.Document do
   @doc """
   Replace document
 
-  PUT /_api/document/{document-handle} 
+  PUT /_api/document/{document-handle}
   """
   @spec replace(Endpoint.t, t, map) :: Arangoex.ok_error(t | [t])
   def replace(endpoint, doc, new_doc, opts) do
@@ -160,7 +160,7 @@ defmodule Arangoex.Document do
   @doc """
   Removes a document
 
-  DELETE /_api/document/{document-handle} 
+  DELETE /_api/document/{document-handle}
   """
   @spec delete(Endpoint.t, t, keyword) :: Arangoex.ok_error(t | [t])
   def delete(endpoint, doc, opts \\ []) do
@@ -172,20 +172,20 @@ defmodule Arangoex.Document do
     |> Endpoint.delete("document/#{doc._id}#{query}", %{}, headers)
     |> to_result
   end
-  
+
   @spec to_result(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
   defp to_result({:ok, result}) when is_list(result), do: Enum.map(result, &to_document(&1))
   defp to_result({:ok, result}), do: to_document(result)
   defp to_result({:error, _} = e), do: e
 
   @spec to_document(map) :: Arangoex.ok_error(t| map)
-  defp to_document(%{} = result) do
-    case result do
-      %{"error" => true, "errorMessage" => _em, "errorNum" => _en} -> {:error, result}
-      %{"old" => old, "new" => new} -> {:ok, {Docref.new(result), old, new}}
-      %{"old" => old} -> {:ok, {Docref.new(result), old}}
-      %{"new" => new} -> {:ok, {Docref.new(result), new}}
-      %{"_id" => _id} -> {:ok, Docref.new(result)}
+    defp to_document(%{} = result) do
+      case result do
+        %{"error" => true, "errorMessage" => _em, "errorNum" => _en} -> {:error, result}
+        %{"old" => old, "new" => new} -> {:ok, {Docref.new(result), old, new}}
+        %{"old" => old} -> {:ok, {Docref.new(result), old}}
+        %{"new" => new} -> {:ok, {Docref.new(result), new}}
+        %{"_id" => _id} -> {:ok, Docref.new(result)}
+      end
     end
   end
-end

@@ -55,7 +55,7 @@ defmodule Arangoex.Transaction do
       wait_for_sync: boolean
     }
   end
-  
+
   @doc """
   Execute transaction
 
@@ -73,8 +73,8 @@ defmodule Arangoex.Transaction do
       %{collections: collections, action: t.action}
       |> Map.merge(if t.params, do: %{"params" => t.params}, else: %{})
       |> Map.merge(if t.lock_timeout, do: %{"lockTimeout" => t.lock_timeout}, else: %{})
-      |> Map.merge(if t.wait_for_sync, do: %{"waitForSync" => t.wait_for_sync}, else: %{})    
-    
+      |> Map.merge(if t.wait_for_sync, do: %{"waitForSync" => t.wait_for_sync}, else: %{})
+
     endpoint
     |> Endpoint.post("/transaction", body)
   end

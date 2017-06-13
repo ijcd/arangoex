@@ -123,7 +123,7 @@ defmodule Arangoex.GraphTraversal do
       sort: String.t
     }
   end
-  
+
 
   @doc """
   Executes a traversal
@@ -136,4 +136,3 @@ defmodule Arangoex.GraphTraversal do
     |> Endpoint.post("/traversal", traversal)
   end
 end
-  

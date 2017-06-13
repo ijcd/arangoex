@@ -1,12 +1,12 @@
 defmodule DocumentTest do
   @moduledoc "ArangoDB Document methods"
-  
+
   use Arangoex.TestCase
   doctest Arangoex
 
-  alias Arangoex.Collection  
+  alias Arangoex.Collection
   alias Arangoex.Document
-  alias Arangoex.Document.Docref  
+  alias Arangoex.Document.Docref
 
   setup do
     %{
@@ -27,7 +27,7 @@ defmodule DocumentTest do
       assert {:ok, {%Docref{_id: _, _key: _, _rev: _}, _new}} = Document.create(ctx.endpoint, ctx.coll, ctx.data2, returnNew: true)
       assert {:ok, {%Docref{_id: _, _key: _, _rev: _}, _new}} = Document.create(ctx.endpoint, ctx.coll, ctx.data3, waitForSync: true, returnNew: true)
       assert_raise RuntimeError, "unknown key: badarg", fn ->
-        Document.create(ctx.endpoint, ctx.coll, ctx.data3, badarg: false)
+	Document.create(ctx.endpoint, ctx.coll, ctx.data3, badarg: false)
       end
     end
 
@@ -40,7 +40,7 @@ defmodule DocumentTest do
       assert [
         {:ok, _},
         {:ok, _},
-        {:ok, _},        
+        {:ok, _},
       ] = Document.create(ctx.endpoint, ctx.coll, [ctx.data1, ctx.data2, ctx.data3])
     end
 
@@ -48,7 +48,7 @@ defmodule DocumentTest do
       assert {:ok, %Docref{_id: _, _key: key, _rev: _}} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
       assert {:error,
               %{
-                "error" => true,                              
+                "error" => true,
                 "code" => 409,
                 "errorMessage" => "cannot create document, unique constraint violated"
               }
@@ -58,7 +58,7 @@ defmodule DocumentTest do
     test "fails to create a document on an unknown collection", ctx do
       assert {:error,
               %{
-                "error" => true,                              
+                "error" => true,
                 "code" => 404,
                 "errorMessage" => "collection 'asdf' not found"
               }
@@ -75,12 +75,12 @@ defmodule DocumentTest do
 
     test "fetches the header of a document using If-Matching, If-None-Matching", ctx do
       {:ok, doc} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
-      
+
       assert {:error, _} = Document.header(ctx.endpoint, doc, ifNoneMatch: doc._rev)
-      assert {:ok, _}    = Document.header(ctx.endpoint, doc, ifNoneMatch: "999")    
+      assert {:ok, _}    = Document.header(ctx.endpoint, doc, ifNoneMatch: "999")
 
       assert {:ok, _}    = Document.header(ctx.endpoint, doc, ifMatch: doc._rev)
-      assert {:error, _} = Document.header(ctx.endpoint, doc, ifMatch: "999")    
+      assert {:error, _} = Document.header(ctx.endpoint, doc, ifMatch: "999")
     end
   end
 
@@ -96,12 +96,12 @@ defmodule DocumentTest do
 
     test "fetches a document using If-Matching, If-None-Matching", ctx do
       {:ok, doc} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
-      
+
       assert {:error, _} = Document.document(ctx.endpoint, doc, ifNoneMatch: doc._rev)
-      assert {:ok, _}    = Document.document(ctx.endpoint, doc, ifNoneMatch: "999")    
+      assert {:ok, _}    = Document.document(ctx.endpoint, doc, ifNoneMatch: "999")
 
       assert {:ok, _}    = Document.document(ctx.endpoint, doc, ifMatch: doc._rev)
-      assert {:error, _} = Document.document(ctx.endpoint, doc, ifMatch: "999")    
+      assert {:error, _} = Document.document(ctx.endpoint, doc, ifMatch: "999")
     end
   end
 
@@ -109,23 +109,23 @@ defmodule DocumentTest do
     test "fetches all documents", ctx do
       {:ok, data1} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
       {:ok, data2} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
-      {:ok, data3} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)    
-      
+      {:ok, data3} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)
+
       assert {:ok, %{"result" => result}} = Document.documents(ctx.endpoint, ctx.coll)
       path1 = "/_db/#{ctx.db.name}/_api/document/#{data1._id}"
       path2 = "/_db/#{ctx.db.name}/_api/document/#{data2._id}"
-      path3 = "/_db/#{ctx.db.name}/_api/document/#{data3._id}"    
+      path3 = "/_db/#{ctx.db.name}/_api/document/#{data3._id}"
       assert path1 in result
       assert path2 in result
-      assert path3 in result    
+      assert path3 in result
 
       assert {:ok, %{"result" => result}} = Document.documents(ctx.endpoint, ctx.coll, type: :path)
       path1 = "/_db/#{ctx.db.name}/_api/document/#{data1._id}"
       path2 = "/_db/#{ctx.db.name}/_api/document/#{data2._id}"
-      path3 = "/_db/#{ctx.db.name}/_api/document/#{data3._id}"    
+      path3 = "/_db/#{ctx.db.name}/_api/document/#{data3._id}"
       assert path1 in result
       assert path2 in result
-      assert path3 in result    
+      assert path3 in result
 
       assert {:ok, %{"result" => result}} = Document.documents(ctx.endpoint, ctx.coll, type: :id)
       id1 = data1._id
@@ -133,7 +133,7 @@ defmodule DocumentTest do
       id3 = data3._id
       assert id1 in result
       assert id2 in result
-      assert id3 in result    
+      assert id3 in result
 
       assert {:ok, %{"result" => result}} = Document.documents(ctx.endpoint, ctx.coll, type: :key)
       key1 = data1._key
@@ -144,11 +144,11 @@ defmodule DocumentTest do
       assert key3 in result
 
       assert_raise RuntimeError, "unknown type: blarg", fn ->
-        Document.documents(ctx.endpoint, ctx.coll, type: "blarg")    
+	Document.documents(ctx.endpoint, ctx.coll, type: "blarg")
       end
 
       assert_raise RuntimeError, "unknown type: foo", fn ->
-        Document.documents(ctx.endpoint, ctx.coll, type: :foo)    
+	Document.documents(ctx.endpoint, ctx.coll, type: :foo)
       end
     end
   end
@@ -162,9 +162,9 @@ defmodule DocumentTest do
 
     test "fails to update an unknown document", ctx do
       assert {:error, %{"code" => 404, "errorMessage" => "document not found"}} =
-        Document.update(ctx.endpoint, %Docref{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}, %{"foo" => 1})
+	Document.update(ctx.endpoint, %Docref{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}, %{"foo" => 1})
     end
-    
+
     test "updates a document, returning the new document", ctx do
       {:ok, docref} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
       new_doc = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20}}
@@ -195,7 +195,7 @@ defmodule DocumentTest do
       assert %{"_id" => ^id, "_key" => ^key, "_rev" => ^rev,
                "age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => nil}
       } = new_returned
-    end    
+    end
 
     test "updates a document, returning the new document (keepNull = false)", ctx do
       old_data = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20}}
@@ -206,16 +206,16 @@ defmodule DocumentTest do
 
       %{"_id" => ^id, "_key" => ^key, "_rev" => ^rev, "age" => 32, "fruit" => fruit} = new_returned
       assert Map.has_key?(fruit, "pear") == false
-      assert fruit == %{"apple" => 3, "peach" => 1}      
-    end    
-    
+      assert fruit == %{"apple" => 3, "peach" => 1}
+    end
+
     test "updates a document, returning the old document and new document (mergeObejcts = true (default))", ctx do
       old_data = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20}}
       new_data = %{"age" => 43, "fruit" => %{plum: 2, grape: 12}}
 
       {:ok, %Docref{_id: old_id, _key: old_key, _rev: old_rev} = old_ref} = Document.create(ctx.endpoint, ctx.coll, old_data)
       {:ok, {%Docref{_id: new_id, _key: new_key, _rev: new_rev} = _new_ref, old_returned, new_returned}} =
-        Document.update(ctx.endpoint, old_ref, new_data, returnOld: true, returnNew: true)
+	Document.update(ctx.endpoint, old_ref, new_data, returnOld: true, returnNew: true)
 
       assert %{
         "_id" => ^old_id, "_key" => ^old_key, "_rev" => ^old_rev,
@@ -225,7 +225,7 @@ defmodule DocumentTest do
       assert %{
         "_id" => ^new_id, "_key" => ^new_key, "_rev" => ^new_rev,
         "age" => 43, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20, "plum" => 2, "grape" => 12}
-      } = new_returned      
+      } = new_returned
     end
 
     test "updates a document, returning the old document and new document (mergeObjects = false)", ctx do
@@ -234,7 +234,7 @@ defmodule DocumentTest do
 
       {:ok, %Docref{_id: old_id, _key: old_key, _rev: old_rev} = old_ref} = Document.create(ctx.endpoint, ctx.coll, old_data)
       {:ok, {%Docref{_id: new_id, _key: new_key, _rev: new_rev} = _new_ref, old_returned, new_returned}} =
-        Document.update(ctx.endpoint, old_ref, new_data, returnOld: true, returnNew: true, mergeObjects: false)
+	Document.update(ctx.endpoint, old_ref, new_data, returnOld: true, returnNew: true, mergeObjects: false)
 
       assert %{
         "_id" => ^old_id, "_key" => ^old_key, "_rev" => ^old_rev,
@@ -244,7 +244,7 @@ defmodule DocumentTest do
       assert %{
         "_id" => ^new_id, "_key" => ^new_key, "_rev" => ^new_rev,
         "age" => 43, "fruit" => %{"plum" => 2, "grape" => 12}
-      } = new_returned      
+      } = new_returned
     end
 
     test "updates a document successful, with waitForSync", ctx do
@@ -261,7 +261,7 @@ defmodule DocumentTest do
     end
 
     test "fails to update a document, considering revision (ignoreRevs = false)", ctx do
-      {:ok, {docref, doc}} = Document.create(ctx.endpoint, ctx.coll, ctx.data1, returnNew: true)      
+      {:ok, {docref, doc}} = Document.create(ctx.endpoint, ctx.coll, ctx.data1, returnNew: true)
 
       doc2 = Map.merge(doc, %{"age" => 77, "_rev" => "foobar"})
       assert {:error, %{"errorNum" => 1200, "errorMessage" => "precondition failed"}} = Document.update(ctx.endpoint, docref, doc2, returnNew: true, ignoreRevs: false)
@@ -292,7 +292,7 @@ defmodule DocumentTest do
 
       new_data1 = Enum.reduce([ctx.data1, %{age2: ctx.data1["age"] + 1}, dref1], &Map.merge/2)
       new_data2 = Enum.reduce([ctx.data2, %{age2: ctx.data2["age"] + 1}, dref2], &Map.merge/2)
-      new_data3 = Enum.reduce([ctx.data3, %{age2: ctx.data3["age"] + 1}, dref3], &Map.merge/2)      
+      new_data3 = Enum.reduce([ctx.data3, %{age2: ctx.data3["age"] + 1}, dref3], &Map.merge/2)
 
       assert [
         {:ok, _},
@@ -310,13 +310,13 @@ defmodule DocumentTest do
       badref = %{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}
       new_data1 = Enum.reduce([ctx.data1, %{age2: ctx.data1["age"] + 1}, badref], &Map.merge/2)
       new_data2 = Enum.reduce([ctx.data2, %{age2: ctx.data2["age"] + 1}, badref], &Map.merge/2)
-      new_data3 = Enum.reduce([ctx.data3, %{age2: ctx.data3["age"] + 1}, badref], &Map.merge/2)      
-      
+      new_data3 = Enum.reduce([ctx.data3, %{age2: ctx.data3["age"] + 1}, badref], &Map.merge/2)
+
       assert [
         {:error, %{"errorMessage" => "document not found"}},
         {:error, %{"errorMessage" => "document not found"}},
         {:error, %{"errorMessage" => "document not found"}},
-      ] = Document.update(ctx.endpoint, ctx.coll, [new_data1, new_data2, new_data3])      
+      ] = Document.update(ctx.endpoint, ctx.coll, [new_data1, new_data2, new_data3])
     end
 
     test "updates several documents, returning the new documents", ctx do
@@ -365,7 +365,7 @@ defmodule DocumentTest do
        {:ok, ret2},
        {:ok, ret3}
       ] = Document.update(ctx.endpoint, ctx.coll, [new_data1, new_data2, new_data3], returnOld: true)
-      
+
       assert {
         %Docref{_id: _, _key: _, _oldRev: _, _rev: _},
         %{"_id" => _, "_key" => _, "_rev" => _,
@@ -382,7 +382,7 @@ defmodule DocumentTest do
           "age" => 44, "name" => "Jack", "sports" => %{"hockey" => 7, "soccer" => 8}}
       } = ret3
     end
-    
+
     test "updates several documents, returning the new documents (keepNull = default)", ctx do
       old_data = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20}}
       new_data = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => nil}}
@@ -395,7 +395,7 @@ defmodule DocumentTest do
       new_data1 = Map.merge(new_data, dref1)
       new_data2 = Map.merge(new_data, dref2)
       new_data3 = Map.merge(new_data, dref3)
-      
+
       [{:ok, ret1},
        {:ok, ret2},
        {:ok, ret3}
@@ -413,7 +413,7 @@ defmodule DocumentTest do
         %Docref{_id: ^id3, _key: ^key3, _oldRev: ^rev3},
         %{"_id" => ^id3, "_key" => ^key3, "age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => nil}}
       } = ret3
-    end    
+    end
 
     test "updates several documents, returning the new documents (keepNull = false)", ctx do
       old_data = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20}}
@@ -427,7 +427,7 @@ defmodule DocumentTest do
       new_data1 = Map.merge(new_data, dref1)
       new_data2 = Map.merge(new_data, dref2)
       new_data3 = Map.merge(new_data, dref3)
-      
+
       [{:ok, ret1},
        {:ok, ret2},
        {:ok, ret3}
@@ -445,8 +445,8 @@ defmodule DocumentTest do
         %Docref{_id: ^id3, _key: ^key3, _oldRev: ^rev3},
         %{"_id" => ^id3, "_key" => ^key3, "age" => 32, "fruit" => %{"apple" => 3, "peach" => 1}}
       } = ret3
-    end    
-        
+    end
+
     test "updates several documents, returning the old and new documents (mergeObejcts = true (default))", ctx do
       old_data = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 20}}
 
@@ -458,7 +458,7 @@ defmodule DocumentTest do
       new_data1 = Map.merge(%{"age" => 43, "fruit" => %{plum: 21, grape: 12}}, Map.take(old_dref1, [:_id, :_key, :_rev]))
       new_data2 = Map.merge(%{"age" => 43, "fruit" => %{plum: 22, grape: 12}}, Map.take(old_dref2, [:_id, :_key, :_rev]))
       new_data3 = Map.merge(%{"age" => 43, "fruit" => %{plum: 23, grape: 12}}, Map.take(old_dref3, [:_id, :_key, :_rev]))
-      
+
       [{:ok, ret1},
        {:ok, ret2},
        {:ok, ret3},
@@ -502,7 +502,7 @@ defmodule DocumentTest do
       new_data1 = Map.merge(%{"age" => 43, "fruit" => %{plum: 21, grape: 12}}, Map.take(old_dref1, [:_id, :_key, :_rev]))
       new_data2 = Map.merge(%{"age" => 43, "fruit" => %{plum: 22, grape: 12}}, Map.take(old_dref2, [:_id, :_key, :_rev]))
       new_data3 = Map.merge(%{"age" => 43, "fruit" => %{plum: 23, grape: 12}}, Map.take(old_dref3, [:_id, :_key, :_rev]))
-      
+
       [{:ok, ret1},
        {:ok, ret2},
        {:ok, ret3},
@@ -543,7 +543,7 @@ defmodule DocumentTest do
 
       new_data1 = Enum.reduce([ctx.data1, %{age2: ctx.data1["age"] + 1}, dref1], &Map.merge/2)
       new_data2 = Enum.reduce([ctx.data2, %{age2: ctx.data2["age"] + 1}, dref2], &Map.merge/2)
-      new_data3 = Enum.reduce([ctx.data3, %{age2: ctx.data3["age"] + 1}, dref3], &Map.merge/2)      
+      new_data3 = Enum.reduce([ctx.data3, %{age2: ctx.data3["age"] + 1}, dref3], &Map.merge/2)
 
       assert [
         {:ok, %Docref{} = _},
@@ -551,7 +551,7 @@ defmodule DocumentTest do
         {:ok, %Docref{} = _}
       ] = Document.update(ctx.endpoint, ctx.coll, [new_data1, new_data2, new_data3], waitForSync: true)
     end
-    
+
     test "updates several documents, considering revision (ignoreRevs = false)", ctx do
       [{:ok, {_, doc1}},
        {:ok, {_, doc2}},
@@ -582,7 +582,7 @@ defmodule DocumentTest do
         {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
         {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
       ] = Document.update(ctx.endpoint, ctx.coll, [new_doc1, new_doc2, new_doc3], returnNew: true, ignoreRevs: false)
-    end          
+    end
   end
 
   describe "replacing a document" do
@@ -594,9 +594,9 @@ defmodule DocumentTest do
 
     test "fails to replace an unknown document", ctx do
       assert {:error, %{"code" => 404, "errorMessage" => "document not found"}} =
-        Document.replace(ctx.endpoint, %Docref{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}, %{"foo" => 1})
+	Document.replace(ctx.endpoint, %Docref{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}, %{"foo" => 1})
     end
-    
+
     test "replaces a document, returning the new document", ctx do
       {:ok, docref} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
       new_doc = %{"age" => 32, "fruit" => %{"apple" => 3, "peach" => 1, "pear" => 99}}
@@ -662,7 +662,7 @@ defmodule DocumentTest do
 
       new_data1 = Enum.reduce([ctx.data1, %{"age2" => ctx.data1["age"] + 1}, dref1], &Map.merge/2)
       new_data2 = Enum.reduce([ctx.data2, %{"age2" => ctx.data2["age"] + 1}, dref2], &Map.merge/2)
-      new_data3 = Enum.reduce([ctx.data3, %{"age2" => ctx.data3["age"] + 1}, dref3], &Map.merge/2)      
+      new_data3 = Enum.reduce([ctx.data3, %{"age2" => ctx.data3["age"] + 1}, dref3], &Map.merge/2)
 
       assert [
         {:ok, _},
@@ -680,13 +680,13 @@ defmodule DocumentTest do
       badref = %{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}
       new_data1 = Enum.reduce([ctx.data1, %{"age2" => ctx.data1["age"] + 1}, badref], &Map.merge/2)
       new_data2 = Enum.reduce([ctx.data2, %{"age2" => ctx.data2["age"] + 1}, badref], &Map.merge/2)
-      new_data3 = Enum.reduce([ctx.data3, %{"age2" => ctx.data3["age"] + 1}, badref], &Map.merge/2)      
-      
+      new_data3 = Enum.reduce([ctx.data3, %{"age2" => ctx.data3["age"] + 1}, badref], &Map.merge/2)
+
       assert [
         {:error, %{"errorMessage" => "document not found"}},
         {:error, %{"errorMessage" => "document not found"}},
         {:error, %{"errorMessage" => "document not found"}},
-      ] = Document.replace(ctx.endpoint, ctx.coll, [new_data1, new_data2, new_data3])      
+      ] = Document.replace(ctx.endpoint, ctx.coll, [new_data1, new_data2, new_data3])
     end
 
     test "replaces several documents, returning the new documents", ctx do
@@ -740,7 +740,7 @@ defmodule DocumentTest do
       new_data1 = Map.merge(%{"age" => 41, "fruit" => %{"plum" => 21, "grape" => 12}}, Map.take(old_dref1, [:_id, :_key, :_rev]))
       new_data2 = Map.merge(%{"age" => 42, "fruit" => %{"plum" => 22, "grape" => 12}}, Map.take(old_dref2, [:_id, :_key, :_rev]))
       new_data3 = Map.merge(%{"age" => 43, "fruit" => %{"plum" => 23, "grape" => 12}}, Map.take(old_dref3, [:_id, :_key, :_rev]))
-      
+
       [{:ok, {%Docref{}, old_doc1, new_doc1}},
        {:ok, {%Docref{}, old_doc2, new_doc2}},
        {:ok, {%Docref{}, old_doc3, new_doc3}},
@@ -762,7 +762,7 @@ defmodule DocumentTest do
 
       new_data1 = Enum.reduce([ctx.data1, %{"age2" => ctx.data1["age"] + 1}, dref1], &Map.merge/2)
       new_data2 = Enum.reduce([ctx.data2, %{"age2" => ctx.data2["age"] + 1}, dref2], &Map.merge/2)
-      new_data3 = Enum.reduce([ctx.data3, %{"age2" => ctx.data3["age"] + 1}, dref3], &Map.merge/2)      
+      new_data3 = Enum.reduce([ctx.data3, %{"age2" => ctx.data3["age"] + 1}, dref3], &Map.merge/2)
 
       assert [
         {:ok, _},
@@ -801,22 +801,22 @@ defmodule DocumentTest do
         {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
         {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
       ] = Document.replace(ctx.endpoint, ctx.coll, [new_doc1, new_doc2, new_doc3], returnNew: true, ignoreRevs: false)
-    end          
+    end
   end
-    
+
   describe "removing a document" do
     test "removes a document successfully", ctx do
       {:ok, docref} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
 
       assert {:ok, _} = Document.delete(ctx.endpoint, docref)
-      assert {:error, %{"code" => 404}} = Document.document(ctx.endpoint, docref)      
+      assert {:error, %{"code" => 404}} = Document.document(ctx.endpoint, docref)
     end
 
     test "fails to remove an unknown document", ctx do
       assert {:error, %{"code" => 404, "errorMessage" => "document not found"}} =
-        Document.delete(ctx.endpoint, %Docref{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"})
+	Document.delete(ctx.endpoint, %Docref{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"})
     end
-    
+
     test "removes a document, returning the old document", ctx do
       {:ok, docref} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
 
@@ -867,8 +867,8 @@ defmodule DocumentTest do
     test "fails to remove_multi an unknown documents", ctx do
       badref1 = %{_id: "#{ctx.coll.name}/123456", _key: "123456", _rev: "123456"}
       badref2 = %{_id: "#{ctx.coll.name}/123457", _key: "123457", _rev: "123457"}
-      badref3 = %{_id: "#{ctx.coll.name}/123458", _key: "123458", _rev: "123458"}      
-      
+      badref3 = %{_id: "#{ctx.coll.name}/123458", _key: "123458", _rev: "123458"}
+
       assert [
         {:error, %{"errorMessage" => "document not found"}},
         {:error, %{"errorMessage" => "document not found"}},
@@ -944,8 +944,6 @@ defmodule DocumentTest do
       assert {:ok, _} = Document.document(ctx.endpoint, dref1)
       assert {:ok, _} = Document.document(ctx.endpoint, dref2)
       assert {:ok, _} = Document.document(ctx.endpoint, dref3)
-    end          
+    end
   end
 end
-
-

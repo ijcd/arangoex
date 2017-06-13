@@ -4,7 +4,7 @@ defmodule SimpleTest do
 
   alias Arangoex.Simple
   alias Arangoex.Document
-  alias Arangoex.Index  
+  alias Arangoex.Index
 
   setup do
     %{
@@ -18,7 +18,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)
-    
+
     assert {
       :ok, %{
         "cached" => false,
@@ -63,7 +63,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)
-    
+
     assert {
       :ok, %{
         "code" => 200,
@@ -75,15 +75,15 @@ defmodule SimpleTest do
   test "Simple query by-example", ctx do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
-    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)    
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)
-    
+
     assert {
       :ok, %{
         "code" => 201, "count" => 2, "error" => false, "hasMore" => false,
         "result" => [
           %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}},
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}
         ]
       }
     } = Simple.query_by_example(ctx.endpoint, ctx.coll, %{age: 33})
@@ -93,7 +93,7 @@ defmodule SimpleTest do
         "code" => 201, "count" => 2, "error" => false, "hasMore" => false,
         "result" => [
           %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}},
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}
         ]
       }
     } = Simple.query_by_example(ctx.endpoint, ctx.coll, %{"cars.honda": 5})
@@ -103,7 +103,7 @@ defmodule SimpleTest do
         "code" => 201, "count" => 2, "error" => false, "hasMore" => false,
         "result" => [
           %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}},
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}
         ]
       }
     } = Simple.query_by_example(ctx.endpoint, ctx.coll, %{"cars" => %{"honda" => 5, "ford" => 6}})
@@ -112,7 +112,7 @@ defmodule SimpleTest do
       :ok, %{
         "code" => 201, "count" => 1, "error" => false, "hasMore" => false,
         "result" => [
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}
         ]
       }
     } = Simple.query_by_example(ctx.endpoint, ctx.coll, %{age: 33}, skip: 1)
@@ -121,7 +121,7 @@ defmodule SimpleTest do
       :ok, %{
         "code" => 201, "count" => 1, "error" => false, "hasMore" => false,
         "result" => [
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "name" => "John", "cars" => %{"ford" => 6, "honda" => 5}}
         ]
       }
     } = Simple.query_by_example(ctx.endpoint, ctx.coll, %{age: 33}, limit: 1)
@@ -130,9 +130,9 @@ defmodule SimpleTest do
   test "Find document matching an example", ctx do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
-    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)    
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data2)
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)
-    
+
     assert {
       :ok, %{
         "code" => 200, "error" => false,
@@ -170,7 +170,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, ctx.data3)
 
     {:ok, %{"id" => index_id}} = Index.create_fulltext(ctx.endpoint, ctx.coll.name, "name")
-    
+
     assert {
       :ok, %{
         "code" => 201,
@@ -198,7 +198,7 @@ defmodule SimpleTest do
         ]
       }
     } = Simple.query_fulltext(ctx.endpoint, ctx.coll, "name", "john", index: index_id)
-    
+
     assert {
       :ok, %{
         "code" => 201,
@@ -219,7 +219,7 @@ defmodule SimpleTest do
         "hasMore" => false,
         "result" => [
           %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "cars" => %{"ford" => 6, "honda" => 5}, "name" => "John"},
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "cars" => %{"ford" => 6, "honda" => 5}, "name" => "John"}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "cars" => %{"ford" => 6, "honda" => 5}, "name" => "John"}
         ]
       }
     } = Simple.query_fulltext(ctx.endpoint, ctx.coll, "name", "john", skip: 1)
@@ -231,7 +231,7 @@ defmodule SimpleTest do
         "error" => false,
         "hasMore" => false,
         "result" => [
-          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "cars" => %{"ford" => 6, "honda" => 5}, "name" => "John"}          
+          %{"_id" => _, "_key" => _, "_rev" => _, "age" => 33, "cars" => %{"ford" => 6, "honda" => 5}, "name" => "John"}
         ]
       }
     } = Simple.query_fulltext(ctx.endpoint, ctx.coll, "name", "john", skip: 1, limit: 1)
@@ -268,7 +268,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 6})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 8})
     {:ok, %{"id" => _id1}} = Index.create_skiplist(ctx.endpoint, ctx.coll.name, ["size"])
-    
+
     assert {
       :ok, %{
         "code" => 201,
@@ -293,7 +293,7 @@ defmodule SimpleTest do
           %{"_id" => _, "_key" => _, "_rev" => _, "size" => 2},
           %{"_id" => _, "_key" => _, "_rev" => _, "size" => 4},
           %{"_id" => _, "_key" => _, "_rev" => _, "size" => 6},
-          %{"_id" => _, "_key" => _, "_rev" => _, "size" => 8},          
+          %{"_id" => _, "_key" => _, "_rev" => _, "size" => 8},
         ]
       }
     } = Simple.range(ctx.endpoint, ctx.coll, "size", 2, 8, closed: true)
@@ -316,7 +316,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 2})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 4})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 4})
-    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 4})    
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 4})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 6})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 6})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"size" => 6})
@@ -401,7 +401,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "b"})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "b"})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "c"})
-    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "c"})    
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "c"})
 
     assert {
       :ok, %{
@@ -449,9 +449,9 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "b"})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "b"})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "c"})
-    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "c"})    
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "c"})
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "d"})
-    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "e"})    
+    {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"name" => "e"})
 
     assert {
       :ok, %{
@@ -507,7 +507,7 @@ defmodule SimpleTest do
         "hasMore" => false,
         "result" => [
           %{"_id" => _, "_key" => _, "_rev" => _, "name" => "c", "bang" => 3},
-          %{"_id" => _, "_key" => _, "_rev" => _, "name" => "c", "bang" => 3},          
+          %{"_id" => _, "_key" => _, "_rev" => _, "name" => "c", "bang" => 3},
         ]
       }
     } = Simple.query_by_example(ctx.endpoint, ctx.coll, %{"bang" => 3})
@@ -561,7 +561,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"lat" => 4, "long" => 8, "lat2" => 0, "long2" => 0})
     {:ok, %{"id" => _id1}} = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat", "long"])
     {:ok, %{"id" => _id2}} = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat2", "long2"])
-    
+
     assert {
       :ok, %{
         "code" => 201,
@@ -649,7 +649,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"lat" => 4, "long" => 8, "lat2" => 0, "long2" => 0})
     {:ok, %{"id" => _id1}} = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat", "long"])
     {:ok, %{"id" => _id2}} = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat2", "long2"])
-    
+
     assert {
       :ok, %{
         "code" => 201,
@@ -712,7 +712,7 @@ defmodule SimpleTest do
     {:ok, _} = Document.create(ctx.endpoint, ctx.coll, %{"lat" => 4, "long" => 8, "lat2" => 0, "long2" => 0})
     {:ok, %{"id" => _id1}} = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat", "long"])
     {:ok, %{"id" => _id2}} = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat2", "long2"])
-    
+
     assert {
       :ok, %{
         "code" => 201,

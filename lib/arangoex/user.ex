@@ -2,7 +2,7 @@ defmodule Arangoex.User do
   @moduledoc "ArangoDB User methods"
 
   alias Arangoex.Endpoint
-  alias Arangoex.Utils  
+  alias Arangoex.Utils
 
   defstruct [
     user: nil,
@@ -19,13 +19,13 @@ defmodule Arangoex.User do
     extra: map,
     changePassword: boolean,
   }
-  
+
   @doc """
   Create User
-  
+
   POST /_api/user
   """
-  @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)  
+  @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)
   def create(endpoint, user) do
     endpoint
     |> Endpoint.post("user", user)
@@ -34,7 +34,7 @@ defmodule Arangoex.User do
 
   @doc """
   Remove User
-  
+
   DELETE /_api/user/{user}
   """
   @spec remove(Endpoint.t, t) :: Arangoex.ok_error(map)
@@ -46,7 +46,7 @@ defmodule Arangoex.User do
   @doc """
   List available Users
 
-  GET /_api/user/ 
+  GET /_api/user/
   """
   @spec users(Endpoint.t) :: Arangoex.ok_error([t])
   def users(endpoint) do
@@ -57,10 +57,10 @@ defmodule Arangoex.User do
 
   @doc """
   Fetch User
-  
-  GET /_api/user/{user} 
+
+  GET /_api/user/{user}
   """
-  @spec user(Endpoint.t, t) :: Arangoex.ok_error(t)  
+  @spec user(Endpoint.t, t) :: Arangoex.ok_error(t)
   def user(endpoint, user) do
     endpoint
     |> Endpoint.get("user/#{user.user}")
@@ -69,27 +69,27 @@ defmodule Arangoex.User do
 
   @doc """
   Update User
-  
-  PATCH /_api/user/{user} 
+
+  PATCH /_api/user/{user}
   """
   @spec update(Endpoint.t, t) :: Arangoex.ok_error(map)
   def update(endpoint, user, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
-    
+
     endpoint
     |> Endpoint.patch("user/#{user.user}", properties)
-    |> to_user    
+    |> to_user
   end
 
   @doc """
   Replace User
-  
-  PUT /_api/user/{user} 
+
+  PUT /_api/user/{user}
   """
   @spec replace(Endpoint.t, t) :: Arangoex.ok_error(map)
   def replace(endpoint, user, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
-    
+
     endpoint
     |> Endpoint.put("user/#{user.user}", properties)
     |> to_user
@@ -97,7 +97,7 @@ defmodule Arangoex.User do
 
   @doc """
   List the databases available to a User
-   
+
   GET /_api/user/{user}/database
   """
   @spec databases(Endpoint.t, t) :: Arangoex.ok_error([String.t])
@@ -109,32 +109,32 @@ defmodule Arangoex.User do
 
   @doc """
   Grant database access
-  
-  PUT /_api/user/{user}/database/{dbname} 
+
+  PUT /_api/user/{user}/database/{dbname}
   """
   @spec grant(Endpoint.t, t, Database.t) :: Arangoex.ok_error([String.t])
   def grant(endpoint, user, database) do
     endpoint
     |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "rw"})
   end
-  
+
   @doc """
   Revoke database access
-  
-  PUT /_api/user/{user}/database/{dbname} 
+
+  PUT /_api/user/{user}/database/{dbname}
   """
   @spec revoke(Endpoint.t, t, Database.t) :: Arangoex.ok_error([String.t])
   def revoke(endpoint, user, database) do
     endpoint
     |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "none"})
   end
-  
-  @spec to_user(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())  
+
+  @spec to_user(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
   defp to_user({:ok, %{"result" => result}}) when is_list(result), do: {:ok, Enum.map(result, &new(&1))}
   defp to_user({:ok, result}), do: {:ok, new(result)}
   defp to_user({:error, _} = e), do: e
 
   @spec decode_result(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
   defp decode_result({:ok, %{"result" => result}}), do: {:ok, result}
-  defp decode_result({:error, _} = e), do: e  
+  defp decode_result({:error, _} = e), do: e
 end

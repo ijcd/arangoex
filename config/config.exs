@@ -7,7 +7,7 @@ if Mix.env == :dev do
     tasks: [
       "test",
       "credo",
-      "dialyzer",      
+      "dialyzer",
     ]
 end
 

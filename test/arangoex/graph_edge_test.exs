@@ -2,9 +2,9 @@ defmodule GraphEdgeTest do
   use Arangoex.TestCase
   doctest Arangoex
 
-  alias Arangoex.Graph  
+  alias Arangoex.Graph
   alias Arangoex.GraphEdge
-  
+
   test "Read in or outbound edges", ctx do
     {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "people", from: ["person"], to: ["person"]}])
     {:ok, %{"vertex" => %{"_id" => amy_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Amy", name: "Amy"})
@@ -12,7 +12,7 @@ defmodule GraphEdgeTest do
     {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Cindy", name: "Cindy"})
     {:ok, %{"vertex" => %{"_id" => derek_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Derek", name: "Derek"})
     {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Erin", name: "Erin"})
-    {:ok, %{"vertex" => %{"_id" => fred_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Fred", name: "Fred"})        
+    {:ok, %{"vertex" => %{"_id" => fred_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Fred", name: "Fred"})
 
     # (amy, brad, cindy) -> derek
     Graph.edge_create(ctx.endpoint, "social", "people", %Graph.Edge{type: "people", from: "person/Amy", to: "person/Derek"})

@@ -20,4 +20,3 @@ defmodule Arangoex.GraphEdge do
     |> Endpoint.get("/edges/#{collection_name}#{query}")
   end
 end
-  

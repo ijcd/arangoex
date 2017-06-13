@@ -3,7 +3,7 @@ defmodule AqlTest do
   doctest Arangoex
 
   alias Arangoex.Aql
-  alias Arangoex.Collection  
+  alias Arangoex.Collection
 
   test "Return registered AQL user functions", ctx do
     # no functions yet
@@ -33,7 +33,7 @@ defmodule AqlTest do
         "error" => false,
       }
     } == Aql.create_function(ctx.endpoint, aql_function)
-    
+
     # function should be there
     assert {
       :ok, [
@@ -50,7 +50,7 @@ defmodule AqlTest do
       name: "myfunctions::temperature::celsiustofahrenheit",
       code: "function (celsius) { return celsius * 1.8 + 32; }",
     }
-    
+
     {:ok, _} = Aql.create_function(ctx.endpoint, aql_function)
     {:ok, functions} = Aql.functions(ctx.endpoint)
     assert Enum.count(functions) == 1
@@ -59,7 +59,7 @@ defmodule AqlTest do
     assert {
       :ok, %{
           "code" => 200,
-          "error" => false,          
+          "error" => false,
       }
     } == Aql.delete_function(ctx.endpoint, "myfunctions::temperature::celsiustofahrenheit")
 
@@ -89,7 +89,7 @@ defmodule AqlTest do
     } = Aql.explain_query(ctx.endpoint, "FOR p IN products RETURN p")
     assert Enum.count(plan["rules"]) == 0
   end
-    
+
   test "Explain an AQL query (a plan with some optimizer rules applied)", ctx do
     {:ok, _} = Collection.create(ctx.endpoint, %Collection{name: "products"})
 
@@ -118,7 +118,7 @@ defmodule AqlTest do
     } = Aql.explain_query(ctx.endpoint, "FOR p IN products LET a = p.id FILTER a == 4 LET name = p.name SORT p.id LIMIT 1 RETURN name", max_number_of_plans: 2, all_plans: true, optimizer_rules: ["-all", "+use-index-for-sort", "+use-index-range"])
     assert Enum.count(plans) > 0
     assert Enum.count(plans) <= 2
-end    
+end
 
   test "Explain an AQL query (returning all plans)", ctx do
     {:ok, _} = Collection.create(ctx.endpoint, %Collection{name: "products"})
@@ -146,7 +146,7 @@ end
         "warnings" => warnings
       }
     } = Aql.explain_query(ctx.endpoint, "FOR i IN 1..10 RETURN 1 / 0")
-    assert Enum.count(warnings) > 0    
+    assert Enum.count(warnings) > 0
   end
 
   test "Explain an AQL query (invalid query, missing bind parameter)", ctx do
@@ -168,7 +168,7 @@ end
     assert {
       :ok, %{
         "code" => 200,
-        "error" => false,        
+        "error" => false,
         "parsed" => true,
         "collections" => ["products"],
         "bindVars" => ["name"],
@@ -182,11 +182,11 @@ end
     {:ok, _} = Collection.create(ctx.endpoint, %Collection{name: "products"})
 
     assert {
-      :error, %{ 
-        "code" => 400, 
-        "error" => true, 
-        "errorMessage" => "syntax error, unexpected assignment near '= @name LIMIT 2 RETURN p.n' at position 1:33", 
-        "errorNum" => 1501 
+      :error, %{
+        "code" => 400,
+        "error" => true,
+        "errorMessage" => "syntax error, unexpected assignment near '= @name LIMIT 2 RETURN p.n' at position 1:33",
+        "errorNum" => 1501
       }
     } = Aql.validate_query(ctx.endpoint, "FOR p IN products FILTER p.name = @name LIMIT 2 RETURN p.n")
   end
@@ -232,7 +232,7 @@ end
       :ok, []
     } == Aql.current_queries(ctx.endpoint)
   end
-  
+
   test "Returns the properties for the AQL query tracking", ctx do
     # with no queries running
     assert {
@@ -252,11 +252,11 @@ end
   test "Changes the properties for the AQL query tracking", ctx do
     assert {
       :ok, %{
-        "enabled" => true,        
-        "trackSlowQueries" => true,
-        "maxSlowQueries" => 64,
-        "slowQueryThreshold" => 10,
-        "maxQueryStringLength" => 8192,
+	"enabled" => true,
+	"trackSlowQueries" => true,
+	"maxSlowQueries" => 64,
+	"slowQueryThreshold" => 10,
+	"maxQueryStringLength" => 8192,
       }
     } == Aql.set_query_properties(ctx.endpoint, enabled: true, track_slow_queries: false, max_slow_queries: 128, slow_query_threshold: 30, max_query_string_length: 8192)
   end
