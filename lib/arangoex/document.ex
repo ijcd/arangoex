@@ -1,7 +1,7 @@
 defmodule Arangoex.Document do
   @moduledoc "ArangoDB Document methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
   alias Arangoex.Collection
   alias Arangoex.Utils
 
@@ -24,13 +24,17 @@ defmodule Arangoex.Document do
 
   POST /_api/document/{collection}
   """
-  @spec create(Endpoint.t, Collection.t, map | [map]) :: Arangoex.ok_error(map | [map])
-  def create(endpoint, coll, doc, opts \\ []) do
+  @spec create(Collection.t, map | [map]) :: Arangoex.ok_error(map | [map])
+  def create(collection, document, opts \\ []) do
     query = Utils.opts_to_query(opts, [:waitForSync, :returnNew])
 
-    endpoint
-    |> Endpoint.post("document/#{coll.name}#{query}", doc)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :post,
+      path: "document/#{collection.name}#{query}",
+      body: document,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
   @doc """
@@ -38,12 +42,16 @@ defmodule Arangoex.Document do
 
   HEAD /_api/document/{document-handle}
   """
-  @spec header(Endpoint.t, map, keyword) :: Arangoex.ok_error(map)
-  def header(endpoint, doc, opts \\ []) do
+  @spec header(map, keyword) :: Arangoex.ok_error(map)
+  def header(document, opts \\ []) do
     headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch])
 
-    endpoint
-    |> Endpoint.head("document/#{doc._id}", headers)
+    %Request{
+      endpoint: :document,
+      http_method: :head,
+      path: "document/#{document._id}",
+      headers: headers,
+    }
   end
 
   @doc """
@@ -51,12 +59,16 @@ defmodule Arangoex.Document do
 
   GET /_api/document/{document-handle}
   """
-  @spec document(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
-  def document(endpoint, doc, opts \\ []) do
+  @spec document(t, keyword) :: Arangoex.ok_error(map)
+  def document(document, opts \\ []) do
     headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch])
 
-    endpoint
-    |> Endpoint.get("document/#{doc._id}", headers)
+    %Request{
+      endpoint: :document,
+      http_method: :get,
+      path: "document/#{document._id}",
+      headers: headers,
+    }
   end
 
   @doc """
@@ -64,35 +76,43 @@ defmodule Arangoex.Document do
 
   PUT /_api/simple/all-keys
   """
-  @spec documents(Endpoint.t, Collection.t, keyword) :: Arangoex.ok_error(t | [t])
-  def documents(endpoint, coll, opts \\ []) do
+  @spec documents(Collection.t, keyword) :: Arangoex.ok_error(t | [t])
+  def documents(collection, opts \\ []) do
     type = Utils.ensure_permitted(opts, [:type])[:type]
     body = cond do
-      type == :id   -> %{"collection" => coll.name, "type" => "id"}
-      type == :path -> %{"collection" => coll.name, "type" => "path"}
-      type == :key  -> %{"collection" => coll.name, "type" => "key"}
-      type == nil   -> %{"collection" => coll.name}
+      type == :id   -> %{"collection" => collection.name, "type" => "id"}
+      type == :path -> %{"collection" => collection.name, "type" => "path"}
+      type == :key  -> %{"collection" => collection.name, "type" => "key"}
+      type == nil   -> %{"collection" => collection.name}
       true -> raise "unknown type: #{type}"
     end
 
-    endpoint
-    |> Endpoint.put("simple/all-keys", body)
+    %Request{
+      endpoint: :document,
+      http_method: :put,
+      path: "simple/all-keys",
+      body: body,
+    }
   end
 
-  def update(endpoint, coll, docs, opts \\ [])
+  def update(collection, docs, opts \\ [])
 
   @doc """
   Update documents
 
   PATCH /_api/document/{collection}
   """
-  @spec update(Endpoint.t, Collection.t, [map], keyword) :: Arangoex.ok_error([map])
-  def update(endpoint, coll, new_docs, opts) when is_list(new_docs) do
+  @spec update(Collection.t, [map], keyword) :: Arangoex.ok_error([map])
+  def update(collection, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    endpoint
-    |> Endpoint.patch("document/#{coll.name}#{query}", new_docs)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :patch,
+      path: "document/#{collection.name}#{query}",
+      body: new_docs,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
   @doc """
@@ -100,31 +120,40 @@ defmodule Arangoex.Document do
 
   PATCH /_api/document/{document-handle}
   """
-  @spec update(Endpoint.t, map, map, keyword) :: Arangoex.ok_error(map)
-  def update(endpoint, doc, new_doc, opts) do
+  @spec update(map, map, keyword) :: Arangoex.ok_error(map)
+  def update(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
     query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    endpoint
-    |> Endpoint.patch("document/#{doc._id}#{query}", new_doc, headers)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :patch,
+      path: "document/#{document._id}#{query}",
+      headers: headers,
+      body: new_document,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
-  def replace(endpoint, coll, docs, opts \\ [])
+  def replace(collection, docs, opts \\ [])
 
   @doc """
   Replace documents
 
-  PATCH /_api/document/{collection}
+  PUT /_api/document/{collection}
   """
-  @spec replace(Endpoint.t, Collection.t, [map], keyword) :: Arangoex.ok_error([map])
-  def replace(endpoint, coll, new_docs, opts) when is_list(new_docs) do
+  @spec replace(Collection.t, [map], keyword) :: Arangoex.ok_error([map])
+  def replace(collection, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    endpoint
-    |> Endpoint.put("document/#{coll.name}#{query}", new_docs)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :put,
+      path: "document/#{collection.name}#{query}",
+      body: new_docs,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
   @doc """
@@ -132,15 +161,20 @@ defmodule Arangoex.Document do
 
   PUT /_api/document/{document-handle}
   """
-  @spec replace(Endpoint.t, t, map) :: Arangoex.ok_error(t | [t])
-  def replace(endpoint, doc, new_doc, opts) do
+  @spec replace(t, map) :: Arangoex.ok_error(t | [t])
+  def replace(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
     query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    endpoint
-    |> Endpoint.put("document/#{doc._id}#{query}", new_doc, headers)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :put,
+      path: "document/#{document._id}#{query}",
+      body: new_document,
+      headers: headers,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
   @doc """
@@ -148,13 +182,17 @@ defmodule Arangoex.Document do
 
   DELETE /_api/document/{collection}
   """
-  @spec delete_multi(Endpoint.t, Collection.t, [map], keyword) :: Arangoex.ok_error(t | [t])
-  def delete_multi(endpoint, coll, docs, opts \\ []) when is_list(docs) do
+  @spec delete_multi(Collection.t, [map], keyword) :: Arangoex.ok_error(t | [t])
+  def delete_multi(collection, docs, opts \\ []) when is_list(docs) do
     query = Utils.opts_to_query(opts, [:waitForSync, :ignoreRevs, :returnOld])
 
-    endpoint
-    |> Endpoint.delete("document/#{coll.name}#{query}", docs)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :delete,
+      path: "document/#{collection.name}#{query}",
+      body: docs,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
   @doc """
@@ -162,23 +200,27 @@ defmodule Arangoex.Document do
 
   DELETE /_api/document/{document-handle}
   """
-  @spec delete(Endpoint.t, t, keyword) :: Arangoex.ok_error(t | [t])
-  def delete(endpoint, doc, opts \\ []) do
+  @spec delete(t, keyword) :: Arangoex.ok_error(t | [t])
+  def delete(document, opts \\ []) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
     query = Utils.opts_to_query(query_opts, [:waitForSync, :returnOld])
 
-    endpoint
-    |> Endpoint.delete("document/#{doc._id}#{query}", %{}, headers)
-    |> to_result
+    %Request{
+      endpoint: :document,
+      http_method: :delete,
+      path: "document/#{document._id}#{query}",
+      body: %{},
+      headers: headers,
+      ok_decoder: __MODULE__.DocumentDecoder,
+    }
   end
 
-  @spec to_result(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
-  defp to_result({:ok, result}) when is_list(result), do: Enum.map(result, &to_document(&1))
-  defp to_result({:ok, result}), do: to_document(result)
-  defp to_result({:error, _} = e), do: e
+  defmodule DocumentDecoder do
+    @spec decode_ok(any()) :: Arangoex.ok_error(any())
+    def decode_ok(result) when is_list(result), do: Enum.map(result, &to_document(&1))
+    def decode_ok(result), do: to_document(result)
 
-  @spec to_document(map) :: Arangoex.ok_error(t| map)
     defp to_document(%{} = result) do
       case result do
         %{"error" => true, "errorMessage" => _em, "errorNum" => _en} -> {:error, result}
@@ -189,3 +231,4 @@ defmodule Arangoex.Document do
       end
     end
   end
+end

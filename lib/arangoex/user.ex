@@ -1,7 +1,7 @@
 defmodule Arangoex.User do
   @moduledoc "ArangoDB User methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
   alias Arangoex.Utils
 
   defstruct [
@@ -18,6 +18,7 @@ defmodule Arangoex.User do
     active: boolean,
     extra: map,
     changePassword: boolean,
+    passwd: String.t,
   }
 
   @doc """
@@ -25,11 +26,19 @@ defmodule Arangoex.User do
 
   POST /_api/user
   """
-  @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)
-  def create(endpoint, user) do
-    endpoint
-    |> Endpoint.post("user", user)
-    |> to_user
+  @type create_user_opts :: [{:user, String.t} | {:passwd, String.t} | {:active, boolean} | {:extra, Map.t}]
+  @spec create(create_user_opts | t) :: Arangoex.ok_error(t)
+  def create(user \\ [])
+  def create(%__MODULE__{user: name}), do: create(user: name)
+  def create(opts) do
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :post,
+      path: "user",
+      body: opts |> Keyword.take([:user, :passwd, :active, :extra]) |> Enum.into(%{}),
+      ok_decoder: __MODULE__.UserDecoder,
+    }
   end
 
   @doc """
@@ -37,10 +46,15 @@ defmodule Arangoex.User do
 
   DELETE /_api/user/{user}
   """
-  @spec remove(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def remove(endpoint, user) do
-    endpoint
-    |> Endpoint.delete("user/#{user.user}")
+  @spec remove(t | String.t) :: Arangoex.ok_error(map)
+  def remove(%__MODULE__{user: name}), do: remove(name)
+  def remove(name) do
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :delete,
+      path: "user/#{name}",
+    }
   end
 
   @doc """
@@ -48,11 +62,15 @@ defmodule Arangoex.User do
 
   GET /_api/user/
   """
-  @spec users(Endpoint.t) :: Arangoex.ok_error([t])
-  def users(endpoint) do
-    endpoint
-    |> Endpoint.get("user")
-    |> to_user
+  @spec users() :: Arangoex.ok_error([t])
+  def users() do
+    %Request{
+      endpoint: :user,
+            system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "user",
+      ok_decoder: __MODULE__.UserDecoder,
+    }
   end
 
   @doc """
@@ -60,11 +78,16 @@ defmodule Arangoex.User do
 
   GET /_api/user/{user}
   """
-  @spec user(Endpoint.t, t) :: Arangoex.ok_error(t)
-  def user(endpoint, user) do
-    endpoint
-    |> Endpoint.get("user/#{user.user}")
-    |> to_user
+  @spec user(String.t | t) :: Arangoex.ok_error(t)
+  def user(%__MODULE__{user: name}), do: user(name)
+  def user(name) do
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "user/#{name}",
+      ok_decoder: __MODULE__.UserDecoder,
+    }
   end
 
   @doc """
@@ -72,13 +95,18 @@ defmodule Arangoex.User do
 
   PATCH /_api/user/{user}
   """
-  @spec update(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def update(endpoint, user, opts \\ []) do
+  @spec update(t) :: Arangoex.ok_error(map)
+  def update(user, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
 
-    endpoint
-    |> Endpoint.patch("user/#{user.user}", properties)
-    |> to_user
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :patch,
+      path: "user/#{user.user}",
+      body: properties,
+      ok_decoder: __MODULE__.UserDecoder,
+    }
   end
 
   @doc """
@@ -86,13 +114,18 @@ defmodule Arangoex.User do
 
   PUT /_api/user/{user}
   """
-  @spec replace(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def replace(endpoint, user, opts \\ []) do
+  @spec replace(t) :: Arangoex.ok_error(map)
+  def replace(user, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
 
-    endpoint
-    |> Endpoint.put("user/#{user.user}", properties)
-    |> to_user
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :put,
+      path: "user/#{user.user}",
+      body: properties,
+      ok_decoder: __MODULE__.UserDecoder,
+    }
   end
 
   @doc """
@@ -100,11 +133,16 @@ defmodule Arangoex.User do
 
   GET /_api/user/{user}/database
   """
-  @spec databases(Endpoint.t, t) :: Arangoex.ok_error([String.t])
-  def databases(endpoint, user) do
-    endpoint
-    |> Endpoint.get("user/#{user.user}/database")
-    |> decode_result
+  @spec databases(String.t | t) :: Arangoex.ok_error([String.t])
+  def databases(%__MODULE__{user: name}), do: databases(name)
+  def databases(user_name) do
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "user/#{user_name}/database",
+      ok_decoder: __MODULE__.PlainDecoder,
+    }
   end
 
   @doc """
@@ -112,10 +150,16 @@ defmodule Arangoex.User do
 
   PUT /_api/user/{user}/database/{dbname}
   """
-  @spec grant(Endpoint.t, t, Database.t) :: Arangoex.ok_error([String.t])
-  def grant(endpoint, user, database) do
-    endpoint
-    |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "rw"})
+  @spec grant(t, Database.t) :: Arangoex.ok_error([String.t])
+  def grant(%__MODULE__{user: user_name}, database_name), do: grant(user_name, database_name)
+  def grant(user_name, database_name) do
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :put,
+      path: "user/#{user_name}/database/#{database_name}",
+      body: %{grant: "rw"},
+    }
   end
 
   @doc """
@@ -123,18 +167,29 @@ defmodule Arangoex.User do
 
   PUT /_api/user/{user}/database/{dbname}
   """
-  @spec revoke(Endpoint.t, t, Database.t) :: Arangoex.ok_error([String.t])
-  def revoke(endpoint, user, database) do
-    endpoint
-    |> Endpoint.put("user/#{user.user}/database/#{database.name}", %{grant: "none"})
+  @spec revoke(t, Database.t) :: Arangoex.ok_error([String.t])
+  def revoke(%__MODULE__{user: user_name}, database_name), do: revoke(user_name, database_name)
+  def revoke(user_name, database_name) do
+    %Request{
+      endpoint: :user,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :put,
+      path: "user/#{user_name}/database/#{database_name}",
+      body: %{grant: "none"},
+    }
   end
 
-  @spec to_user(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
-  defp to_user({:ok, %{"result" => result}}) when is_list(result), do: {:ok, Enum.map(result, &new(&1))}
-  defp to_user({:ok, result}), do: {:ok, new(result)}
-  defp to_user({:error, _} = e), do: e
+  defmodule UserDecoder do
+    alias Arangoex.User
 
-  @spec decode_result(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
-  defp decode_result({:ok, %{"result" => result}}), do: {:ok, result}
-  defp decode_result({:error, _} = e), do: e
+    @spec decode_ok(Map.t) :: Arangoex.ok_error(User.t)
+    def decode_ok(%{"result" => result}) when is_list(result), do: {:ok, Enum.map(result, &User.new(&1))}
+    def decode_ok(result), do: {:ok, User.new(result)}
+  end
+
+  defmodule PlainDecoder do
+    @spec decode_ok(any()) :: Arangoex.ok_error(any())
+    def decode_ok(%{"result" => %{} = result}), do: {:ok, result}
+    def decode_ok(%{"result" => result}), do: {:ok, result}
+  end
 end

@@ -7,13 +7,13 @@ defmodule CursorTest do
   alias Arangoex.Document
 
   setup ctx do
-    {:ok, coll} = Collection.create(ctx.endpoint, %Collection{name: "products"})
-    {:ok, _} = Document.create(ctx.endpoint, coll, %{"name" => "Alice", "age" => 11})
-    {:ok, _} = Document.create(ctx.endpoint, coll, %{"name" => "Bob", "age" => 22})
-    {:ok, _} = Document.create(ctx.endpoint, coll, %{"name" => "Charlie", "age" => 33})
-    {:ok, _} = Document.create(ctx.endpoint, coll, %{"name" => "Dave", "age" => 44})
-    {:ok, _} = Document.create(ctx.endpoint, coll, %{"name" => "Eve", "age" => 55})
-    {:ok, _} = Document.create(ctx.endpoint, coll, %{"name" => "Frank", "age" => 66})
+    {:ok, coll} = Collection.create(%Collection{name: "products"}) |> on_db(ctx)
+    {:ok, _} = Document.create(coll, %{"name" => "Alice", "age" => 11}) |> on_db(ctx)
+    {:ok, _} = Document.create(coll, %{"name" => "Bob", "age" => 22}) |> on_db(ctx)
+    {:ok, _} = Document.create(coll, %{"name" => "Charlie", "age" => 33}) |> on_db(ctx)
+    {:ok, _} = Document.create(coll, %{"name" => "Dave", "age" => 44}) |> on_db(ctx)
+    {:ok, _} = Document.create(coll, %{"name" => "Eve", "age" => 55}) |> on_db(ctx)
+    {:ok, _} = Document.create(coll, %{"name" => "Frank", "age" => 66}) |> on_db(ctx)
     ctx
   end
 
@@ -44,7 +44,7 @@ defmodule CursorTest do
           "warnings" => []
         },
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
     assert Enum.count(result) == 2
   end
 
@@ -75,7 +75,7 @@ defmodule CursorTest do
           "warnings" => []
         },
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
     assert Enum.count(result) == 2
   end
 
@@ -107,7 +107,7 @@ defmodule CursorTest do
           "warnings" => []
         },
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (using the query option \"fullCount\")", ctx do
@@ -138,7 +138,7 @@ defmodule CursorTest do
           "warnings" => []
         }
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (enabling and disabling optimizer rules)", ctx do
@@ -169,7 +169,7 @@ defmodule CursorTest do
           "warnings" => []
         },
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (execute a data-modification query and retrieve the number of modified documents)", ctx do
@@ -196,7 +196,7 @@ defmodule CursorTest do
           "warnings" => []
         }
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (execute a data-modification query with option ignoreErrors)", ctx do
@@ -223,7 +223,7 @@ defmodule CursorTest do
           "warnings" => []
         }
       }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (bad query - missing body)", ctx do
@@ -238,7 +238,7 @@ defmodule CursorTest do
         "errorMessage" => "query is empty (while parsing)",
         "errorNum" => 1502
       }
-    } == Cursor.cursor_create(ctx.endpoint, cursor)
+    } == Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (bad query - unknown collection)", ctx do
@@ -255,7 +255,7 @@ defmodule CursorTest do
         "errorMessage" => "collection not found (unknowncoll)",
         "errorNum" => 1203
       }
-    } == Cursor.cursor_create(ctx.endpoint, cursor)
+    } == Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (bad query - execute a data-modification query that attempts to remove a non-existing document)", ctx do
@@ -270,7 +270,7 @@ defmodule CursorTest do
         "errorMessage" => "document not found (while executing)",
         "errorNum" => 1202
       }
-    } == Cursor.cursor_create(ctx.endpoint, cursor)
+    } == Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Delete cursor", ctx do
@@ -280,7 +280,7 @@ defmodule CursorTest do
       batch_size: 2
     }
 
-    {:ok, %{"id" => id}} = Cursor.cursor_create(ctx.endpoint, cursor)
+    {:ok, %{"id" => id}} = Cursor.cursor_create(cursor) |> on_db(ctx)
 
     # delete the cursor
     assert {
@@ -289,7 +289,7 @@ defmodule CursorTest do
         "error" => false,
         "id" => _
       }
-    } = Cursor.cursor_delete(ctx.endpoint, id)
+    } = Cursor.cursor_delete(id) |> on_db(ctx)
 
     # cannot delete again
     assert {
@@ -299,7 +299,7 @@ defmodule CursorTest do
         "errorMessage" => "cursor not found",
         "errorNum" => 1600
       }
-    } == Cursor.cursor_delete(ctx.endpoint, id)
+    } == Cursor.cursor_delete(id) |> on_db(ctx)
   end
 
   test "Read next batch from cursor", ctx do
@@ -313,7 +313,7 @@ defmodule CursorTest do
         "id" => id,
         "result" => result,
      }
-    } = Cursor.cursor_create(ctx.endpoint, cursor)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
     assert Enum.count(result) == 2
 
     # get another batch
@@ -338,7 +338,7 @@ defmodule CursorTest do
           "warnings" => []
         }
       }
-    } = Cursor.cursor_next(ctx.endpoint, id)
+    } = Cursor.cursor_next(id) |> on_db(ctx)
     assert Enum.count(result) == 2
 
     # get another batch
@@ -363,7 +363,7 @@ defmodule CursorTest do
           "warnings" => []
         }
       }
-    } = Cursor.cursor_next(ctx.endpoint, id)
+    } = Cursor.cursor_next(id) |> on_db(ctx)
     assert Enum.count(result) == 1
   end
 end

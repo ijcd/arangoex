@@ -7,7 +7,7 @@ defmodule UserTest do
   alias Arangoex.User
 
   test "lists users" do
-    {:ok, users} = User.users(test_endpoint())
+    {:ok, users} = User.users() |> arango
     
     names =
       users
@@ -20,9 +20,9 @@ defmodule UserTest do
   test "creates a user" do
     new_username = Faker.Lorem.word
 
-    {:ok, original_users} = User.users(test_endpoint())
-    {:ok, user} = User.create(test_endpoint(), %User{user: new_username})
-    {:ok, after_users} = User.users(test_endpoint())
+    {:ok, original_users} = User.users() |> arango
+    {:ok, user} = User.create(user: new_username) |> arango
+    {:ok, after_users} = User.users() |> arango
 
     assert [user] == after_users -- original_users
     assert user.user== new_username
@@ -32,23 +32,23 @@ defmodule UserTest do
     new_user = %User{user: Faker.Lorem.word}
 
     # create one to remove
-    {:ok, _} = User.create(test_endpoint(), new_user)
-    {:ok, users} = User.users(test_endpoint())
+    {:ok, _} = User.create(new_user) |> arango
+    {:ok, users} = User.users() |> arango
 
     assert new_user.user in Enum.map(users, & &1.user)
 
     # remove and make sure it's gone
-    {:ok, _} = User.remove(test_endpoint(), new_user)
-    {:ok, users} = User.users(test_endpoint())
+    {:ok, _} = User.remove(new_user) |> arango
+    {:ok, users} = User.users() |> arango
       
     refute new_user.user in Enum.map(users, & &1.user)
   end
 
   test "looks up user information" do
     new_user = %User{user: Faker.Lorem.word}
-    {:ok, _} = User.create(test_endpoint(), new_user)
+    {:ok, _} = User.create(new_user) |> arango
 
-    assert {:ok, %User{} = fetched_user} = User.user(test_endpoint(), new_user)
+    assert {:ok, %User{} = fetched_user} = User.user(new_user) |> arango
     assert fetched_user.user == new_user.user
   end
   
@@ -56,10 +56,10 @@ defmodule UserTest do
     user_name = Faker.Lorem.word
     user_pass = ""
     user = %Arangoex.User{user: user_name, passwd: user_pass, active: false}
-    {:ok, user} = User.create(test_endpoint(), user)
+    {:ok, user} = User.create(user) |> arango
 
     extra = %{"foo" => 1, "bar" => 2}    
-    {:ok, updated_user} = User.update(test_endpoint(), user, extra: extra, active: true)
+    {:ok, updated_user} = User.update(user, extra: extra, active: true) |> arango
     assert %User{user: ^user_name, active: true, extra: ^extra} = updated_user
   end
 
@@ -67,35 +67,35 @@ defmodule UserTest do
     user_name = Faker.Lorem.word
     user_pass = ""
     user = %Arangoex.User{user: user_name, passwd: user_pass, active: false}
-    {:ok, user} = User.create(test_endpoint(), user)
+    {:ok, user} = User.create(user) |> arango
 
     extra = %{"foo" => 1, "bar" => 2}    
-    {:ok, replaced_user} = User.replace(test_endpoint(), user, extra: extra, active: true)
+    {:ok, replaced_user} = User.replace(user, extra: extra, active: true) |> arango
     assert %User{user: ^user_name, active: true, extra: ^extra} = replaced_user
   end
 
   test "lists accessible databases", ctx do
-    {:ok, dbs} = User.databases(test_endpoint(), %User{user: "root"})
+    {:ok, dbs} = User.databases(%User{user: "root"}) |> arango
     assert "_system" in Map.keys(dbs)
-    assert ctx.db.name in Map.keys(dbs)
+    assert ctx.db_name in Map.keys(dbs)
 
-    {:ok, _} = User.create(test_endpoint(), %Arangoex.User{user: "johnny"})
-    {:ok, dbs} = User.databases(test_endpoint(), %User{user: "johnny"})
+    {:ok, _} = User.create(%Arangoex.User{user: "johnny"}) |> arango
+    {:ok, dbs} = User.databases(%User{user: "johnny"}) |> arango
     assert dbs == %{}
   end
 
   test "grant and revoke database access", ctx do
     johnny = %User{user: "johnny"}
-    db_name = ctx.db.name
+    db_name = ctx.db_name
     
-    {:ok, _} = User.create(test_endpoint(), johnny)
-    {:ok, dbs} = User.databases(test_endpoint(), johnny)
+    {:ok, _} = User.create(johnny) |> arango
+    {:ok, dbs} = User.databases(johnny) |> arango
     refute db_name in Map.keys(dbs)
     
-    {:ok, _} = User.grant(test_endpoint(), johnny, ctx.db)
-    assert {:ok, %{^db_name => "rw"}} = User.databases(test_endpoint(), johnny)
+    {:ok, _} = User.grant(johnny, db_name) |> arango
+    assert {:ok, %{^db_name => "rw"}} = User.databases(johnny) |> arango
 
-    {:ok, _} = User.revoke(test_endpoint(), johnny, ctx.db)
-    assert {:ok, %{^db_name => "none"}} = User.databases(test_endpoint(), johnny)
+    {:ok, _} = User.revoke(johnny, db_name) |> arango
+    assert {:ok, %{^db_name => "none"}} = User.databases(johnny) |> arango
   end
 end

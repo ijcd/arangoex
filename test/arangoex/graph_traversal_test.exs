@@ -6,23 +6,23 @@ defmodule GraphTraversalTest do
   alias Arangoex.Graph
 
   setup ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "knows_graph", [%Graph.EdgeDefinition{collection: "people", from: ["persons"], to: ["persons"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "knows_graph", "persons", %{_key: "alice", name: "Alice"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "knows_graph", "persons", %{_key: "bob", name: "Bob"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "knows_graph", "persons", %{_key: "charlie", name: "Charlie"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "knows_graph", "persons", %{_key: "dave", name: "Dave"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "knows_graph", "persons", %{_key: "eve", name: "Eve"})
+    {:ok, _} = Graph.create("knows_graph", [%Graph.EdgeDefinition{collection: "people", from: ["persons"], to: ["persons"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("knows_graph", "persons", %{_key: "alice", name: "Alice"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("knows_graph", "persons", %{_key: "bob", name: "Bob"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("knows_graph", "persons", %{_key: "charlie", name: "Charlie"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("knows_graph", "persons", %{_key: "dave", name: "Dave"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("knows_graph", "persons", %{_key: "eve", name: "Eve"}) |> on_db(ctx)
 
     # alice knows bob
     # bob knows charlie
     # bob knows dave
     # eve knows alice
     # eve knows bob
-    Graph.edge_create(ctx.endpoint, "knows_graph", "people", %Graph.Edge{type: "people", from: "persons/alice", to: "persons/bob"})
-    Graph.edge_create(ctx.endpoint, "knows_graph", "people", %Graph.Edge{type: "people", from: "persons/bob", to: "persons/charlie"})
-    Graph.edge_create(ctx.endpoint, "knows_graph", "people", %Graph.Edge{type: "people", from: "persons/bob", to: "persons/dave"})
-    Graph.edge_create(ctx.endpoint, "knows_graph", "people", %Graph.Edge{type: "people", from: "persons/eve", to: "persons/alice"})
-    Graph.edge_create(ctx.endpoint, "knows_graph", "people", %Graph.Edge{type: "people", from: "persons/eve", to: "persons/bob"})
+    Graph.edge_create("knows_graph", "people", %Graph.Edge{type: "people", from: "persons/alice", to: "persons/bob"}) |> on_db(ctx)
+    Graph.edge_create("knows_graph", "people", %Graph.Edge{type: "people", from: "persons/bob", to: "persons/charlie"}) |> on_db(ctx)
+    Graph.edge_create("knows_graph", "people", %Graph.Edge{type: "people", from: "persons/bob", to: "persons/dave"}) |> on_db(ctx)
+    Graph.edge_create("knows_graph", "people", %Graph.Edge{type: "people", from: "persons/eve", to: "persons/alice"}) |> on_db(ctx)
+    Graph.edge_create("knows_graph", "people", %Graph.Edge{type: "people", from: "persons/eve", to: "persons/bob"}) |> on_db(ctx)
   end
 
   test "executes a traversal (Follow only outbound edges)", ctx do
@@ -37,7 +37,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -95,7 +95,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "inbound"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "inbound"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -132,7 +132,7 @@ defmodule GraphTraversalTest do
       }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", uniqueness: %{"vertices" => "none", "edges" => "global"}})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", uniqueness: %{"vertices" => "none", "edges" => "global"}}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -220,7 +220,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", filter: "if (vertex.name === \"Bob\" || vertex.name === \"Charlie\") { return \"exclude\"; } return;" })
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", filter: "if (vertex.name === \"Bob\" || vertex.name === \"Charlie\") { return \"exclude\"; } return;" }) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -260,7 +260,7 @@ defmodule GraphTraversalTest do
       }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", filter: "if (vertex.name === \"Bob\") { return \"prune\"; } return;" })
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", filter: "if (vertex.name === \"Bob\") { return \"prune\"; } return;" }) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -298,7 +298,7 @@ defmodule GraphTraversalTest do
       }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", minDepth: 2})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", minDepth: 2}) |> on_db(ctx)
 
     assert [
       %{"_key" => "charlie", "_id" => "persons/charlie", "name" => "Charlie"},
@@ -343,7 +343,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", maxDepth: 1})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", maxDepth: 1}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -381,7 +381,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", visitor: "result.visited.vertices.push(vertex._id);"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", visitor: "result.visited.vertices.push(vertex._id);"}) |> on_db(ctx)
 
     assert [
       "persons/alice",
@@ -404,7 +404,7 @@ defmodule GraphTraversalTest do
           "myVertices" => visited_vertices,
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", init: "result.visited = 0; result.myVertices = [];", visitor: "result.visited++; result.myVertices.push(vertex);"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "outbound", init: "result.visited = 0; result.myVertices = [];", visitor: "result.visited++; result.myVertices.push(vertex);"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -426,7 +426,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", expander: "var connections = [ ];if (vertex.name === \"Alice\") {config.datasource.getInEdges(vertex).forEach(function (e) {connections.push({ vertex: require(\"internal\").db._document(e._from), edge: e});});}if (vertex.name === \"Eve\") {config.datasource.getOutEdges(vertex).forEach(function (e) {connections.push({vertex: require(\"internal\").db._document(e._to), edge: e});});}return connections;"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", expander: "var connections = [ ];if (vertex.name === \"Alice\") {config.datasource.getInEdges(vertex).forEach(function (e) {connections.push({ vertex: require(\"internal\").db._document(e._from), edge: e});});}if (vertex.name === \"Eve\") {config.datasource.getOutEdges(vertex).forEach(function (e) {connections.push({vertex: require(\"internal\").db._document(e._to), edge: e});});}return connections;"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -476,7 +476,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", strategy: "depthfirst"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", strategy: "depthfirst"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -628,7 +628,7 @@ defmodule GraphTraversalTest do
           }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", order: "postorder"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", order: "postorder"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "charlie", "_id" => "persons/charlie", "name" => "Charlie"},
@@ -780,7 +780,7 @@ defmodule GraphTraversalTest do
       }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", itemOrder: "backward"})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", itemOrder: "backward"}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -932,7 +932,7 @@ defmodule GraphTraversalTest do
       }
         }
       }
-    } = GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", uniqueness: %{"vertices" => "none", "edges" => "global"}})
+    } = GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "persons/alice", graphName: "knows_graph", direction: "any", uniqueness: %{"vertices" => "none", "edges" => "global"}}) |> on_db(ctx)
 
     assert [
       %{"_key" => "alice", "_id" => "persons/alice", "name" => "Alice"},
@@ -1009,14 +1009,14 @@ defmodule GraphTraversalTest do
   end
 
   test "executes a traversal (If the underlying graph is cyclic, maxIterations should be set)", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "cyclic_graph", [%Graph.EdgeDefinition{collection: "cylons", from: ["cylon"], to: ["cylon"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "cyclic_graph", "cylon", %{_key: "alice", name: "Alice"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "cyclic_graph", "cylon", %{_key: "bob", name: "Bob"})
+    {:ok, _} = Graph.create("cyclic_graph", [%Graph.EdgeDefinition{collection: "cylons", from: ["cylon"], to: ["cylon"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("cyclic_graph", "cylon", %{_key: "alice", name: "Alice"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("cyclic_graph", "cylon", %{_key: "bob", name: "Bob"}) |> on_db(ctx)
 
     # alice knows bob
     # bob knows alice
-    Graph.edge_create(ctx.endpoint, "cyclic_graph", "cylons", %Graph.Edge{type: "cylons", from: "cylon/alice", to: "cylon/bob"})
-    Graph.edge_create(ctx.endpoint, "cyclic_graph", "cylons", %Graph.Edge{type: "cylons", from: "cylon/bob", to: "cylon/alice"})
+    Graph.edge_create("cyclic_graph", "cylons", %Graph.Edge{type: "cylons", from: "cylon/alice", to: "cylon/bob"}) |> on_db(ctx)
+    Graph.edge_create("cyclic_graph", "cylons", %Graph.Edge{type: "cylons", from: "cylon/bob", to: "cylon/alice"}) |> on_db(ctx)
 
     assert {
       :error, %{
@@ -1025,6 +1025,6 @@ defmodule GraphTraversalTest do
         "errorNum" => 1909,
         "errorMessage" => "too many iterations - try increasing the value of 'maxIterations'"
       }
-    } == GraphTraversal.traversal(ctx.endpoint, %GraphTraversal.Traversal{startVertex: "cylon/alice", graphName: "cyclic_graph", direction: "any", uniqueness: %{"vertices" => "none", "edges" => "none"}, maxIterations: 5})
+    } == GraphTraversal.traversal(%GraphTraversal.Traversal{startVertex: "cylon/alice", graphName: "cyclic_graph", direction: "any", uniqueness: %{"vertices" => "none", "edges" => "none"}, maxIterations: 5}) |> on_db(ctx)
   end
 end

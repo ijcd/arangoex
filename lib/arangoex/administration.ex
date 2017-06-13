@@ -1,7 +1,7 @@
 defmodule Arangoex.Administration do
   @moduledoc "ArangoDB Administration methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
   alias Arangoex.Utils
 
   @doc """
@@ -9,11 +9,13 @@ defmodule Arangoex.Administration do
 
   GET /_admin/database/target-version
   """
-  @spec database_version(Endpoint.t) :: Arangoex.ok_error(map)
-  def database_version(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/database/target-version")
+  @spec database_version() :: Arangoex.ok_error(map)
+  def database_version() do
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/database/target-version"
+    }
   end
 
   @doc """
@@ -21,14 +23,17 @@ defmodule Arangoex.Administration do
 
   GET /_admin/echo
   """
-  @spec echo(Endpoint.t) :: Arangoex.ok_error(map)
-  def echo(endpoint, query_opts \\ [], header_opts \\ []) do
+  @spec echo(keyword, keyword) :: Arangoex.ok_error(map)
+  def echo(query_opts \\ [], header_opts \\ []) do
     headers = Utils.opts_to_headers(header_opts, [:*])
     query = Utils.opts_to_query(query_opts, [:*])
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/echo#{query}", headers)
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      headers: headers,
+      path: "/_admin/echo#{query}"
+    }
   end
 
   @doc """
@@ -36,13 +41,17 @@ defmodule Arangoex.Administration do
 
   POST /_admin/execute
   """
-  @spec execute(Endpoint.t, String.t, keyword) :: Arangoex.ok_error(map)
-  def execute(endpoint, code, opts \\ []) do
+  @spec execute(String.t, keyword) :: Arangoex.ok_error(map)
+  def execute(code, opts \\ []) do
     query = Utils.opts_to_query(opts, [:returnAsJson])
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.post_raw("/_admin/execute#{query}", code)
+    %Request{
+      endpoint: :administration,
+      http_method: :post,
+      body: code,
+      path: "/_admin/execute#{query}",
+      encode_body: false
+    }
   end
 
   @doc """
@@ -50,13 +59,15 @@ defmodule Arangoex.Administration do
 
   GET /_admin/log
   """
-  @spec log(Endpoint.t) :: Arangoex.ok_error(map)
-  def log(endpoint, opts \\ []) do
+  @spec log() :: Arangoex.ok_error(map)
+  def log(opts \\ []) do
     query = Utils.opts_to_query(opts, [:upto, :level, :start, :size, :offset, :search, :sort])
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/log#{query}")
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/log#{query}"
+    }
   end
 
   @doc """
@@ -64,14 +75,17 @@ defmodule Arangoex.Administration do
 
   GET /_admin/long_echo
   """
-  @spec long_echo(Endpoint.t) :: Arangoex.ok_error(map)
-  def long_echo(endpoint, query_opts \\ [], header_opts \\ []) do
+  @spec long_echo() :: Arangoex.ok_error(map)
+  def long_echo(query_opts \\ [], header_opts \\ []) do
     headers = Utils.opts_to_headers(header_opts, [:*])
     query = Utils.opts_to_query(query_opts, [:*])
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/long_echo#{query}", headers)
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      headers: headers,
+      path: "/_admin/long_echo#{query}"
+    }
   end
 
   @doc """
@@ -79,11 +93,13 @@ defmodule Arangoex.Administration do
 
   POST /_admin/routing/reload
   """
-  @spec reload_routing(Endpoint.t) :: Arangoex.ok_error(map)
-  def reload_routing(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.post("/_admin/routing/reload")
+  @spec reload_routing() :: Arangoex.ok_error(map)
+  def reload_routing() do
+    %Request{
+      endpoint: :administration,
+      http_method: :post,
+      path: "/_admin/routing/reload"
+    }
   end
 
   @doc """
@@ -91,11 +107,13 @@ defmodule Arangoex.Administration do
 
   GET /_admin/server/id
   """
-  @spec server_id(Endpoint.t) :: Arangoex.ok_error(map)
-  def server_id(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/server/id")
+  @spec server_id() :: Arangoex.ok_error(map)
+  def server_id() do
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/server/id"
+    }
   end
 
   @doc """
@@ -103,11 +121,13 @@ defmodule Arangoex.Administration do
 
   GET /_admin/server/role
   """
-  @spec server_role(Endpoint.t) :: Arangoex.ok_error(map)
-  def server_role(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/server/role")
+  @spec server_role() :: Arangoex.ok_error(map)
+  def server_role() do
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/server/role"
+    }
   end
 
   @doc """
@@ -115,11 +135,13 @@ defmodule Arangoex.Administration do
 
   DELETE /_admin/shutdown
   """
-  @spec shutdown(Endpoint.t) :: Arangoex.ok_error(map)
-  def shutdown(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.delete("/_admin/shutdown")
+  @spec shutdown() :: Arangoex.ok_error(map)
+  def shutdown() do
+    %Request{
+      endpoint: :administration,
+      http_method: :delete,
+      path: "/_admin/shutdown"
+    }
   end
 
   @doc """
@@ -127,13 +149,15 @@ defmodule Arangoex.Administration do
 
   GET /_admin/sleep
   """
-  @spec sleep(Endpoint.t, keyword) :: Arangoex.ok_error(map)
-  def sleep(endpoint, opts \\ []) do
+  @spec sleep(keyword) :: Arangoex.ok_error(map)
+  def sleep(opts \\ []) do
     query = Utils.opts_to_query(opts, [:duration])
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/sleep#{query}")
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/sleep#{query}"
+    }
   end
 
   @doc """
@@ -141,11 +165,13 @@ defmodule Arangoex.Administration do
 
   GET /_admin/statistics
   """
-  @spec statistics(Endpoint.t) :: Arangoex.ok_error(map)
-  def statistics(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/statistics")
+  @spec statistics() :: Arangoex.ok_error(map)
+  def statistics() do
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/statistics"
+    }
   end
 
   @doc """
@@ -153,11 +179,13 @@ defmodule Arangoex.Administration do
 
   GET /_admin/statistics-description
   """
-  @spec statistics_description(Endpoint.t) :: Arangoex.ok_error(map)
-  def statistics_description(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/statistics-description")
+  @spec statistics_description() :: Arangoex.ok_error(map)
+  def statistics_description() do
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/statistics-description"
+    }
   end
 
   @doc """
@@ -165,11 +193,13 @@ defmodule Arangoex.Administration do
 
   POST /_admin/test
   """
-  @spec test(Endpoint.t) :: Arangoex.ok_error(map)
-  def test(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.post("/_admin/test")
+  @spec test() :: Arangoex.ok_error(map)
+  def test() do
+    %Request{
+      endpoint: :administration,
+      http_method: :post,
+      path: "/_admin/test"
+    }
   end
 
   @doc """
@@ -177,11 +207,13 @@ defmodule Arangoex.Administration do
 
   GET /_admin/time
   """
-  @spec time(Endpoint.t) :: Arangoex.ok_error(map)
-  def time(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/time")
+  @spec time() :: Arangoex.ok_error(map)
+  def time() do
+    %Request{
+      endpoint: :administration,
+      http_method: :get,
+      path: "/_admin/time"
+    }
   end
 
   @doc """
@@ -189,11 +221,14 @@ defmodule Arangoex.Administration do
 
   GET /_api/endpoint
   """
-  @spec endpoints(Endpoint.t) :: Arangoex.ok_error(map)
-  def endpoints(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("endpoint")
+  @spec endpoints() :: Arangoex.ok_error(map)
+  def endpoints() do
+    %Request{
+      endpoint: :administration,
+      system_only: true,           # or just /_api? Same thing?
+      http_method: :get,
+      path: "endpoint"
+    }
   end
 
   @doc """
@@ -201,10 +236,13 @@ defmodule Arangoex.Administration do
 
   GET /_api/version
   """
-  @spec version(Endpoint.t) :: Arangoex.ok_error(map)
-  def version(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("version")
+  @spec version() :: Arangoex.ok_error(map)
+  def version() do
+    %Request{
+      endpoint: :administration,
+      system_only: true,           # or just /_api? Same thing?
+      http_method: :get,
+      path: "version"
+    }
   end
 end

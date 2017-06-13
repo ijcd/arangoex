@@ -10,16 +10,15 @@ defmodule GraphTest do
         "code" => 200,
         "error" => false,
         "graphs" => []}
-    } = Graph.graphs(ctx.endpoint)
+    } = Graph.graphs() |> on_db(ctx)
   end
 
   test "Create a graph", ctx do
     graph = Graph.create(
-      ctx.endpoint,
       "foobar",
       [%Graph.EdgeDefinition{collection: "edges", from: ["startVertices"], to: ["endVertices"]}],
       ["orphans1", "orphans2"]
-    )
+    ) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -43,7 +42,7 @@ defmodule GraphTest do
   end
 
   test "Drop a graph", ctx do
-    Graph.create(ctx.endpoint, "toDrop")
+    Graph.create("toDrop") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -51,7 +50,7 @@ defmodule GraphTest do
         "error" => false,
         "removed" => true
       }
-    } = Graph.drop(ctx.endpoint, "toDrop")
+    } = Graph.drop("toDrop") |> on_db(ctx)
 
     assert {
       :error, %{
@@ -60,11 +59,11 @@ defmodule GraphTest do
         "errorMessage" => "graph not found",
         "errorNum" => 1924
       }
-    } = Graph.drop(ctx.endpoint, "doesNotExist")
+    } = Graph.drop("doesNotExist") |> on_db(ctx)
   end
 
   test "Get a graph", ctx do
-    Graph.create(ctx.endpoint, "toGet")
+    Graph.create("toGet") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -78,7 +77,7 @@ defmodule GraphTest do
           "orphanCollections" => []
         }
       }
-    } = Graph.graph(ctx.endpoint, "toGet")
+    } = Graph.graph("toGet") |> on_db(ctx)
 
     assert {
       :error, %{
@@ -87,19 +86,18 @@ defmodule GraphTest do
         "errorMessage" => "graph not found",
         "errorNum" => 1924
       }
-    } = Graph.graph(ctx.endpoint, "doesNotExist")
+    } = Graph.graph("doesNotExist") |> on_db(ctx)
   end
 
   test "List edge definitions", ctx do
     Graph.create(
-      ctx.endpoint,
       "foobar",
       [
         %Graph.EdgeDefinition{collection: "foos", from: ["fooFrom"], to: ["fooTo"]},
         %Graph.EdgeDefinition{collection: "bars", from: ["barFrom"], to: ["barTo"]},
         %Graph.EdgeDefinition{collection: "bangs", from: ["bangFrom"], to: ["bangTo"]},
       ]
-    )
+    ) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -107,11 +105,11 @@ defmodule GraphTest do
         "collections" => ["bangs", "bars", "foos"],
         "error" => false
        }
-    } = Graph.edges(ctx.endpoint, "foobar")
+    } = Graph.edges("foobar") |> on_db(ctx)
   end
 
   test "Add edge definition", ctx do
-    Graph.create(ctx.endpoint, "foobar")
+    Graph.create("foobar") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -119,7 +117,7 @@ defmodule GraphTest do
         "collections" => [],
         "error" => false
        }
-    } = Graph.edges(ctx.endpoint, "foobar")
+    } = Graph.edges("foobar") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -135,13 +133,13 @@ defmodule GraphTest do
           ]
         }
       }
-    } = Graph.extend_edge_definintions(ctx.endpoint, "foobar", %Graph.EdgeDefinition{collection: "bangs", from: ["bangFrom"], to: ["bangTo"]})
+    } = Graph.extend_edge_definintions("foobar", %Graph.EdgeDefinition{collection: "bangs", from: ["bangFrom"], to: ["bangTo"]}) |> on_db(ctx)
   end
 
   test "Create an edge", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
+    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "males", %{_key: "Glenn", name: "Glenn"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Maria", name: "Maria"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -153,13 +151,13 @@ defmodule GraphTest do
           "_rev" => _,
         },
       }
-    } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"})
+    } = Graph.edge_create("social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"}) |> on_db(ctx)
   end
 
   test "Remove an edge", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
+    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "males", %{_key: "Glenn", name: "Glenn"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Maria", name: "Maria"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -169,7 +167,7 @@ defmodule GraphTest do
           "_key" => edge_key
         }
       }
-    } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"})
+    } = Graph.edge_create("social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -177,14 +175,14 @@ defmodule GraphTest do
         "error" => false,
         "removed" => true
       }
-    } = Graph.edge_delete(ctx.endpoint, "social", "friends", edge_key)
+    } = Graph.edge_delete("social", "friends", edge_key) |> on_db(ctx)
   end
 
   test "Get an edge", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Nancy", name: "Nancy"})
+    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "males", %{_key: "Glenn", name: "Glenn"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Maria", name: "Maria"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Nancy", name: "Nancy"}) |> on_db(ctx)
 
     # create an edge with extra data
     assert {
@@ -195,7 +193,7 @@ defmodule GraphTest do
           "_key" => edge_key
         }
       }
-    } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"})
+    } = Graph.edge_create("social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -208,7 +206,7 @@ defmodule GraphTest do
           "type" => "friends"
         },
       }
-    } = Graph.edge(ctx.endpoint, "social", "friends", edge_key)
+    } = Graph.edge("social", "friends", edge_key) |> on_db(ctx)
 
     # create an edge with extra data
     assert {
@@ -219,7 +217,7 @@ defmodule GraphTest do
           "_key" => edge_key
         }
       }
-    } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Nancy", data: %{random: "string"}})
+    } = Graph.edge_create("social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Nancy", data: %{random: "string"}}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -233,13 +231,13 @@ defmodule GraphTest do
           "random" => "string"
         },
       }
-    } = Graph.edge(ctx.endpoint, "social", "friends", edge_key)
+    } = Graph.edge("social", "friends", edge_key) |> on_db(ctx)
   end
 
   test "Modify an edge", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
+    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "males", %{_key: "Glenn", name: "Glenn"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Maria", name: "Maria"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -249,7 +247,7 @@ defmodule GraphTest do
           "_key" => edge_key
         }
       }
-    } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria", data: %{since: "when"}})
+    } = Graph.edge_create("social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria", data: %{since: "when"}}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -262,7 +260,7 @@ defmodule GraphTest do
           "_rev" => _,
         },
       }
-    } = Graph.edge_update(ctx.endpoint, "social", "friends", edge_key, %{"since" => "then"})
+    } = Graph.edge_update("social", "friends", edge_key, %{"since" => "then"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -276,14 +274,14 @@ defmodule GraphTest do
           "since" => "then"
         },
       }
-    } = Graph.edge(ctx.endpoint, "social", "friends", edge_key)
+    } = Graph.edge("social", "friends", edge_key) |> on_db(ctx)
   end
 
   test "Replace an edge", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "males", %{_key: "Glenn", name: "Glenn"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Maria", name: "Maria"})
-    {:ok, _} = Graph.vertex_create(ctx.endpoint, "social", "females", %{_key: "Nancy", name: "Nancy"})
+    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "males", %{_key: "Glenn", name: "Glenn"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Maria", name: "Maria"}) |> on_db(ctx)
+    {:ok, _} = Graph.vertex_create("social", "females", %{_key: "Nancy", name: "Nancy"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -293,7 +291,7 @@ defmodule GraphTest do
           "_key" => edge_key
         }
       }
-    } = Graph.edge_create(ctx.endpoint, "social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria", data: %{since: "when"}})
+    } = Graph.edge_create("social", "friends", %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Maria", data: %{since: "when"}}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -303,7 +301,7 @@ defmodule GraphTest do
           "_key" => ^edge_key
         }
       }
-    } = Graph.edge_replace(ctx.endpoint, "social", "friends", edge_key, %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Nancy", data: %{after: "tomorrow"}})
+    } = Graph.edge_replace("social", "friends", edge_key, %Graph.Edge{type: "friends", from: "males/Glenn", to: "females/Nancy", data: %{after: "tomorrow"}}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -317,11 +315,11 @@ defmodule GraphTest do
           "after" => "tomorrow"
         },
       }
-    } = Graph.edge(ctx.endpoint, "social", "friends", edge_key)
+    } = Graph.edge("social", "friends", edge_key) |> on_db(ctx)
   end
 
   test "Remove an edge definition from the graph", ctx do
-    Graph.create(ctx.endpoint, "foobar", [%Graph.EdgeDefinition{collection: "edges", from: ["startVertices"], to: ["endVertices"]}], ["orphans1", "orphans2"])
+    Graph.create("foobar", [%Graph.EdgeDefinition{collection: "edges", from: ["startVertices"], to: ["endVertices"]}], ["orphans1", "orphans2"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -341,7 +339,7 @@ defmodule GraphTest do
           ]
         }
       }
-    } = Graph.graph(ctx.endpoint, "foobar")
+    } = Graph.graph("foobar") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -355,11 +353,11 @@ defmodule GraphTest do
           "edgeDefinitions" => [],
         }
       }
-    } = Graph.edge_definition_delete(ctx.endpoint, "foobar", "edges")
+    } = Graph.edge_definition_delete("foobar", "edges") |> on_db(ctx)
   end
 
   test "Replace an edge definition", ctx do
-    Graph.create(ctx.endpoint, "foobar", [%Graph.EdgeDefinition{collection: "edges", from: ["startVertices"], to: ["endVertices"]}], ["orphans1", "orphans2"])
+    Graph.create("foobar", [%Graph.EdgeDefinition{collection: "edges", from: ["startVertices"], to: ["endVertices"]}], ["orphans1", "orphans2"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -379,7 +377,7 @@ defmodule GraphTest do
           ]
         }
       }
-    } = Graph.graph(ctx.endpoint, "foobar")
+    } = Graph.graph("foobar") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -399,11 +397,11 @@ defmodule GraphTest do
           ],
         }
       }
-    } = Graph.edge_definition_replace(ctx.endpoint, "foobar", "edges", %Graph.EdgeDefinition{collection: "edges", from: ["newStartVertices"], to: ["newEndVertices"]})
+    } = Graph.edge_definition_replace("foobar", "edges", %Graph.EdgeDefinition{collection: "edges", from: ["newStartVertices"], to: ["newEndVertices"]}) |> on_db(ctx)
   end
 
   test "List vertex collections", ctx do
-    Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}])
+    Graph.create("social", [%Graph.EdgeDefinition{collection: "friends", from: ["females", "males"], to: ["females", "males"]}]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -411,12 +409,12 @@ defmodule GraphTest do
         "error" => false,
         "collections" => ["females", "males"]
       }
-    } = Graph.vertex_collections(ctx.endpoint, "social")
+    } = Graph.vertex_collections("social") |> on_db(ctx)
   end
 
 
   test "Add vertex collection", ctx do
-    Graph.create(ctx.endpoint, "social", [])
+    Graph.create("social", []) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -424,7 +422,7 @@ defmodule GraphTest do
         "error" => false,
         "collections" => []
       }
-    } = Graph.vertex_collections(ctx.endpoint, "social")
+    } = Graph.vertex_collections("social") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -434,7 +432,7 @@ defmodule GraphTest do
           "orphanCollections" => ["cats"]
         }
       }
-    } = Graph.vertex_collection_create(ctx.endpoint, "social", %Graph.VertexCollection{collection: "cats"})
+    } = Graph.vertex_collection_create("social", %Graph.VertexCollection{collection: "cats"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -442,11 +440,11 @@ defmodule GraphTest do
         "error" => false,
         "collections" => ["cats"]
       }
-    } = Graph.vertex_collections(ctx.endpoint, "social")
+    } = Graph.vertex_collections("social") |> on_db(ctx)
   end
 
   test "Remove vertex collection", ctx do
-    Graph.create(ctx.endpoint, "social", [], ["cats", "dogs"])
+    Graph.create("social", [], ["cats", "dogs"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -454,7 +452,7 @@ defmodule GraphTest do
         "error" => false,
         "collections" => ["cats", "dogs"]
       }
-    } = Graph.vertex_collections(ctx.endpoint, "social")
+    } = Graph.vertex_collections("social") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -464,29 +462,29 @@ defmodule GraphTest do
           "orphanCollections" => ["cats"]
         }
       }
-    } = Graph.vertex_collection_delete(ctx.endpoint, "social", "dogs")
+    } = Graph.vertex_collection_delete("social", "dogs") |> on_db(ctx)
   end
 
   test "Create a vertex", ctx do
-    Graph.create(ctx.endpoint, "social", [], ["cats", "dogs"])
+    Graph.create("social", [], ["cats", "dogs"]) |> on_db(ctx)
 
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
       }
-    } = Graph.vertex_create(ctx.endpoint, "social", "dogs", %{name: "meowington", size: "medium"})
+    } = Graph.vertex_create("social", "dogs", %{name: "meowington", size: "medium"}) |> on_db(ctx)
   end
 
   test "Remove a vertex", ctx do
-    Graph.create(ctx.endpoint, "social", [], ["cats", "dogs"])
+    Graph.create("social", [], ["cats", "dogs"]) |> on_db(ctx)
 
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
       }
-    } = Graph.vertex_create(ctx.endpoint, "social", "dogs", %{_key: "mton", name: "meowington", size: "medium"})
+    } = Graph.vertex_create("social", "dogs", %{_key: "mton", name: "meowington", size: "medium"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -494,18 +492,18 @@ defmodule GraphTest do
         "error" => false,
         "removed" => true,
       }
-    } = Graph.vertex_delete(ctx.endpoint, "social", "dogs", "mton")
+    } = Graph.vertex_delete("social", "dogs", "mton") |> on_db(ctx)
   end
 
   test "Get a vertex", ctx do
-    Graph.create(ctx.endpoint, "social", [], ["cats", "dogs"])
+    Graph.create("social", [], ["cats", "dogs"]) |> on_db(ctx)
 
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
       }
-    } = Graph.vertex_create(ctx.endpoint, "social", "dogs", %{_key: "mton", name: "meowington", size: "medium"})
+    } = Graph.vertex_create("social", "dogs", %{_key: "mton", name: "meowington", size: "medium"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -519,25 +517,25 @@ defmodule GraphTest do
           "size" => "medium"
         }
       }
-    } = Graph.vertex(ctx.endpoint, "social", "dogs", "mton")
+    } = Graph.vertex("social", "dogs", "mton") |> on_db(ctx)
   end
 
   test "Modify a vertex", ctx do
-    Graph.create(ctx.endpoint, "social", [], ["cats", "dogs"])
+    Graph.create("social", [], ["cats", "dogs"]) |> on_db(ctx)
 
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
       }
-    } = Graph.vertex_create(ctx.endpoint, "social", "dogs", %{_key: "mton", name: "meowington", size: "medium"})
+    } = Graph.vertex_create("social", "dogs", %{_key: "mton", name: "meowington", size: "medium"}) |> on_db(ctx)
 
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
       }
-    } = Graph.vertex_update(ctx.endpoint, "social", "dogs", "mton", %{age: 9})
+    } = Graph.vertex_update("social", "dogs", "mton", %{age: 9}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -552,18 +550,18 @@ defmodule GraphTest do
           "age" => 9,
         }
       }
-    } = Graph.vertex(ctx.endpoint, "social", "dogs", "mton")
+    } = Graph.vertex("social", "dogs", "mton") |> on_db(ctx)
   end
 
   test "Replace a vertex", ctx do
-    Graph.create(ctx.endpoint, "social", [], ["cats", "dogs"])
+    Graph.create("social", [], ["cats", "dogs"]) |> on_db(ctx)
 
     assert {
       :ok, %{
         "code" => 202,
         "error" => false,
       }
-    } = Graph.vertex_create(ctx.endpoint, "social", "dogs", %{_key: "mton", name: "meowington", size: "medium"})
+    } = Graph.vertex_create("social", "dogs", %{_key: "mton", name: "meowington", size: "medium"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -573,7 +571,7 @@ defmodule GraphTest do
           "_key" => "mton",
         }
       }
-    } = Graph.vertex_replace(ctx.endpoint, "social", "dogs", "mton", %{age: 9})
+    } = Graph.vertex_replace("social", "dogs", "mton", %{age: 9}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -586,7 +584,7 @@ defmodule GraphTest do
           "age" => 9,
         }
       }
-    } = Graph.vertex(ctx.endpoint, "social", "dogs", "mton")
+    } = Graph.vertex("social", "dogs", "mton") |> on_db(ctx)
 
     refute Map.has_key?(mton, "name")
     refute Map.has_key?(mton, "size")

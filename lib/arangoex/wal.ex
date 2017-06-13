@@ -1,7 +1,7 @@
 defmodule Arangoex.Wal do
   @moduledoc "ArangoDB Wal methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
   alias Arangoex.Utils
 
   defstruct [
@@ -30,13 +30,17 @@ defmodule Arangoex.Wal do
 
   PUT /_admin/wal/flush
   """
-  @spec flush(Endpoint.t, keyword) :: Arangoex.ok_error(map)
-  def flush(endpoint, opts \\ []) do
+  @spec flush(keyword) :: Arangoex.ok_error(map)
+  def flush(opts \\ []) do
     flush_opts = Utils.opts_to_vars(opts, [:waitForSync, :waitForCollector])
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.put("/_admin/wal/flush", flush_opts)
+    %Request{
+      endpoint: :wal,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :put,
+      path: "/_admin/wal/flush",
+      body: flush_opts,
+    }
   end
 
   @doc """
@@ -44,12 +48,15 @@ defmodule Arangoex.Wal do
 
   GET /_admin/wal/properties
   """
-  @spec properties(Endpoint.t) :: Arangoex.ok_error(t)
-  def properties(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/wal/properties")
-    |> to_wal
+  @spec properties() :: Arangoex.ok_error(t)
+  def properties() do
+    %Request{
+      endpoint: :wal,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "/_admin/wal/properties",
+      ok_decoder: __MODULE__.WalDecoder,
+    }
   end
 
   @doc """
@@ -57,16 +64,20 @@ defmodule Arangoex.Wal do
 
   PUT /_admin/wal/properties
   """
-  @spec set_properties(Endpoint.t, t | keyword) :: Arangoex.ok_error(t)
-  def set_properties(endpoint, %__MODULE__{} = properties), do: set_properties(endpoint, properties |> Map.from_struct |> Enum.into([]))
-  def set_properties(endpoint, properties) do
+  @spec set_properties(t | keyword) :: Arangoex.ok_error(t)
+  def set_properties(%__MODULE__{} = properties), do: set_properties(properties |> Map.from_struct |> Enum.into([]))
+  def set_properties(properties) do
     defaults = %__MODULE__{} |> Map.from_struct |> Map.keys
     wal_properties = Utils.opts_to_vars(properties, defaults)
 
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.put("/_admin/wal/properties", wal_properties)
-    |> to_wal
+    %Request{
+      endpoint: :wal,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :put,
+      path: "/_admin/wal/properties",
+      body: wal_properties,
+      ok_decoder: __MODULE__.WalDecoder,
+    }
   end
 
   @doc """
@@ -74,14 +85,20 @@ defmodule Arangoex.Wal do
 
   GET /_admin/wal/transactions
   """
-  @spec transactions(Endpoint.t) :: Arangoex.ok_error(map)
-  def transactions(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("/_admin/wal/transactions")
+  @spec transactions() :: Arangoex.ok_error(map)
+  def transactions() do
+    %Request{
+      endpoint: :wal,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "/_admin/wal/transactions",
+    }
   end
 
-  @spec to_wal(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
-  defp to_wal({:ok, result}), do: {:ok, new(result)}
-  defp to_wal({:error, _} = e), do: e
+  defmodule WalDecoder do
+    alias Arangoex.Wal
+
+    @spec decode_ok(Map.t) :: Arangoex.ok_error(Wal.t)
+    def decode_ok(result), do: {:ok, Wal.new(result)}
+  end
 end

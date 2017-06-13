@@ -1,7 +1,7 @@
 defmodule Arangoex.GraphTraversal do
   @moduledoc "ArangoDB Traversal methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
 
   defmodule Traversal do
     @moduledoc false
@@ -130,9 +130,13 @@ defmodule Arangoex.GraphTraversal do
 
   POST /_api/traversal
   """
-  @spec traversal(Endpoint.t, Traversal.t) :: Arangoex.ok_error(map)
-  def traversal(endpoint, traversal) do
-    endpoint
-    |> Endpoint.post("/traversal", traversal)
+  @spec traversal(Traversal.t) :: Arangoex.ok_error(map)
+  def traversal(traversal) do
+    %Request{
+      endpoint: :graph_traversal,
+      http_method: :post,
+      path: "traversal",
+      body: traversal
+    }
   end
 end

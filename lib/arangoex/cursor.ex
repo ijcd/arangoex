@@ -1,7 +1,7 @@
 defmodule Arangoex.Cursor do
   @moduledoc "ArangoDB Cursor methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
 
   defmodule Cursor do
     @moduledoc false
@@ -112,8 +112,8 @@ defmodule Arangoex.Cursor do
   #
   # POST /_api/cursor
   # """
-  @spec cursor_create(Endpoint.t, Cursor.t) :: Arangoex.ok_error(map)
-  def cursor_create(endpoint, cursor) do
+  @spec cursor_create(Cursor.t) :: Arangoex.ok_error(map)
+  def cursor_create(cursor) do
     query = Map.get(cursor, :query)
     bind_vars = Map.get(cursor, :bind_vars)
     count = Map.get(cursor, :count)
@@ -139,8 +139,12 @@ defmodule Arangoex.Cursor do
       top_level
       |> Map.merge(if Enum.any?(options), do: %{"options" => options}, else: %{})
 
-    endpoint
-    |> Endpoint.post("cursor", cursor_request)
+    %Request{
+      endpoint: :cursor,
+      http_method: :post,
+      path: "cursor",
+      body: cursor_request
+    }
   end
 
   # @doc """
@@ -148,10 +152,13 @@ defmodule Arangoex.Cursor do
 
   # DELETE /_api/cursor/{cursor-identifier}
   # """
-  @spec cursor_delete(Endpoint.t, Cursor.t) :: Arangoex.ok_error(map)
-  def cursor_delete(endpoint, cursor_id) do
-    endpoint
-    |> Endpoint.delete("cursor/#{cursor_id}")
+  @spec cursor_delete(Cursor.t) :: Arangoex.ok_error(map)
+  def cursor_delete(cursor_id) do
+    %Request{
+      endpoint: :cursor,
+      http_method: :delete,
+      path: "cursor/#{cursor_id}"
+    }
   end
 
   # @doc """
@@ -159,9 +166,12 @@ defmodule Arangoex.Cursor do
 
   # PUT /_api/cursor/{cursor-identifier}
   # """
-  @spec cursor_next(Endpoint.t, Cursor.t) :: Arangoex.ok_error(map)
-  def cursor_next(endpoint, cursor_id) do
-    endpoint
-    |> Endpoint.put("cursor/#{cursor_id}")
+  @spec cursor_next(Cursor.t) :: Arangoex.ok_error(map)
+  def cursor_next(cursor_id) do
+    %Request{
+      endpoint: :cursor,
+      http_method: :put,
+      path: "cursor/#{cursor_id}"
+    }
   end
 end

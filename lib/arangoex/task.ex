@@ -1,7 +1,7 @@
 defmodule Arangoex.Task do
   @moduledoc "ArangoDB Administration methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
 
   defstruct [
     :name,
@@ -34,11 +34,15 @@ defmodule Arangoex.Task do
 
   POST /_api/tasks
   """
-  @spec create(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def create(endpoint, task) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.post("tasks", task)
+  @spec create(t) :: Arangoex.ok_error(map)
+  def create(task) do
+    %Request{
+      endpoint: :task,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :post,
+      path: "tasks",
+      body: task
+    }
   end
 
   @doc """
@@ -46,11 +50,14 @@ defmodule Arangoex.Task do
 
   GET /_api/tasks
   """
-  @spec tasks(Endpoint.t) :: Arangoex.ok_error(map)
-  def tasks(endpoint) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("tasks")
+  @spec tasks() :: Arangoex.ok_error(map)
+  def tasks() do
+    %Request{
+      endpoint: :task,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "tasks",
+    }
   end
 
   @doc """
@@ -58,11 +65,14 @@ defmodule Arangoex.Task do
 
   DELETE /_api/tasks/{id}
   """
-  @spec delete(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def delete(endpoint, task_id) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.delete("tasks/#{task_id}")
+  @spec delete(String.t) :: Arangoex.ok_error(map)
+  def delete(task_id) do
+    %Request{
+      endpoint: :task,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :delete,
+      path: "tasks/#{task_id}",
+    }
   end
 
   @doc """
@@ -70,11 +80,14 @@ defmodule Arangoex.Task do
 
   GET /_api/tasks/{id}
   """
-  @spec task(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def task(endpoint, task_id) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.get("tasks/#{task_id}")
+  @spec task(String.t) :: Arangoex.ok_error(map)
+  def task(task_id) do
+    %Request{
+      endpoint: :task,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "tasks/#{task_id}",
+    }
   end
 
   @doc """
@@ -82,10 +95,14 @@ defmodule Arangoex.Task do
 
   PUT /_api/tasks/{id}
   """
-  @spec create_with_id(Endpoint.t, String.t, Task.t) :: Arangoex.ok_error(map)
-  def create_with_id(endpoint, task_id, task) do
-    endpoint
-    |> Endpoint.with_db("_system")
-    |> Endpoint.put("tasks/#{task_id}", task)
+  @spec create_with_id(String.t, Task.t) :: Arangoex.ok_error(map)
+  def create_with_id(task_id, task) do
+    %Request{
+      endpoint: :task,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :put,
+      path: "tasks/#{task_id}",
+      body: task,
+    }
   end
 end

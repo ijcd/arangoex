@@ -6,22 +6,22 @@ defmodule GraphEdgeTest do
   alias Arangoex.GraphEdge
 
   test "Read in or outbound edges", ctx do
-    {:ok, _} = Graph.create(ctx.endpoint, "social", [%Graph.EdgeDefinition{collection: "people", from: ["person"], to: ["person"]}])
-    {:ok, %{"vertex" => %{"_id" => amy_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Amy", name: "Amy"})
-    {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Brad", name: "Brad"})
-    {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Cindy", name: "Cindy"})
-    {:ok, %{"vertex" => %{"_id" => derek_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Derek", name: "Derek"})
-    {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Erin", name: "Erin"})
-    {:ok, %{"vertex" => %{"_id" => fred_id}}} = Graph.vertex_create(ctx.endpoint, "social", "person", %{_key: "Fred", name: "Fred"})
+    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "people", from: ["person"], to: ["person"]}]) |> on_db(ctx)
+    {:ok, %{"vertex" => %{"_id" => amy_id}}} = Graph.vertex_create("social", "person", %{_key: "Amy", name: "Amy"}) |> on_db(ctx)
+    {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create("social", "person", %{_key: "Brad", name: "Brad"}) |> on_db(ctx)
+    {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create("social", "person", %{_key: "Cindy", name: "Cindy"}) |> on_db(ctx)
+    {:ok, %{"vertex" => %{"_id" => derek_id}}} = Graph.vertex_create("social", "person", %{_key: "Derek", name: "Derek"}) |> on_db(ctx)
+    {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create("social", "person", %{_key: "Erin", name: "Erin"}) |> on_db(ctx)
+    {:ok, %{"vertex" => %{"_id" => fred_id}}} = Graph.vertex_create("social", "person", %{_key: "Fred", name: "Fred"}) |> on_db(ctx)
 
     # (amy, brad, cindy) -> derek
-    Graph.edge_create(ctx.endpoint, "social", "people", %Graph.Edge{type: "people", from: "person/Amy", to: "person/Derek"})
-    Graph.edge_create(ctx.endpoint, "social", "people", %Graph.Edge{type: "people", from: "person/Brad", to: "person/Derek"})
-    Graph.edge_create(ctx.endpoint, "social", "people", %Graph.Edge{type: "people", from: "person/Cindy", to: "person/Derek"})
+    Graph.edge_create("social", "people", %Graph.Edge{type: "people", from: "person/Amy", to: "person/Derek"}) |> on_db(ctx)
+    Graph.edge_create("social", "people", %Graph.Edge{type: "people", from: "person/Brad", to: "person/Derek"}) |> on_db(ctx)
+    Graph.edge_create("social", "people", %Graph.Edge{type: "people", from: "person/Cindy", to: "person/Derek"}) |> on_db(ctx)
 
     # derek -> (erin, fred)
-    Graph.edge_create(ctx.endpoint, "social", "people", %Graph.Edge{type: "people", from: "person/Derek", to: "person/Erin"})
-    Graph.edge_create(ctx.endpoint, "social", "people", %Graph.Edge{type: "people", from: "person/Derek", to: "person/Fred"})
+    Graph.edge_create("social", "people", %Graph.Edge{type: "people", from: "person/Derek", to: "person/Erin"}) |> on_db(ctx)
+    Graph.edge_create("social", "people", %Graph.Edge{type: "people", from: "person/Derek", to: "person/Fred"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -30,7 +30,7 @@ defmodule GraphEdgeTest do
         "stats" => %{"filtered" => 0, "scannedIndex" => 3},
         "edges" => edges
       }
-    } = GraphEdge.edges(ctx.endpoint, "people", derek_id, "in")
+    } = GraphEdge.edges("people", derek_id, "in") |> on_db(ctx)
     assert [
       %{"_from" => "person/Amy", "_to" => "person/Derek", "type" => "people"},
       %{"_from" => "person/Brad", "_to" => "person/Derek", "type" => "people"},
@@ -44,7 +44,7 @@ defmodule GraphEdgeTest do
         "stats" => %{"filtered" => 0, "scannedIndex" => 2},
         "edges" => edges,
       }
-    } = GraphEdge.edges(ctx.endpoint, "people", derek_id, "out")
+    } = GraphEdge.edges("people", derek_id, "out") |> on_db(ctx)
     assert [
       %{"_from" => "person/Derek", "_id" => _, "_key" => _, "_rev" => _, "_to" => "person/Erin", "type" => "people"},
       %{"_from" => "person/Derek", "_id" => _, "_key" => _, "_rev" => _, "_to" => "person/Fred", "type" => "people"},
@@ -57,7 +57,7 @@ defmodule GraphEdgeTest do
         "stats" => %{"filtered" => 0, "scannedIndex" => 0},
         "edges" => [],
       }
-    } = GraphEdge.edges(ctx.endpoint, "people", amy_id, "in")
+    } = GraphEdge.edges("people", amy_id, "in") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -66,7 +66,7 @@ defmodule GraphEdgeTest do
         "stats" => %{"filtered" => 0, "scannedIndex" => 0},
         "edges" => [],
       }
-    } = GraphEdge.edges(ctx.endpoint, "people", fred_id, "out")
+    } = GraphEdge.edges("people", fred_id, "out") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -75,7 +75,7 @@ defmodule GraphEdgeTest do
         "stats" => %{"filtered" => 0, "scannedIndex" => 5},
         "edges" => edges,
       }
-    } = GraphEdge.edges(ctx.endpoint, "people", derek_id)
+    } = GraphEdge.edges("people", derek_id) |> on_db(ctx)
     assert [
       %{"_from" => "person/Amy", "_to" => "person/Derek", "type" => "people"},
       %{"_from" => "person/Brad", "_to" => "person/Derek", "type" => "people"},

@@ -1,7 +1,7 @@
 defmodule Arangoex.Transaction do
   @moduledoc "ArangoDB Transaction methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
 
   defmodule Transaction do
     @moduledoc false
@@ -61,8 +61,8 @@ defmodule Arangoex.Transaction do
 
   POST /_api/transaction
   """
-  @spec transaction(Endpoint.t, Transaction.t) :: Arangoex.ok_error(map)
-  def transaction(endpoint, t) do
+  @spec transaction(Transaction.t) :: Arangoex.ok_error(map)
+  def transaction(t) do
     collections =
       %{}
       |> Map.merge(if t.read_collections, do: %{"read" => t.read_collections}, else: %{})
@@ -75,7 +75,11 @@ defmodule Arangoex.Transaction do
       |> Map.merge(if t.lock_timeout, do: %{"lockTimeout" => t.lock_timeout}, else: %{})
       |> Map.merge(if t.wait_for_sync, do: %{"waitForSync" => t.wait_for_sync}, else: %{})
 
-    endpoint
-    |> Endpoint.post("/transaction", body)
+    %Request{
+      endpoint: :transaction,
+      http_method: :post,
+      path: "transaction",
+      body: body,
+    }
   end
 end

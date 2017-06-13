@@ -1,7 +1,7 @@
 defmodule Arangoex.Graph do
   @moduledoc "ArangoDB Graph methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
 
   defmodule EdgeDefinition do
     @moduledoc false
@@ -56,10 +56,13 @@ defmodule Arangoex.Graph do
 
   GET /_api/gharial
   """
-  @spec graphs(Endpoint.t) :: Arangoex.ok_error(map)
-  def graphs(endpoint) do
-    endpoint
-    |> Endpoint.get("gharial")
+  @spec graphs() :: Arangoex.ok_error(map)
+  def graphs() do
+    %Request{
+      endpoint: :graph,
+      http_method: :get,
+      path: "gharial"
+    }
   end
 
   @doc """
@@ -67,16 +70,20 @@ defmodule Arangoex.Graph do
 
   POST /_api/gharial
   """
-  @spec create(Endpoint.t, String.t, list(EdgeDefinition.t), list(String.t)) :: Arangoex.ok_error(map)
-  def create(endpoint, graph_name, edge_definitions \\ [], orphan_collections \\ []) do
+  @spec create(String.t, list(EdgeDefinition.t), list(String.t)) :: Arangoex.ok_error(map)
+  def create(graph_name, edge_definitions \\ [], orphan_collections \\ []) do
     body = %{
       "name" => graph_name,
       "edgeDefinitions" => edge_definitions,
       "orphanCollections" => orphan_collections
     }
 
-    endpoint
-    |> Endpoint.post("gharial", body)
+    %Request{
+      endpoint: :graph,
+      http_method: :post,
+      path: "gharial",
+      body: body
+    }
   end
 
   @doc """
@@ -84,10 +91,13 @@ defmodule Arangoex.Graph do
 
   DELETE /_api/gharial/{graph-name}
   """
-  @spec drop(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def drop(endpoint, graph_name) do
-    endpoint
-    |> Endpoint.delete("gharial/#{graph_name}")
+  @spec drop(String.t) :: Arangoex.ok_error(map)
+  def drop(graph_name) do
+    %Request{
+      endpoint: :graph,
+      http_method: :delete,
+      path: "gharial/#{graph_name}"
+    }
   end
 
   @doc """
@@ -95,10 +105,13 @@ defmodule Arangoex.Graph do
 
   GET /_api/gharial/{graph-name}
   """
-  @spec graph(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def graph(endpoint, graph_name) do
-    endpoint
-    |> Endpoint.get("gharial/#{graph_name}")
+  @spec graph(String.t) :: Arangoex.ok_error(map)
+  def graph(graph_name) do
+    %Request{
+      endpoint: :graph,
+      http_method: :get,
+      path: "gharial/#{graph_name}"
+    }
   end
 
   @doc """
@@ -106,10 +119,13 @@ defmodule Arangoex.Graph do
 
   GET /_api/gharial/{graph-name}/edge
   """
-  @spec edges(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def edges(endpoint, graph_name) do
-    endpoint
-    |> Endpoint.get("gharial/#{graph_name}/edge")
+  @spec edges(String.t) :: Arangoex.ok_error(map)
+  def edges(graph_name) do
+    %Request{
+      endpoint: :graph,
+      http_method: :get,
+      path: "gharial/#{graph_name}/edge"
+    }
   end
 
   @doc """
@@ -117,12 +133,16 @@ defmodule Arangoex.Graph do
 
   POST /_api/gharial/{graph-name}/edge
   """
-  @spec extend_edge_definintions(Endpoint.t, String.t, EdgeDefinition.t) :: Arangoex.ok_error(map)
-  def extend_edge_definintions(endpoint, graph_name, edge_definition) do
+  @spec extend_edge_definintions(String.t, EdgeDefinition.t) :: Arangoex.ok_error(map)
+  def extend_edge_definintions(graph_name, edge_definition) do
     body = Map.from_struct(edge_definition)
 
-    endpoint
-    |> Endpoint.post("gharial/#{graph_name}/edge", body)
+    %Request{
+      endpoint: :graph,
+      http_method: :post,
+      path: "gharial/#{graph_name}/edge",
+      body: body
+    }
   end
 
   @doc """
@@ -130,16 +150,20 @@ defmodule Arangoex.Graph do
 
   POST /_api/gharial/{graph-name}/edge/{collection-name}
   """
-  @spec edge_create(Endpoint.t, String.t, String.t, Edge.t) :: Arangoex.ok_error(map)
-  def edge_create(endpoint, graph_name, collection_name, edge) do
+  @spec edge_create(String.t, String.t, Edge.t) :: Arangoex.ok_error(map)
+  def edge_create(graph_name, collection_name, edge) do
     body = %{
       "type" => edge.type,
       "_from" => edge.from,
       "_to" => edge.to,
     } |> Map.merge(edge.data || %{})
 
-    endpoint
-    |> Endpoint.post("gharial/#{graph_name}/edge/#{collection_name}", body)
+    %Request{
+      endpoint: :graph,
+      http_method: :post,
+      path: "gharial/#{graph_name}/edge/#{collection_name}",
+      body: body
+    }
   end
 
   @doc """
@@ -147,10 +171,13 @@ defmodule Arangoex.Graph do
 
   DELETE /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
   """
-  @spec edge_delete(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
-  def edge_delete(endpoint, graph_name, collection_name, edge_key) do
-    endpoint
-    |> Endpoint.delete("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}")
+  @spec edge_delete(String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def edge_delete(graph_name, collection_name, edge_key) do
+    %Request{
+      endpoint: :graph,
+      http_method: :delete,
+      path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}"
+    }
   end
 
   @doc """
@@ -158,10 +185,13 @@ defmodule Arangoex.Graph do
 
   GET /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
   """
-  @spec edge(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
-  def edge(endpoint, graph_name, collection_name, edge_key) do
-    endpoint
-    |> Endpoint.get("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}")
+  @spec edge(String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def edge(graph_name, collection_name, edge_key) do
+    %Request{
+      endpoint: :graph,
+      http_method: :get,
+      path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}"
+    }
   end
 
   @doc """
@@ -169,10 +199,14 @@ defmodule Arangoex.Graph do
 
   PATCH /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
   """
-  @spec edge_update(Endpoint.t, String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
-  def edge_update(endpoint, graph_name, collection_name, edge_key, edge_body) do
-    endpoint
-    |> Endpoint.patch("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}", edge_body)
+  @spec edge_update(String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def edge_update(graph_name, collection_name, edge_key, edge_body) do
+    %Request{
+      endpoint: :graph,
+      http_method: :patch,
+      path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}",
+      body: edge_body
+    }
   end
 
   @doc """
@@ -180,16 +214,20 @@ defmodule Arangoex.Graph do
 
   PUT /_api/gharial/{graph-name}/edge/{collection-name}/{edge-key}
   """
-  @spec edge_replace(Endpoint.t, String.t, String.t, String.t, Edge.t) :: Arangoex.ok_error(map)
-  def edge_replace(endpoint, graph_name, collection_name, edge_key, edge) do
+  @spec edge_replace(String.t, String.t, String.t, Edge.t) :: Arangoex.ok_error(map)
+  def edge_replace(graph_name, collection_name, edge_key, edge) do
     body = %{
       "type" => edge.type,
       "_from" => edge.from,
       "_to" => edge.to,
     } |> Map.merge(edge.data || %{})
 
-    endpoint
-    |> Endpoint.put("gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}", body)
+    %Request{
+      endpoint: :graph,
+      http_method: :put,
+      path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}",
+      body: body
+    }
   end
 
   @doc """
@@ -197,10 +235,13 @@ defmodule Arangoex.Graph do
 
   DELETE /_api/gharial/{graph-name}/edge/{definition-name}
   """
-  @spec edge_definition_delete(Endpoint.t, String.t, String.t) :: Arangoex.ok_error(map)
-  def edge_definition_delete(endpoint, graph_name, edge_definition_name) do
-    endpoint
-    |> Endpoint.delete("gharial/#{graph_name}/edge/#{edge_definition_name}")
+  @spec edge_definition_delete(String.t, String.t) :: Arangoex.ok_error(map)
+  def edge_definition_delete(graph_name, edge_definition_name) do
+    %Request{
+      endpoint: :graph,
+      http_method: :delete,
+      path: "gharial/#{graph_name}/edge/#{edge_definition_name}"
+    }
   end
 
   @doc """
@@ -208,10 +249,14 @@ defmodule Arangoex.Graph do
 
   PUT /_api/gharial/{graph-name}/edge/{definition-name}
   """
-  @spec edge_definition_replace(Endpoint.t, String.t, String.t, EdgeDefinition.t) :: Arangoex.ok_error(map)
-  def edge_definition_replace(endpoint, graph_name, edge_definition_name, edge_definition) do
-    endpoint
-    |> Endpoint.put("gharial/#{graph_name}/edge/#{edge_definition_name}", edge_definition)
+  @spec edge_definition_replace(String.t, String.t, EdgeDefinition.t) :: Arangoex.ok_error(map)
+  def edge_definition_replace(graph_name, edge_definition_name, edge_definition) do
+    %Request{
+      endpoint: :graph,
+      http_method: :put,
+      path: "gharial/#{graph_name}/edge/#{edge_definition_name}",
+      body: edge_definition
+    }
   end
 
   @doc """
@@ -219,10 +264,13 @@ defmodule Arangoex.Graph do
 
   GET /_api/gharial/{graph-name}/vertex
   """
-  @spec vertex_collections(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def vertex_collections(endpoint, graph_name) do
-    endpoint
-    |> Endpoint.get("gharial/#{graph_name}/vertex")
+  @spec vertex_collections(String.t) :: Arangoex.ok_error(map)
+  def vertex_collections(graph_name) do
+    %Request{
+      endpoint: :graph,
+      http_method: :get,
+      path: "gharial/#{graph_name}/vertex",
+    }
   end
 
   @doc """
@@ -230,12 +278,16 @@ defmodule Arangoex.Graph do
 
   POST /_api/gharial/{graph-name}/vertex
   """
-  @spec vertex_collection_create(Endpoint.t, String.t, VertexCollection.t) :: Arangoex.ok_error(map)
-  def vertex_collection_create(endpoint, graph_name, vertex_collection) do
+  @spec vertex_collection_create(String.t, VertexCollection.t) :: Arangoex.ok_error(map)
+  def vertex_collection_create(graph_name, vertex_collection) do
     body = Map.from_struct(vertex_collection)
 
-    endpoint
-    |> Endpoint.post("gharial/#{graph_name}/vertex", body)
+    %Request{
+      endpoint: :graph,
+      http_method: :post,
+      path: "gharial/#{graph_name}/vertex",
+      body: body
+    }
   end
 
   @doc """
@@ -243,10 +295,13 @@ defmodule Arangoex.Graph do
 
   DELETE /_api/gharial/{graph-name}/vertex/{collection-name}
   """
-  @spec vertex_collection_delete(Endpoint.t, String.t, String.t) :: Arangoex.ok_error(map)
-  def vertex_collection_delete(endpoint, graph_name, collection_name) do
-    endpoint
-    |> Endpoint.delete("gharial/#{graph_name}/vertex/#{collection_name}")
+  @spec vertex_collection_delete(String.t, String.t) :: Arangoex.ok_error(map)
+  def vertex_collection_delete(graph_name, collection_name) do
+    %Request{
+      endpoint: :graph,
+      http_method: :delete,
+      path: "gharial/#{graph_name}/vertex/#{collection_name}",
+    }
   end
 
   @doc """
@@ -254,10 +309,14 @@ defmodule Arangoex.Graph do
 
   POST /_api/gharial/{graph-name}/vertex/{collection-name}
   """
-  @spec vertex_create(Endpoint.t, String.t, String.t, map) :: Arangoex.ok_error(map)
-  def vertex_create(endpoint, graph_name, collection_name, vertex_body) do
-    endpoint
-    |> Endpoint.post("gharial/#{graph_name}/vertex/#{collection_name}", vertex_body)
+  @spec vertex_create(String.t, String.t, map) :: Arangoex.ok_error(map)
+  def vertex_create(graph_name, collection_name, vertex_body) do
+    %Request{
+      endpoint: :graph,
+      http_method: :post,
+      path: "gharial/#{graph_name}/vertex/#{collection_name}",
+      body: vertex_body
+    }
   end
 
   @doc """
@@ -265,10 +324,13 @@ defmodule Arangoex.Graph do
 
   DELETE /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
   """
-  @spec vertex_delete(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
-  def vertex_delete(endpoint, graph_name, collection_name, vertex_key) do
-    endpoint
-    |> Endpoint.delete("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}")
+  @spec vertex_delete(String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def vertex_delete(graph_name, collection_name, vertex_key) do
+    %Request{
+      endpoint: :graph,
+      http_method: :delete,
+      path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
+    }
   end
 
   @doc """
@@ -276,10 +338,13 @@ defmodule Arangoex.Graph do
 
   GET /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
   """
-  @spec vertex(Endpoint.t, String.t, String.t, String.t) :: Arangoex.ok_error(map)
-  def vertex(endpoint, graph_name, collection_name, vertex_key) do
-    endpoint
-    |> Endpoint.get("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}")
+  @spec vertex(String.t, String.t, String.t) :: Arangoex.ok_error(map)
+  def vertex(graph_name, collection_name, vertex_key) do
+    %Request{
+      endpoint: :graph,
+      http_method: :get,
+      path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
+    }
   end
 
   @doc """
@@ -287,10 +352,14 @@ defmodule Arangoex.Graph do
 
   PATCH /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
   """
-  @spec vertex_update(Endpoint.t, String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
-  def vertex_update(endpoint, graph_name, collection_name, vertex_key, vertex_body) do
-    endpoint
-    |> Endpoint.patch("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}", vertex_body)
+  @spec vertex_update(String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def vertex_update(graph_name, collection_name, vertex_key, vertex_body) do
+    %Request{
+      endpoint: :graph,
+      http_method: :patch,
+      path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
+      body: vertex_body
+    }
   end
 
   @doc """
@@ -298,9 +367,13 @@ defmodule Arangoex.Graph do
 
   PUT /_api/gharial/{graph-name}/vertex/{collection-name}/{vertex-key}
   """
-  @spec vertex_replace(Endpoint.t, String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
-  def vertex_replace(endpoint, graph_name, collection_name, vertex_key, vertex_body) do
-    endpoint
-    |> Endpoint.put("gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}", vertex_body)
+  @spec vertex_replace(String.t, String.t, String.t, map) :: Arangoex.ok_error(map)
+  def vertex_replace(graph_name, collection_name, vertex_key, vertex_body) do
+    %Request{
+      endpoint: :graph,
+      http_method: :put,
+      path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
+      body: vertex_body
+    }
   end
 end

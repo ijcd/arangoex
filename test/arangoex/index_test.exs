@@ -18,7 +18,7 @@ defmodule IndexTest do
         "type" => "primary",
         "unique" => true
       }
-    } = Index.index(ctx.endpoint, id)
+    } = Index.index(id) |> on_db(ctx)
   end
 
   test "Fails to read an index", ctx do
@@ -31,8 +31,7 @@ defmodule IndexTest do
         "errorMessage" => "unknown index '123'",
         "errorNum" => 1212
       }
-    } = Index.index(ctx.endpoint,
-id)
+    } = Index.index(id) |> on_db(ctx)
   end
 
   test "Read all indexes of a collection", ctx do
@@ -63,7 +62,7 @@ id)
            }
         ]
       }
-    } = Index.indexes(ctx.endpoint, ctx.coll.name)
+    } = Index.indexes(ctx.coll.name) |> on_db(ctx)
   end
 
   test "Create general index", ctx do
@@ -79,7 +78,7 @@ id)
         "type" => "fulltext",
         "unique" => false
       }
-    } = Index.create_general(ctx.endpoint, ctx.coll.name, %{"type" => "fulltext", "fields" => ["bar"], "minLength" => 3})
+    } = Index.create_general(ctx.coll.name, %{"type" => "fulltext", "fields" => ["bar"], "minLength" => 3}) |> on_db(ctx)
   end
 
   test "Create fulltext index", ctx do
@@ -95,7 +94,7 @@ id)
         "type" => "fulltext",
         "unique" => false
       }
-    } = Index.create_fulltext(ctx.endpoint, ctx.coll.name, "foo")
+    } = Index.create_fulltext(ctx.coll.name, "foo") |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -109,7 +108,7 @@ id)
         "type" => "fulltext",
         "unique" => false
       }
-    } = Index.create_fulltext(ctx.endpoint, ctx.coll.name, "bar", minLength: 10)
+    } = Index.create_fulltext(ctx.coll.name, "bar", minLength: 10) |> on_db(ctx)
   end
 
   test "Create geo-spatial index", ctx do
@@ -126,7 +125,7 @@ id)
         "constraint" => false,
         "ignoreNull" => true
       }
-    } = Index.create_geo(ctx.endpoint, ctx.coll.name, ["lat", "long"])
+    } = Index.create_geo(ctx.coll.name, ["lat", "long"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -142,7 +141,7 @@ id)
         "ignoreNull" => true,
         "geoJson" => false
       }
-    } = Index.create_geo(ctx.endpoint, ctx.coll.name, ["latlong_array"])
+    } = Index.create_geo(ctx.coll.name, ["latlong_array"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -158,7 +157,7 @@ id)
         "ignoreNull" => true,
         "geoJson" => true
       }
-    } = Index.create_geo(ctx.endpoint, ctx.coll.name, ["latlong_array2"], geoJson: true)
+    } = Index.create_geo(ctx.coll.name, ["latlong_array2"], geoJson: true) |> on_db(ctx)
   end
 
   test "Create hash index", ctx do
@@ -173,7 +172,7 @@ id)
         "type" => "hash",
         "unique" => false,
       }
-    } = Index.create_hash(ctx.endpoint, ctx.coll.name, ["bang", "bar", "foo"])
+    } = Index.create_hash(ctx.coll.name, ["bang", "bar", "foo"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -186,7 +185,7 @@ id)
         "type" => "hash",
         "unique" => true,
       }
-    } = Index.create_hash(ctx.endpoint, ctx.coll.name, ["bang", "bar", "foo"], unique: true, sparse: true)
+    } = Index.create_hash(ctx.coll.name, ["bang", "bar", "foo"], unique: true, sparse: true) |> on_db(ctx)
   end
 
   test "Create a persistent index", ctx do
@@ -200,7 +199,7 @@ id)
         "type" => "persistent",
         "unique" => false,
       }
-    } = Index.create_persistent(ctx.endpoint, ctx.coll.name, ["foo", "bar", "bang"])
+    } = Index.create_persistent(ctx.coll.name, ["foo", "bar", "bang"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -212,7 +211,7 @@ id)
         "type" => "persistent",
         "unique" => true,
       }
-    } = Index.create_persistent(ctx.endpoint, ctx.coll.name, ["foo", "bar", "bang"], unique: true, sparse: true)
+    } = Index.create_persistent(ctx.coll.name, ["foo", "bar", "bang"], unique: true, sparse: true) |> on_db(ctx)
   end
 
   test "Create skip list", ctx do
@@ -226,7 +225,7 @@ id)
         "type" => "skiplist",
         "unique" => false,
       }
-    } = Index.create_skiplist(ctx.endpoint, ctx.coll.name, ["foo", "bar", "bang"])
+    } = Index.create_skiplist(ctx.coll.name, ["foo", "bar", "bang"]) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -238,19 +237,19 @@ id)
         "type" => "skiplist",
         "unique" => true,
       }
-    } = Index.create_skiplist(ctx.endpoint, ctx.coll.name, ["foo", "bar", "bang"], unique: true, sparse: true)
+    } = Index.create_skiplist(ctx.coll.name, ["foo", "bar", "bang"], unique: true, sparse: true) |> on_db(ctx)
   end
 
   test "Delete index", ctx do
-    {:ok, %{"id" => id}} = Index.create_fulltext(ctx.endpoint, ctx.coll.name, "foo")
+    {:ok, %{"id" => id}} = Index.create_fulltext(ctx.coll.name, "foo") |> on_db(ctx)
 
     assert {
       :ok, %{"code" => 200, "error" => false, "id" => ^id}
-    } = Index.delete(ctx.endpoint, id)
+    } = Index.delete(id) |> on_db(ctx)
 
     msg = "unknown index '#{id}'"
     assert {
       :error, %{"code" => 404, "error" => true, "errorMessage" => ^msg, "errorNum" => 1212}
-    } = Index.delete(ctx.endpoint, id)
+    } = Index.delete(id) |> on_db(ctx)
   end
 end

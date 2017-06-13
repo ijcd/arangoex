@@ -4,7 +4,7 @@ defmodule TaskTest do
 
   alias Arangoex.Task
 
-  test "creates a task", ctx do
+  test "creates a task" do
     task = %Task{
       name: "SampleTask",
       command: "(function(params) { require('@arangodb').print(params); })(params)",
@@ -28,11 +28,11 @@ defmodule TaskTest do
         "period" => 2,
         "type" => "periodic"
       }
-    } = Task.create(ctx.endpoint, task)
+    } = Task.create(task) |> arango
   end
 
-  test "lists a task or tasks", ctx do
-     {:ok, tasks} = Task.tasks(ctx.endpoint)
+  test "lists a task or tasks" do
+     {:ok, tasks} = Task.tasks() |> arango
      assert [
         %{
           "database" => "_system",
@@ -64,7 +64,7 @@ defmodule TaskTest do
       ] = Enum.sort(tasks)
   end
 
-  test "deletes a task", ctx do
+  test "deletes a task" do
     assert {
       :error, %{
         "code" => 404,
@@ -72,7 +72,7 @@ defmodule TaskTest do
         "errorNum" => 1852,
         "errorMessage" => "task not found"
       }
-    } = Task.delete(ctx.endpoint, "1234")
+    } = Task.delete("1234") |> arango
 
     task = %Task{
       name: "SampleTask",
@@ -83,14 +83,14 @@ defmodule TaskTest do
       },
       period: 2
     }
-    {:ok, %{"id" => task_id}} = Task.create(ctx.endpoint, task)
+    {:ok, %{"id" => task_id}} = Task.create(task) |> arango
 
     assert {
       :ok, %{"code" => 200, "error" => false}
-    } = Task.delete(ctx.endpoint, task_id)
+    } = Task.delete(task_id) |> arango
   end
 
-  test "fetch a task by id", ctx do
+  test "fetch a task by id" do
     task = %Task{
       name: "SampleTask",
       command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)",
@@ -100,9 +100,9 @@ defmodule TaskTest do
       },
       period: 2
     }
-    {:ok, %{"id" => task_id}} = Task.create(ctx.endpoint, task)
+    {:ok, %{"id" => task_id}} = Task.create(task) |> arango
 
-    task = Task.task(ctx.endpoint, task_id)
+    task = Task.task(task_id) |> arango
     {:ok, result} = task
     assert {
       :ok, %{
@@ -120,7 +120,7 @@ defmodule TaskTest do
     assert Regex.match?(~r/myparams/, result["command"])
   end
 
-  test "create a task by id", ctx do
+  test "create a task by id" do
     task = %Task{
       name: "SampleTask",
       command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)",
@@ -130,9 +130,9 @@ defmodule TaskTest do
       },
       period: 2
     }
-    assert {:ok, _} = Task.create_with_id(ctx.endpoint, "foobar", task)
+    assert {:ok, _} = Task.create_with_id("foobar", task) |> arango
 
-    task = Task.task(ctx.endpoint, "foobar")
+    task = Task.task("foobar") |> arango
     {:ok, result} = task
     assert {
       :ok, %{

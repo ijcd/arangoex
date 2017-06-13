@@ -1,7 +1,15 @@
+# TODO: Deadlock handling / New error code 29 -- Client applications
+# should be prepared to handle error 29 (deadlock detected) that
+# ArangoDB may now throw when it detects a deadlock across multiple
+# transactions. When a client application receives error 29, it should
+# retry the operation that failed. The error can only occur for AQL
+# queries or user transactions that involve more than a single
+# collection.
+
 defmodule Arangoex.Aql do
   @moduledoc "ArangoDB AQL methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
 
   defmodule Function do
     @moduledoc false
@@ -76,10 +84,14 @@ defmodule Arangoex.Aql do
   #
   # GET /_api/aqlfunction
   # """
-  @spec functions(Endpoint.t) :: Arangoex.ok_error(map)
-  def functions(endpoint) do
-    endpoint
-    |> Endpoint.get("/aqlfunction")
+  @spec functions() :: Arangoex.ok_error(map)
+  def functions() do
+    %Request{
+      endpoint: :aql,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :get,
+      path: "aqlfunction"
+    }
   end
 
   # @doc """
@@ -87,10 +99,15 @@ defmodule Arangoex.Aql do
   #
   # POST /_api/aqlfunction
   # """
-  @spec create_function(Endpoint.t, Function.t) :: Arangoex.ok_error(map)
-  def create_function(endpoint, function) do
-    endpoint
-    |> Endpoint.post("/aqlfunction", function)
+  @spec create_function(Function.t) :: Arangoex.ok_error(map)
+  def create_function(function) do
+    %Request{
+      endpoint: :aql,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :post,
+      path: "aqlfunction",
+      body: function,
+    }
   end
 
   @doc """
@@ -98,10 +115,14 @@ defmodule Arangoex.Aql do
 
   DELETE /_api/aqlfunction/{name}
   """
-  @spec delete_function(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def delete_function(endpoint, name) do
-    endpoint
-    |> Endpoint.delete("/aqlfunction/#{name}")
+  @spec delete_function(String.t) :: Arangoex.ok_error(map)
+  def delete_function(name) do
+    %Request{
+      endpoint: :aql,
+      system_only: true,   # or just /_api? Same thing?
+      http_method: :delete,
+      path: "aqlfunction/#{name}",
+    }
   end
 
   # @doc """
@@ -109,8 +130,8 @@ defmodule Arangoex.Aql do
   #
   # POST /_api/explain
   # """
-  @spec explain_query(Endpoint.t, Keyword.t) :: Arangoex.ok_error(map)
-  def explain_query(endpoint, query, options \\ %{}) do
+  @spec explain_query(Keyword.t) :: Arangoex.ok_error(map)
+  def explain_query(query, options \\ %{}) do
     # TODO: this is surely simplified with a reduce
     options = Enum.into(options, %{})
 
@@ -128,8 +149,12 @@ defmodule Arangoex.Aql do
       %{query: query}
       |> Map.merge(if Enum.any?(opts), do: %{"options" => opts}, else: %{})
 
-    endpoint
-    |> Endpoint.post("/explain", explain_request)
+    %Request{
+      endpoint: :aql,
+      http_method: :post,
+      path: "explain",
+      body: explain_request,
+    }
   end
 
   # @doc """
@@ -137,10 +162,14 @@ defmodule Arangoex.Aql do
   #
   # POST /_api/query
   # """
-  @spec validate_query(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def validate_query(endpoint, query) do
-    endpoint
-    |> Endpoint.post("/query", %{query: query})
+  @spec validate_query(String.t) :: Arangoex.ok_error(map)
+  def validate_query(query) do
+    %Request{
+      endpoint: :aql,
+      http_method: :post,
+      path: "query",
+      body: %{query: query},
+    }
   end
 
   # @doc """
@@ -148,10 +177,13 @@ defmodule Arangoex.Aql do
   #
   # DELETE /_api/query-cache
   # """
-  @spec clear_query_cache(Endpoint.t) :: Arangoex.ok_error(map)
-  def clear_query_cache(endpoint) do
-    endpoint
-    |> Endpoint.delete("query-cache")
+  @spec clear_query_cache() :: Arangoex.ok_error(map)
+  def clear_query_cache() do
+    %Request{
+      endpoint: :aql,
+      http_method: :delete,
+      path: "query-cache",
+    }
   end
 
   # @doc """
@@ -159,10 +191,13 @@ defmodule Arangoex.Aql do
   #
   # GET /_api/query-cache/properties
   # """
-  @spec query_cache_properties(Endpoint.t) :: Arangoex.ok_error(map)
-  def query_cache_properties(endpoint) do
-    endpoint
-    |> Endpoint.get("query-cache/properties")
+  @spec query_cache_properties() :: Arangoex.ok_error(map)
+  def query_cache_properties() do
+    %Request{
+      endpoint: :aql,
+      http_method: :get,
+      path: "query-cache/properties",
+    }
   end
 
   # @doc """
@@ -170,9 +205,8 @@ defmodule Arangoex.Aql do
   #
   # PUT /_api/query-cache/properties
   # """
-  @spec set_query_cache_properties(Endpoint.t, Keyword.t) :: Arangoex.ok_error(map)
-  def set_query_cache_properties(endpoint, options \\ %{}) do
-    # TODO: this is surely simplified with a reduce
+  @spec set_query_cache_properties(Keyword.t) :: Arangoex.ok_error(map)
+  def set_query_cache_properties(options \\ %{}) do
     options = Enum.into(options, %{})
 
     max_results = Map.get(options, :max_results)
@@ -183,20 +217,26 @@ defmodule Arangoex.Aql do
       |> Map.merge(if max_results, do: %{"maxResults" => max_results}, else: %{})
       |> Map.merge(if mode, do: %{"mode" => mode}, else: %{})
 
-    endpoint
-    |> Endpoint.put("query-cache/properties", opts)
+    %Request{
+      endpoint: :aql,
+      http_method: :put,
+      path: "query-cache/properties",
+      body: opts,
+    }
   end
-
 
   # @doc """
   # Returns the currently running AQL queries
   #
   # GET /_api/query/current
   # """
-  @spec current_queries(Endpoint.t) :: Arangoex.ok_error(map)
-  def current_queries(endpoint) do
-    endpoint
-    |> Endpoint.get("query/current")
+  @spec current_queries() :: Arangoex.ok_error(map)
+  def current_queries() do
+    %Request{
+      endpoint: :aql,
+      http_method: :get,
+      path: "query/current",
+    }
   end
 
   # @doc """
@@ -204,10 +244,13 @@ defmodule Arangoex.Aql do
   #
   # GET /_api/query/properties
   # """
-  @spec query_properties(Endpoint.t) :: Arangoex.ok_error(map)
-  def query_properties(endpoint) do
-    endpoint
-    |> Endpoint.get("query/properties")
+  @spec query_properties() :: Arangoex.ok_error(map)
+  def query_properties() do
+    %Request{
+      endpoint: :aql,
+      http_method: :get,
+      path: "query/properties",
+    }
   end
 
   # @doc """
@@ -215,9 +258,8 @@ defmodule Arangoex.Aql do
   #
   # PUT /_api/query/properties
   # """
-  @spec set_query_properties(Endpoint.t, Keyword.t) :: Arangoex.ok_error(map)
-  def set_query_properties(endpoint, options \\ %{}) do
-    # TODO: this is surely simplified with a reduce
+  @spec set_query_properties(Keyword.t) :: Arangoex.ok_error(map)
+  def set_query_properties(options \\ %{}) do
     options = Enum.into(options, %{})
 
     enabled = Map.get(options, :enabled)
@@ -234,8 +276,12 @@ defmodule Arangoex.Aql do
       |> Map.merge(if track_slow_queries, do: %{"trackSlowqueries" => track_slow_queries}, else: %{})
       |> Map.merge(if max_query_string_length, do: %{"maxQuerystringlength" => max_query_string_length}, else: %{})
 
-    endpoint
-    |> Endpoint.put("query/properties", opts)
+    %Request{
+      endpoint: :aql,
+      http_method: :put,
+      path: "query/properties",
+      body: opts,
+    }
   end
 
   # @doc """
@@ -243,10 +289,13 @@ defmodule Arangoex.Aql do
   #
   # DELETE /_api/query/slow
   # """
-  @spec clear_slow_queries(Endpoint.t) :: Arangoex.ok_error(map)
-  def clear_slow_queries(endpoint) do
-    endpoint
-    |> Endpoint.delete("query/slow")
+  @spec clear_slow_queries() :: Arangoex.ok_error(map)
+  def clear_slow_queries() do
+    %Request{
+      endpoint: :aql,
+      http_method: :delete,
+      path: "query/slow",
+    }
   end
 
   # @doc """
@@ -254,10 +303,13 @@ defmodule Arangoex.Aql do
   #
   # GET /_api/query/slow
   # """
-  @spec slow_queries(Endpoint.t) :: Arangoex.ok_error(map)
-  def slow_queries(endpoint) do
-    endpoint
-    |> Endpoint.get("query/slow")
+  @spec slow_queries() :: Arangoex.ok_error(map)
+  def slow_queries() do
+    %Request{
+      endpoint: :aql,
+      http_method: :get,
+      path: "query/slow",
+    }
   end
 
   # @doc """
@@ -265,9 +317,12 @@ defmodule Arangoex.Aql do
   #
   # DELETE /_api/query/{query-id}
   # """
-  @spec kill_query(Endpoint.t, String.t) :: Arangoex.ok_error(map)
-  def kill_query(endpoint, query_id) do
-    endpoint
-    |> Endpoint.delete("query/#{query_id}")
+  @spec kill_query(String.t) :: Arangoex.ok_error(map)
+  def kill_query(query_id) do
+    %Request{
+      endpoint: :aql,
+      http_method: :delete,
+      path: "query/#{query_id}",
+    }
   end
 end

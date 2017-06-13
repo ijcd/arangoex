@@ -4,14 +4,14 @@ defmodule WalTest do
 
   alias Arangoex.Wal
 
-  test "flushes the WAL", ctx do
-    assert {:ok, %{}} = ctx.endpoint |> Wal.flush
-    assert {:ok, %{}} = ctx.endpoint |> Wal.flush(waitForSync: true)
-    assert {:ok, %{}} = ctx.endpoint |> Wal.flush(waitForCollector: true)
-    assert {:ok, %{}} = ctx.endpoint |> Wal.flush(waitForSync: true, waitForCollector: true)
+  test "flushes the WAL" do
+    assert {:ok, %{}} = Wal.flush() |> arango
+    assert {:ok, %{}} = Wal.flush(waitForSync: true) |> arango
+    assert {:ok, %{}} = Wal.flush(waitForCollector: true) |> arango
+    assert {:ok, %{}} = Wal.flush(waitForSync: true, waitForCollector: true) |> arango
   end
 
-  test "looks up the WAL properties", ctx do
+  test "looks up the WAL properties" do
     expected_wal = %Arangoex.Wal{
       allowOversizeEntries: false,
       historicLogfiles: 9,
@@ -21,22 +21,21 @@ defmodule WalTest do
       throttleWait: 14_890,
       throttleWhenPending: 2
     }
-    {:ok, _} = Wal.set_properties(ctx.endpoint, expected_wal)
+    {:ok, _} = Wal.set_properties(expected_wal) |> arango
 
-    assert {:ok, ^expected_wal} = ctx.endpoint |> Wal.properties
+    assert {:ok, expected_wal} == Wal.properties() |> arango
   end
 
-  @tag :skip
-  test "sets wal properties", ctx do
-    {:ok, properties} = Wal.set_properties(ctx.endpoint, %Wal{})
+  test "sets wal properties" do
+    {:ok, properties} = Wal.set_properties(%Wal{}) |> arango
     assert %Wal{} = properties
 
-    {:ok, properties} = Wal.set_properties(ctx.endpoint, reserveLogfiles: 7)
+    {:ok, properties} = Wal.set_properties(reserveLogfiles: 7) |> arango
     assert %Wal{reserveLogfiles: 7} = properties
   end
 
-  test "looks up running transactions", ctx do
-    {:ok, transactions} = Wal.transactions(ctx.endpoint)
+  test "looks up running transactions" do
+    {:ok, transactions} = Wal.transactions() |> arango
 
     assert %{"minLastCollected" => nil, "minLastSealed" => nil, "runningTransactions" => 0} = transactions
   end

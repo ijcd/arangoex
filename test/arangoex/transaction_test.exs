@@ -6,7 +6,7 @@ defmodule TransactionTest do
   alias Arangoex.Transaction
 
   test "Executing a transaction on a single collection", ctx do
-    Collection.create(ctx.endpoint, %Collection{name: "products"})
+    Collection.create(%Collection{name: "products"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -14,12 +14,12 @@ defmodule TransactionTest do
         "error" => false,
         "code" => 200
       }
-    } = Transaction.transaction(ctx.endpoint, %Transaction.Transaction{write_collections: ["products"], action: "function () { var db = require('@arangodb').db; db.products.save({});  return db.products.count(); }"})
+    } = Transaction.transaction(%Transaction.Transaction{write_collections: ["products"], action: "function () { var db = require('@arangodb').db; db.products.save({});  return db.products.count(); }"}) |> on_db(ctx)
   end
 
   test "Executing a transaction using multiple collections", ctx do
-    Collection.create(ctx.endpoint, %Collection{name: "products"})
-    Collection.create(ctx.endpoint, %Collection{name: "materials"})
+    Collection.create(%Collection{name: "products"}) |> on_db(ctx)
+    Collection.create(%Collection{name: "materials"}) |> on_db(ctx)
 
     assert {
       :ok, %{
@@ -27,11 +27,11 @@ defmodule TransactionTest do
         "error" => false,
         "code" => 200
       }
-    } = Transaction.transaction(ctx.endpoint, %Transaction.Transaction{write_collections: ["products", "materials"], action: "function () {var db = require('@arangodb').db;db.products.save({});db.materials.save({});return 'worked!';}"})
+    } = Transaction.transaction(%Transaction.Transaction{write_collections: ["products", "materials"], action: "function () {var db = require('@arangodb').db;db.products.save({});db.materials.save({});return 'worked!';}"}) |> on_db(ctx)
   end
 
   test "Aborting a transaction due to an internal error", ctx do
-    Collection.create(ctx.endpoint, %Collection{name: "products"})
+    Collection.create(%Collection{name: "products"}) |> on_db(ctx)
 
     assert {
       :error, %{
@@ -43,11 +43,11 @@ defmodule TransactionTest do
         "errorNum" => 1210,
         "errorMessage" => "unique constraint violated"
       }
-    } = Transaction.transaction(ctx.endpoint, %Transaction.Transaction{write_collections: ["products"], action: "function () {var db = require('@arangodb').db;db.products.save({ _key: 'abc'});db.products.save({ _key: 'abc'});}"})
+    } = Transaction.transaction(%Transaction.Transaction{write_collections: ["products"], action: "function () {var db = require('@arangodb').db;db.products.save({ _key: 'abc'});db.products.save({ _key: 'abc'});}"}) |> on_db(ctx)
   end
 
   test "Aborting a transaction by explicitly throwing an exception", ctx do
-    Collection.create(ctx.endpoint, %Collection{name: "products"})
+    Collection.create(%Collection{name: "products"}) |> on_db(ctx)
 
     assert {
       :error, %{
@@ -57,7 +57,7 @@ defmodule TransactionTest do
         "errorNum" => 500,
         "errorMessage" => "internal server error"
       }
-    } = Transaction.transaction(ctx.endpoint, %Transaction.Transaction{read_collections: ["products"], action: "function () { throw 'doh!'; }"})
+    } = Transaction.transaction(%Transaction.Transaction{read_collections: ["products"], action: "function () { throw 'doh!'; }"}) |> on_db(ctx)
   end
 
   test "referring to a non-existing collection", ctx do
@@ -71,6 +71,6 @@ defmodule TransactionTest do
         "errorNum" => 1203,
         "errorMessage" => "collection not found"
       }
-    } = Transaction.transaction(ctx.endpoint, %Transaction.Transaction{read_collections: ["products"], action: "function () { throw 'doh!'; }"})
+    } = Transaction.transaction(%Transaction.Transaction{read_collections: ["products"], action: "function () { throw 'doh!'; }"}) |> on_db(ctx)
   end
 end

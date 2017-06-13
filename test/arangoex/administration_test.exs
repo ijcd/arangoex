@@ -4,13 +4,13 @@ defmodule AdministrationTest do
 
   alias Arangoex.Administration
 
-  test "returns database version", ctx do
+  test "returns database version" do
     assert {
       :ok, %{"code" => 200, "error" => false, "version" => _}
-    }  = Administration.database_version(ctx.endpoint)
+    }  = Administration.database_version() |> arango
   end
 
-  test "returns echo", ctx do
+  test "returns echo" do
     assert {
       :ok, %{
         "client" => _,
@@ -36,35 +36,35 @@ defmodule AdministrationTest do
         "url" => "/_admin/echo?bar=2&foo=1",
         "user" => "root"
       }
-    } = Administration.echo(ctx.endpoint, %{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4})
+    } = Administration.echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4}) |> arango
   end
 
-  test "executes a program", ctx do
+  test "executes a program" do
     assert {
       :ok, %{"code" => 200, "error" => false}
-    } == Administration.execute(ctx.endpoint, "1")
+    } == Administration.execute("1") |> arango
 
     assert {
       :ok, "1"
-    } == Administration.execute(ctx.endpoint, "return 1;")
+    } == Administration.execute("return 1;") |> arango
 
     assert {
       :ok, "1"
-    } == Administration.execute(ctx.endpoint, "return 1;", returnAsJson: true)
+    } == Administration.execute("return 1;", returnAsJson: true) |> arango
 
     assert {
       :ok, "{\"a\":1,\"b\":2}"
-    } == Administration.execute(ctx.endpoint, "return {a: 1, b: 2};")
+    } == Administration.execute("return {a: 1, b: 2};") |> arango
 
     assert {
       :ok, "{\"a\":1,\"b\":2}"
-    } == Administration.execute(ctx.endpoint, "return {a: 1, b: 2};", returnAsJson: true)
+    } == Administration.execute("return {a: 1, b: 2};", returnAsJson: true) |> arango
   end
 
-  test "reads global logs from the server", ctx do
+  test "reads global logs from the server" do
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint)
+    } = Administration.log() |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -72,7 +72,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, upto: 3)
+    } = Administration.log(upto: 3) |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -81,7 +81,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, level: 3)
+    } = Administration.log(level: 3) |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -90,7 +90,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, start: 2)
+    } = Administration.log(start: 2) |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -98,7 +98,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, size: 2)
+    } = Administration.log(size: 2) |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -107,7 +107,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, offset: 2)
+    } = Administration.log(offset: 2) |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -115,7 +115,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, search: "foo")
+    } = Administration.log(search: "foo") |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -123,7 +123,7 @@ defmodule AdministrationTest do
 
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(ctx.endpoint, sort: "asc")
+    } = Administration.log(sort: "asc") |> arango
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -132,7 +132,7 @@ defmodule AdministrationTest do
 
   @tag :skip
   # times out
-  test "returns long_echo", ctx do
+  test "returns long_echo" do
     assert {
       :ok, %{
         "client" => _,
@@ -159,42 +159,42 @@ defmodule AdministrationTest do
         "url" => "/_admin/long_echo?bar=2&foo=1",
         "user" => "root"
       }
-    } = Administration.long_echo(ctx.endpoint, %{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4})
+    } = Administration.long_echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4}) |> arango
   end
 
-  test "reloads routing", ctx do
+  test "reloads routing" do
     assert {
       :ok, %{"code" => 200, "error" => false}
-    } == Administration.reload_routing(ctx.endpoint)
+    } == Administration.reload_routing() |> arango
   end
 
-  test "gets the server id", ctx do
+  test "gets the server id" do
     assert {
       :error, %HTTPoison.Response{body: body, status_code: 500}
-    } = Administration.server_id(ctx.endpoint)
+    } = Administration.server_id() |> arango
     assert Regex.match?(~r/ArangoDB is not running in cluster mode/, body)
   end
 
-  test "gets the server role", ctx do
+  test "gets the server role" do
     assert {
       :ok, %{"code" => 200, "error" => false, "role" => "SINGLE"}
-    } = Administration.server_role(ctx.endpoint)
+    } = Administration.server_role() |> arango
   end
 
   test "shutdown", ctx do
     # assert {
     #   :ok, "OK"
-    # } == Administration.shutdown(ctx.endpoint)
+    # } == Administration.shutdown() |> arango
     assert {ctx, "It's hard to test this since it shuts down the server..."}
   end
 
-  test "sleep", ctx do
+  test "sleep" do
     assert {
       :ok, %{"code" => 200, "duration" => 0.1, "error" => false}
-    } = Administration.sleep(ctx.endpoint, duration: 0.1)
+    } = Administration.sleep(duration: 0.1) |> arango
   end
 
-  test "statistics", ctx do
+  test "statistics" do
     assert {
       :ok, %{
         "client" => %{
@@ -238,10 +238,10 @@ defmodule AdministrationTest do
         },
         "time" => _
       }
-    } = Administration.statistics(ctx.endpoint)
+    } = Administration.statistics() |> arango
   end
 
-  test "statistics_description", ctx do
+  test "statistics_description" do
     assert {
       :ok, %{
         "code" => 200,
@@ -429,10 +429,10 @@ defmodule AdministrationTest do
           }
         ]
       }
-    } = Administration.statistics_description(ctx.endpoint)
+    } = Administration.statistics_description() |> arango
   end
 
-  test "runs tests on the server", ctx do
+  test "runs tests on the server" do
     # what are some sample test names?
     assert {
       :error, %{
@@ -441,24 +441,24 @@ defmodule AdministrationTest do
         "errorNum" => 400,
         "errorMessage" => "expected attribute 'tests' is missing"
       }
-    } == Administration.test(ctx.endpoint)
+    } == Administration.test() |> arango
   end
 
-  test "returns the system time", ctx do
+  test "returns the system time" do
     assert {
       :ok, %{"code" => 200, "error" => false, "time" => _}
-    } = Administration.time(ctx.endpoint)
+    } = Administration.time() |> arango
   end
 
-  test "lists all endpoints", ctx do
+  test "lists all endpoints" do
     assert {
       :ok, [%{"endpoint" => "http://0.0.0.0:8529"}]
-    } = Administration.endpoints(ctx.endpoint)
+    } = Administration.endpoints() |> arango
   end
 
-  test "fetches the server version", ctx do
+  test "fetches the server version" do
     assert {
       :ok, %{"server" => "arango", "version" => _}
-    } = Administration.version(ctx.endpoint)
+    } = Administration.version() |> arango
   end
 end

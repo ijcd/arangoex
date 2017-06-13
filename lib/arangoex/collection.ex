@@ -1,7 +1,7 @@
 defmodule Arangoex.Collection do
   @moduledoc "ArangoDB Collection methods"
 
-  alias Arangoex.Endpoint
+  alias Arangoex.Request
   alias Arangoex.Utils
 
   defstruct [
@@ -47,12 +47,14 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection
   """
-  @spec collections(Endpoint.t, String.t | nil) :: Arangoex.ok_error(t)
-  def collections(endpoint, db \\ nil) do
-    endpoint
-    |> Endpoint.with_db(db || endpoint.database_name)
-    |> Endpoint.get("collection")
-    |> to_collection
+  @spec collections() :: Arangoex.ok_error(t)
+  def collections() do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection",
+      ok_decoder: __MODULE__.CollectionDecoder,
+    }
   end
 
   @doc """
@@ -60,11 +62,16 @@ defmodule Arangoex.Collection do
 
   POST /_api/collection
   """
-  @spec create(Endpoint.t, t) :: Arangoex.ok_error(t)
-  def create(endpoint, coll) do
-    endpoint
-    |> Endpoint.post("collection", coll)
-    |> to_collection
+  @spec create(t | String.t) :: Arangoex.ok_error(t)
+  def create(name) when is_binary(name), do: create(%__MODULE__{name: name})
+  def create(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :post,
+      path: "collection",
+      body: collection,
+      ok_decoder: __MODULE__.CollectionDecoder,
+    }
   end
 
   @doc """
@@ -72,10 +79,13 @@ defmodule Arangoex.Collection do
 
   DELETE /_api/collection/{collection-name}
   """
-  @spec drop(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def drop(endpoint, coll) do
-    endpoint
-    |> Endpoint.delete("collection/#{coll.name}")
+  @spec drop(t) :: Arangoex.ok_error(map)
+  def drop(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :delete,
+      path: "collection/#{collection.name}",
+    }
   end
 
   @doc """
@@ -83,11 +93,14 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection/{collection-name}
   """
-  @spec collection(Endpoint.t, t) :: Arangoex.ok_error(t)
-  def collection(endpoint, coll) do
-    endpoint
-    |> Endpoint.get("collection/#{coll.name}")
-    |> to_collection
+  @spec collection(t) :: Arangoex.ok_error(t)
+  def collection(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection/#{collection.name}",
+      ok_decoder: __MODULE__.CollectionDecoder,
+    }
   end
 
   @doc """
@@ -95,10 +108,14 @@ defmodule Arangoex.Collection do
 
   PUT /_api/collection/{collection-name}/load
   """
-  @spec load(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def load(endpoint, coll, count \\ true) do
-    endpoint
-    |> Endpoint.put("collection/#{coll.name}/load", %{count: count})
+  @spec load(t) :: Arangoex.ok_error(map)
+  def load(collection, count \\ true) do
+    %Request{
+      endpoint: :collection,
+      http_method: :put,
+      path: "collection/#{collection.name}/load",
+      body: %{count: count},
+    }
   end
 
   @doc """
@@ -106,22 +123,27 @@ defmodule Arangoex.Collection do
 
   PUT /_api/collection/{collection-name}/unload
   """
-  @spec unload(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def unload(endpoint, coll) do
-    endpoint
-    |> Endpoint.put("collection/#{coll.name}/unload")
+  @spec unload(t) :: Arangoex.ok_error(map)
+  def unload(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :put,
+      path: "collection/#{collection.name}/unload",
+    }
   end
 
   @doc """
   Return checksum for the collection
 
-
   GET /_api/collection/{collection-name}/checksum
   """
-  @spec checksum(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def checksum(endpoint, coll) do
-    endpoint
-    |> Endpoint.get("collection/#{coll.name}/checksum")
+  @spec checksum(t) :: Arangoex.ok_error(map)
+  def checksum(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection/#{collection.name}/checksum",
+    }
   end
 
   @doc """
@@ -129,10 +151,13 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection/{collection-name}/count
   """
-  @spec count(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def count(endpoint, coll) do
-    endpoint
-    |> Endpoint.get("collection/#{coll.name}/count")
+  @spec count(t) :: Arangoex.ok_error(map)
+  def count(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection/#{collection.name}/count",
+    }
   end
 
   @doc """
@@ -140,10 +165,13 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection/{collection-name}/figures
   """
-  @spec figures(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def figures(endpoint, coll) do
-    endpoint
-    |> Endpoint.get("collection/#{coll.name}/figures")
+  @spec figures(t) :: Arangoex.ok_error(map)
+  def figures(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection/#{collection.name}/figures",
+    }
   end
 
   @doc """
@@ -151,10 +179,13 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection/{collection-name}/properties
   """
-  @spec properties(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def properties(endpoint, coll) do
-    endpoint
-    |> Endpoint.get("collection/#{coll.name}/properties")
+  @spec properties(t) :: Arangoex.ok_error(map)
+  def properties(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection/#{collection.name}/properties",
+    }
   end
 
   @doc """
@@ -162,12 +193,16 @@ defmodule Arangoex.Collection do
 
   PUT /_api/collection/{collection-name}/properties
   """
-  @spec set_properties(Endpoint.t, t, keyword) :: Arangoex.ok_error(map)
-  def set_properties(endpoint, coll, opts \\ []) do
+  @spec set_properties(t, keyword) :: Arangoex.ok_error(map)
+  def set_properties(collection, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:waitForSync, :journalSize])
 
-    endpoint
-    |> Endpoint.put("collection/#{coll.name}/properties", properties)
+    %Request{
+      endpoint: :collection,
+      http_method: :put,
+      path: "collection/#{collection.name}/properties",
+      body: properties,
+    }
   end
 
   @doc """
@@ -175,10 +210,14 @@ defmodule Arangoex.Collection do
 
   PUT /_api/collection/{collection-name}/rename
   """
-  @spec rename(Endpoint.t, t, String.t) :: Arangoex.ok_error(map)
-  def rename(endpoint, coll, new_name) do
-    endpoint
-    |> Endpoint.put("collection/#{coll.name}/rename", %{name: new_name})
+  @spec rename(t, String.t) :: Arangoex.ok_error(map)
+  def rename(collection, new_name) do
+    %Request{
+      endpoint: :collection,
+      http_method: :put,
+      path: "collection/#{collection.name}/rename",
+      body: %{name: new_name},
+    }
   end
 
   @doc """
@@ -186,10 +225,13 @@ defmodule Arangoex.Collection do
 
   GET /_api/collection/{collection-name}/revision
   """
-  @spec revision(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def revision(endpoint, coll) do
-    endpoint
-    |> Endpoint.get("collection/#{coll.name}/revision")
+  @spec revision(t) :: Arangoex.ok_error(map)
+  def revision(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :get,
+      path: "collection/#{collection.name}/revision",
+    }
   end
 
   @doc """
@@ -197,10 +239,13 @@ defmodule Arangoex.Collection do
 
   PUT /_api/collection/{collection-name}/rotate
   """
-  @spec rotate(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def rotate(endpoint, coll) do
-    endpoint
-    |> Endpoint.put("collection/#{coll.name}/rotate")
+  @spec rotate(t) :: Arangoex.ok_error(map)
+  def rotate(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :put,
+      path: "collection/#{collection.name}/rotate",
+    }
   end
 
   @doc """
@@ -208,14 +253,20 @@ defmodule Arangoex.Collection do
 
   PUT /_api/collection/{collection-name}/truncate
   """
-  @spec truncate(Endpoint.t, t) :: Arangoex.ok_error(map)
-  def truncate(endpoint, coll) do
-    endpoint
-    |> Endpoint.put("collection/#{coll.name}/truncate")
+  @spec truncate(t) :: Arangoex.ok_error(map)
+  def truncate(collection) do
+    %Request{
+      endpoint: :collection,
+      http_method: :put,
+      path: "collection/#{collection.name}/truncate",
+    }
   end
 
-  @spec to_collection(Arangoex.ok_error(any())) :: Arangoex.ok_error(any())
-  defp to_collection({:ok, %{"result" => result}}) when is_list(result), do: {:ok, Enum.map(result, &new(&1))}
-  defp to_collection({:ok, result}), do: {:ok, new(result)}
-  defp to_collection({:error, _} = e), do: e
+  defmodule CollectionDecoder do
+    alias Arangoex.Collection
+
+    @spec decode_ok(Map.t) :: Arangoex.ok_error(Collection.t)
+    def decode_ok(%{"result" => result}) when is_list(result), do: {:ok, Enum.map(result, &Collection.new(&1))}
+    def decode_ok(result), do: {:ok, Collection.new(result)}
+  end
 end
