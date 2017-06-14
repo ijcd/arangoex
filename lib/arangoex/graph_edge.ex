@@ -19,7 +19,8 @@ defmodule Arangoex.GraphEdge do
     %Request{
       endpoint: :graph_edge,
       http_method: :get,
-      path: "edges/#{collection_name}#{query}"
+      path: "edges/#{collection_name}",
+      query: query,
     }
   end
 end

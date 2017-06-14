@@ -20,7 +20,6 @@ defmodule AdministrationTest do
           "accept" => "*/*",
           "authorization" => _,
           "host" => _,
-          "user-agent" => _,
           "my-header" => "3",
           "your-header" => "4",
         },
@@ -170,9 +169,9 @@ defmodule AdministrationTest do
 
   test "gets the server id" do
     assert {
-      :error, %HTTPoison.Response{body: body, status_code: 500}
+      :error, %{"status" => 500, "resp_body" => resp_body}
     } = Administration.server_id() |> arango
-    assert Regex.match?(~r/ArangoDB is not running in cluster mode/, body)
+    assert Regex.match?(~r/ArangoDB is not running in cluster mode/, resp_body)
   end
 
   test "gets the server role" do

@@ -6,20 +6,12 @@ defmodule Arangoex.Utils do
     opts
     |> ensure_permitted(permitted)
     |> Enum.map(fn {k, v} -> {to_header_name(k), v} end)
-    |> Enum.into([])
+    |> Enum.into(%{})
   end
 
   @spec opts_to_query(keyword, [atom]) :: String.t
   def opts_to_query(opts, permitted \\ []) do
-    q =
-      opts
-      |> opts_to_vars(permitted)
-      |> Map.to_list
-    if Enum.any?(q) do
-      "?" <> URI.encode_query(q)
-    else
-      ""
-    end
+    opts_to_vars(opts, permitted)
   end
 
   @spec opts_to_vars(keyword, [atom]) :: map
@@ -30,7 +22,7 @@ defmodule Arangoex.Utils do
     |> Enum.into(%{})
   end
 
-  @doc """ 
+  @doc """
   Filters keywords for permitted attributes given as a keyword list in
   permitted. If a single atom of :* is passed in, all attributes are
   returned. Permitted defaults to an empty keyword list.

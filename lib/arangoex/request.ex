@@ -1,6 +1,37 @@
 defmodule Arangoex.Request do
   require Logger
 
+  defmodule MyConn do
+    use Maxwell.Builder
+
+    # TODO: config or detect when loading
+    # adapter Maxwell.Adapter.Ibrowse
+    # adapter Maxwell.Adapter.Hackney
+    adapter Maxwell.Adapter.Httpc
+
+    middleware Maxwell.Middleware.Headers, %{"User-Agent" => "Arangoex", "Content-Type" => "application/json"}
+
+    def request(http_method, url, query, headers, body) do
+      conn =
+        url
+        |> new()
+        |> put_query_string(query)
+        |> put_req_headers(headers)
+        |> put_req_body(body)
+
+      response = case http_method do
+                   :get -> get(conn)
+                   :head -> head(conn)
+                   :post -> post(conn)
+                   :put -> put(conn)
+                   :patch -> patch(conn)
+                   :delete -> delete(conn)
+                   :trace -> trace(conn)
+                   :options -> options(conn)
+                 end
+    end
+  end
+
   @moduledoc """
   Makes requests to ArangoDB
   """
@@ -9,8 +40,9 @@ defmodule Arangoex.Request do
     endpoint: nil,
     system_only: false,
     http_method: nil,
-    headers: [],
+    headers: %{},
     path: nil,
+    query: %{},
     body: nil,
     encode_body: true,
     ok_decoder: nil,
@@ -26,13 +58,14 @@ defmodule Arangoex.Request do
     http_method: :get | :post | :put | :patch | :delete,
     headers: Keyword.t,
     path: String.t,
+    query: Map.t,
     body: Map.t | String.t,
     encode_body: boolean(),
     ok_decoder: module(),
     config_overrides: Keyword.t,
   }
 
-  @type httpoison_response :: {:ok, HTTPoison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
+  # @type httpoison_response :: {:ok, HTTPossison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
 
   def perform(%__MODULE__{} = operation, config) do
     config = Map.merge(config, Enum.into(operation.config_overrides, %{}))
@@ -67,7 +100,7 @@ defmodule Arangoex.Request do
       IO.inspect(body, label: "BODY")
     end
 
-    response = HTTPoison.request(operation.http_method, url, body, headers)
+    response = MyConn.request(operation.http_method, url, operation.query, headers, body)
 
     decoded =
       response
@@ -98,7 +131,11 @@ defmodule Arangoex.Request do
   defp encode_body(%{body: body, encode_body: false}, _config), do: body
   defp encode_body(%{body: %{__struct__: _} = body}, config), do: encode_body(%{body: map_without_nil_values(body)}, config)
   defp encode_body(%{body: body}, config) when body != nil, do: config[:json_codec].encode!(body)
-  defp encode_body(_, _), do: ""
+  defp encode_body(%{http_method: :post}, _), do: ""
+  defp encode_body(%{http_method: :patch}, _), do: ""
+  defp encode_body(%{http_method: :put}, _), do: ""
+  defp encode_body(%{http_method: :delete}, _), do: ""
+  defp encode_body(_, _), do: nil
 
   def map_without_nil_values(%{__struct__: _} = struct) do
     struct
@@ -108,10 +145,9 @@ defmodule Arangoex.Request do
   end
 
   defp decode_headers(headers) do
-    headers = Enum.into(headers, %{})
-    etag = headers["Etag"]
+    etag = headers["etag"]
     if etag do
-      Map.merge(headers, %{"Etag" => Poison.decode!(etag)})
+      Map.merge(headers, %{"etag" => Poison.decode!(etag)})
     else
       headers
     end
@@ -122,24 +158,30 @@ defmodule Arangoex.Request do
   defp decode_operation_response({:ok, response}, %{ok_decoder: decoder}) when decoder != nil, do: decoder.decode_ok(response)
   defp decode_operation_response(response, _), do: response
 
-  @spec decode_adapter_response(httpoison_response) :: Arangoex.ok_error(any())
+  # @spec decode_adapter_response(httpoison_response) :: Arangoex.ok_error(any())
   defp decode_adapter_response(response) do
     case response do
-      {:ok, %HTTPoison.Response{status_code: status_code, body: body} = embedded_response} when status_code >= 200 and status_code < 300 ->
+      {:ok, %Maxwell.Conn{state: :sent, status: status, resp_headers: resp_headers, resp_body: resp_body}} when status >= 200 and status < 300 ->
         try do
-          {:ok, Poison.decode!(body)}
+          {:ok, Poison.decode!(resp_body)}
         rescue
-          _ -> {:ok, decode_headers(embedded_response.headers)}
+          _ -> {:ok, decode_headers(resp_headers)}
         end
-      {:ok, %HTTPoison.Response{body: body} = response} ->
+      {:ok, %Maxwell.Conn{state: :sent, resp_body: resp_body} = response} ->
+        resp_body_as_string = to_string(resp_body)
         try do
-          {:error, Poison.decode!(body)}
+          {:error, Poison.decode!(resp_body_as_string)}
         rescue
-        _ -> {:error, response}
+          _ -> {:error, %{
+                   "status" => response.status,
+                   "resp_headers" => response.resp_headers,
+                   "resp_body" => resp_body_as_string,
+                   "response" => response
+                }}
         end
-      {:ok, %HTTPoison.Response{} = err} ->
-        {:error, err}
-      {:error, %HTTPoison.Error{}} = err ->
+      # {:ok, %HTTPoison.Response{} = err} ->
+      #   {:error, err}
+      {:error, _} = err ->
         err
     end
   end

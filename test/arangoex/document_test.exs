@@ -68,7 +68,7 @@ defmodule DocumentTest do
     test "fetches the header of a document", ctx do
       {:ok, doc} = Document.create(ctx.coll, ctx.data1) |> on_db(ctx)
       assert {:ok, removed} = Document.header(doc) |> on_db(ctx)
-      assert removed["Etag"] == doc._rev
+      assert removed["etag"] == doc._rev
     end
 
     test "fetches the header of a document using If-Matching, If-None-Matching", ctx do

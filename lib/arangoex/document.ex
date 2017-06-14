@@ -31,7 +31,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :post,
-      path: "document/#{collection.name}#{query}",
+      path: "document/#{collection.name}",
+      query: query,
       body: document,
       ok_decoder: __MODULE__.DocumentDecoder,
     }
@@ -109,7 +110,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :patch,
-      path: "document/#{collection.name}#{query}",
+      path: "document/#{collection.name}",
+      query: query,
       body: new_docs,
       ok_decoder: __MODULE__.DocumentDecoder,
     }
@@ -129,7 +131,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :patch,
-      path: "document/#{document._id}#{query}",
+      path: "document/#{document._id}",
+      query: query,
       headers: headers,
       body: new_document,
       ok_decoder: __MODULE__.DocumentDecoder,
@@ -150,7 +153,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :put,
-      path: "document/#{collection.name}#{query}",
+      path: "document/#{collection.name}",
+      query: query,
       body: new_docs,
       ok_decoder: __MODULE__.DocumentDecoder,
     }
@@ -170,7 +174,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :put,
-      path: "document/#{document._id}#{query}",
+      path: "document/#{document._id}",
+      query: query,
       body: new_document,
       headers: headers,
       ok_decoder: __MODULE__.DocumentDecoder,
@@ -189,7 +194,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :delete,
-      path: "document/#{collection.name}#{query}",
+      path: "document/#{collection.name}",
+      query: query,
       body: docs,
       ok_decoder: __MODULE__.DocumentDecoder,
     }
@@ -209,8 +215,8 @@ defmodule Arangoex.Document do
     %Request{
       endpoint: :document,
       http_method: :delete,
-      path: "document/#{document._id}#{query}",
-      body: %{},
+      path: "document/#{document._id}",
+      query: query,
       headers: headers,
       ok_decoder: __MODULE__.DocumentDecoder,
     }

@@ -75,24 +75,24 @@ defmodule Arangoex.Config do
     @common %{
       scheme: "http",
       host: "localhost",
-      port: 8529,      
+      port: 8529,
 
       username: nil,
       password: nil,
       use_auth: :basic,
 
-      headers: %{"Accept": "*/*"},
+      headers: %{"Accept" => "*/*"},
 
       json_codec: Poison,
 
-      # TODO: use these      
+      # TODO: use these
       retries: [
         max_attempts: 10,
         base_backoff_in_ms: 10,
         max_backoff_in_ms: 10_000
       ],
     }
-    
+
     @defaults %{
       administration: %{},
       aql: %{},
@@ -122,5 +122,5 @@ defmodule Arangoex.Config do
       config = Map.merge(config, @common)
       def get(unquote(endpoint)), do: unquote(Macro.escape(config))
     end
-  end  
+  end
 end

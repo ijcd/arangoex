@@ -30,7 +30,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :get,
-      path: "index/#{query}",
+      path: "index",
+      query: query,
     }
   end
 
@@ -52,7 +53,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :post,
-      path: "index/#{query}",
+      path: "index/",
+      query: query,
       body: body,
     }
   end
@@ -69,7 +71,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :post,
-      path: "index/#{query}",
+      path: "index/",
+      query: query,
       body: body,
     }
   end
@@ -92,7 +95,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :post,
-      path: "index/#{query}",
+      path: "index/",
+      query: query,
       body: body,
     }
   end
@@ -113,7 +117,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :post,
-      path: "index/#{query}",
+      path: "index/",
+      query: query,
       body: body,
     }
   end
@@ -134,7 +139,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :post,
-      path: "index/#{query}",
+      path: "index/",
+      query: query,
       body: body,
     }
   end
@@ -155,7 +161,8 @@ defmodule Arangoex.Index do
     %Request{
       endpoint: :index,
       http_method: :post,
-      path: "index/#{query}",
+      path: "index/",
+      query: query,
       body: body,
     }
   end

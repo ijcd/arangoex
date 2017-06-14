@@ -32,7 +32,8 @@ defmodule Arangoex.Administration do
       endpoint: :administration,
       http_method: :get,
       headers: headers,
-      path: "/_admin/echo#{query}"
+      path: "/_admin/echo",
+      query: query
     }
   end
 
@@ -49,7 +50,8 @@ defmodule Arangoex.Administration do
       endpoint: :administration,
       http_method: :post,
       body: code,
-      path: "/_admin/execute#{query}",
+      path: "/_admin/execute",
+      query: query,
       encode_body: false
     }
   end
@@ -66,7 +68,8 @@ defmodule Arangoex.Administration do
     %Request{
       endpoint: :administration,
       http_method: :get,
-      path: "/_admin/log#{query}"
+      path: "/_admin/log",
+      query: query,
     }
   end
 
@@ -84,7 +87,8 @@ defmodule Arangoex.Administration do
       endpoint: :administration,
       http_method: :get,
       headers: headers,
-      path: "/_admin/long_echo#{query}"
+      path: "/_admin/long_echo",
+      query: query,
     }
   end
 
@@ -156,7 +160,8 @@ defmodule Arangoex.Administration do
     %Request{
       endpoint: :administration,
       http_method: :get,
-      path: "/_admin/sleep#{query}"
+      path: "/_admin/sleep",
+      query: query,
     }
   end
 
