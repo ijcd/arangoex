@@ -169,9 +169,9 @@ defmodule AdministrationTest do
 
   test "gets the server id" do
     assert {
-      :error, %{"status" => 500, "resp_body" => resp_body}
+      :error, %{status: 500, body: body}
     } = Administration.server_id() |> arango
-    assert Regex.match?(~r/ArangoDB is not running in cluster mode/, resp_body)
+    assert Regex.match?(~r/ArangoDB is not running in cluster mode/, body)
   end
 
   test "gets the server role" do

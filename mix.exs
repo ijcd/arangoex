@@ -37,10 +37,10 @@ defmodule Arangoex.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:maxwell, "~> 2.2.1"},
+      {:tesla, "~> 0.7.1"},
+      {:poison, ">= 1.0.0"},
       # {:ibrowse, "~> 4.4", only: [:dev, :test]},
       # {:hackney, "~> 1.8", only: [:dev, :test]},
-      {:poison, "> 0.0.0"},
       {:exconstructor, "~> 1.0.2"},
       {:faker, "> 0.0.0", only: :test},
       {:mix_test_watch, "~> 0.2", only: :dev},

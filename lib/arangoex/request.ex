@@ -1,34 +1,42 @@
 defmodule Arangoex.Request do
   require Logger
 
-  defmodule MyConn do
-    use Maxwell.Builder
+  defmodule ApiConn do
+    use Tesla
+
+    defmodule Response do
+      defstruct [:status, :headers, :body]
+
+      @type t :: %__MODULE__{
+        status: pos_integer(),
+        headers: Map.t,
+        body: nil | String.t
+      }
+    end
 
     # TODO: config or detect when loading
-    # adapter Maxwell.Adapter.Ibrowse
-    # adapter Maxwell.Adapter.Hackney
-    adapter Maxwell.Adapter.Httpc
+    # adapter Tesla.Adapter.Ibrowse
+    # adapter Tesla.Adapter.Hackney
+    adapter Tesla.Adapter.Httpc
 
-    middleware Maxwell.Middleware.Headers, %{"User-Agent" => "Arangoex", "Content-Type" => "application/json"}
+    plug Tesla.Middleware.Tuples
+    plug Tesla.Middleware.Headers, %{"User-Agent" => "Arangoex", "Content-Type" => "application/json"}
 
-    def request(http_method, url, query, headers, body) do
-      conn =
-        url
-        |> new()
-        |> put_query_string(query)
-        |> put_req_headers(headers)
-        |> put_req_body(body)
+    def client(base_url) do
+      Tesla.build_client [
+        {Tesla.Middleware.Tuples, nil},
+        {Tesla.Middleware.BaseUrl, base_url}
+      ]
+    end
 
-      response = case http_method do
-                   :get -> get(conn)
-                   :head -> head(conn)
-                   :post -> post(conn)
-                   :put -> put(conn)
-                   :patch -> patch(conn)
-                   :delete -> delete(conn)
-                   :trace -> trace(conn)
-                   :options -> options(conn)
-                 end
+    def go(client, options) do
+      Tesla.request(client, options)
+      |> decode_response
+    end
+
+    @spec decode_response(Tesla.Env.t) :: Response.t
+    def decode_response({ok_error, %Tesla.Env{status: status, headers: headers, body: body}}) do
+      {ok_error, %Response{status: status, headers: headers, body: body}}
     end
   end
 
@@ -80,12 +88,13 @@ defmodule Arangoex.Request do
       IO.inspect(config, label: "CONFIG")
     end
 
-    url = %URI{
+    base_url = %URI{
       scheme: config.scheme,
       host: config.host,
       port: config.port,
-      path: path_for_operation(operation)
     } |> URI.to_string
+
+    path = path_for_operation(operation)
 
     headers =
       auth_headers(config)
@@ -95,12 +104,21 @@ defmodule Arangoex.Request do
     body = encode_body(operation, config)
 
     if config[:debug_requests] do
-      IO.inspect(url, label: "URL")
+      IO.inspect(base_url, label: "BASE_URL")
+      IO.inspect(path, label: "PATH")
       IO.inspect(headers, label: "HEADERS")
       IO.inspect(body, label: "BODY")
     end
 
-    response = MyConn.request(operation.http_method, url, operation.query, headers, body)
+    client = ApiConn.client(base_url)
+
+    response = ApiConn.go(client,
+      method: operation.http_method,
+      url: path,                              # Tesla will build onto the client's base_Url
+      query: operation.query,
+      headers: headers,
+      body: body,
+    )
 
     decoded =
       response
@@ -161,28 +179,24 @@ defmodule Arangoex.Request do
   # @spec decode_adapter_response(httpoison_response) :: Arangoex.ok_error(any())
   defp decode_adapter_response(response) do
     case response do
-      {:ok, %Maxwell.Conn{state: :sent, status: status, resp_headers: resp_headers, resp_body: resp_body}} when status >= 200 and status < 300 ->
+      {:ok, %ApiConn.Response{status: status, headers: headers, body: body}} when status >= 200 and status < 300 ->
         try do
-          {:ok, Poison.decode!(resp_body)}
+          {:ok, Poison.decode!(body)}
         rescue
-          _ -> {:ok, decode_headers(resp_headers)}
+          _ -> {:ok, decode_headers(headers)}
         end
-      {:ok, %Maxwell.Conn{state: :sent, resp_body: resp_body} = response} ->
-        resp_body_as_string = to_string(resp_body)
+      {:ok, %ApiConn.Response{status: status, headers: headers, body: body}}  ->
         try do
-          {:error, Poison.decode!(resp_body_as_string)}
+          {:error, Poison.decode!(body)}
         rescue
           _ -> {:error, %{
-                   "status" => response.status,
-                   "resp_headers" => response.resp_headers,
-                   "resp_body" => resp_body_as_string,
-                   "response" => response
+                   status: status,
+                   headers: headers,
+                   body: body,
+                   response: response
                 }}
         end
-      # {:ok, %HTTPoison.Response{} = err} ->
-      #   {:error, err}
-      {:error, _} = err ->
-        err
+      {:error, _} = e -> e
     end
   end
 end
