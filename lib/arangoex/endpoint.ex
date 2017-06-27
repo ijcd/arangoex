@@ -114,7 +114,7 @@ defmodule Arangoex.Endpoint do
   end
   
   @spec delete(t, String.t, map | [map], keyword) :: Arangoex.ok_error(any())    
-  def delete(endpoint, resource, data \\ %{}, headers \\ []) do
+  def delete(endpoint, resource, data \\ nil, headers \\ []) do
     url = url(endpoint, resource)
     body = encode_data(data)
     headers = Map.merge(request_headers(endpoint), Enum.into(headers, %{}))
@@ -159,7 +159,8 @@ defmodule Arangoex.Endpoint do
     end
   end
 
-  defp encode_data(%{} = data) when data == %{}, do: ""
+  defp encode_data(nil), do: ""
+  defp encode_data(%{} = data) when data == %{}, do: "{}"
   defp encode_data(%{__struct__: _} = data) do
     data
     |> Map.from_struct

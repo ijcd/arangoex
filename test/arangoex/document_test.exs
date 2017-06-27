@@ -22,6 +22,10 @@ defmodule DocumentTest do
       assert {:ok, %Docref{_id: _, _key: _, _rev: _}} = Document.create(ctx.endpoint, ctx.coll, ctx.data1)
     end
 
+    test "that is empty", ctx do
+      assert {:ok, %Docref{_id: _, _key: _, _rev: _}} = Document.create(ctx.endpoint, ctx.coll, %{})
+    end
+
     test "waiting for sync", ctx do
       assert {:ok, %Docref{_id: _, _key: _, _rev: _}} = Document.create(ctx.endpoint, ctx.coll, ctx.data1, waitForSync: true)
       assert {:ok, {%Docref{_id: _, _key: _, _rev: _}, _new}} = Document.create(ctx.endpoint, ctx.coll, ctx.data2, returnNew: true)
