@@ -19,11 +19,11 @@ end
 
 # You can configure for your application as:
 #
-#     config :arangoex, key: :value
+#     config :Arango, key: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:arangoex, :key)
+#     Application.get_env(:Arango, :key)
 #
 # Or configure a 3rd-party app:
 #

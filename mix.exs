@@ -1,8 +1,8 @@
-defmodule Arangoex.Mixfile do
+defmodule Arango.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :arangoex,
+    [app: :Arango,
      version: "0.1.0",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
@@ -11,7 +11,7 @@ defmodule Arangoex.Mixfile do
 
      # Docs
      # name: "MyApp",
-     source_url: "https://github.com/ijcd/arangoex",
+     source_url: "https://github.com/ijcd/Arango",
      # homepage_url: "http://YOUR_PROJECT_HOMEPAGE",
      # docs: [main: "MyApp", # The main page in the docs
      #        logo: "path/to/logo.png",

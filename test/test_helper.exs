@@ -1,6 +1,6 @@
 ExUnit.start()
 
-defmodule Arangoex.TestHelper do
+defmodule Arango.TestHelper do
   # TODO: make this a struct so it is typed
   def test_config do
     %{
@@ -28,30 +28,30 @@ defmodule Arangoex.TestHelper do
   # send request to arango using default config
   def arango(op, config_overrides \\ []) do
     merged_config = Map.merge(test_config(), Enum.into(config_overrides, %{}))
-    Arangoex.request(op, merged_config)
+    Arango.request(op, merged_config)
   end
 
   # send request to arango using debug config
   def darango(op, config_overrides \\ []) do
     merged_config = Map.merge(debug_config(), Enum.into(config_overrides, %{}))
-    Arangoex.request(op, merged_config)
+    Arango.request(op, merged_config)
   end
 end
 
-defmodule Arangoex.TestCase do
+defmodule Arango.TestCase do
   use ExUnit.CaseTemplate
-  import Arangoex.TestHelper
+  import Arango.TestHelper
 
-  alias Arangoex.User
-  alias Arangoex.Database
-  alias Arangoex.Collection
-  alias Arangoex.Aql
-  alias Arangoex.Task
-  alias Arangoex.Wal
+  alias Arango.User
+  alias Arango.Database
+  alias Arango.Collection
+  alias Arango.Aql
+  alias Arango.Task
+  alias Arango.Wal
 
   using do
     quote do
-      import Arangoex.TestHelper
+      import Arango.TestHelper
     end
   end
 
