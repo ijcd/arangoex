@@ -28,11 +28,11 @@ defmodule TaskTest do
         "period" => 2,
         "type" => "periodic"
       }
-    } = Task.create(task) |> arango
+    } = Task.create(task) |> arango()
   end
 
   test "lists a task or tasks" do
-     {:ok, tasks} = Task.tasks() |> arango
+     {:ok, tasks} = Task.tasks() |> arango()
      assert [
         %{
           "database" => "_system",
@@ -72,7 +72,7 @@ defmodule TaskTest do
         "errorNum" => 1852,
         "errorMessage" => "task not found"
       }
-    } = Task.delete("1234") |> arango
+    } = Task.delete("1234") |> arango()
 
     task = %Task{
       name: "SampleTask",
@@ -83,11 +83,11 @@ defmodule TaskTest do
       },
       period: 2
     }
-    {:ok, %{"id" => task_id}} = Task.create(task) |> arango
+    {:ok, %{"id" => task_id}} = Task.create(task) |> arango()
 
     assert {
       :ok, %{"code" => 200, "error" => false}
-    } = Task.delete(task_id) |> arango
+    } = Task.delete(task_id) |> arango()
   end
 
   test "fetch a task by id" do
@@ -100,9 +100,9 @@ defmodule TaskTest do
       },
       period: 2
     }
-    {:ok, %{"id" => task_id}} = Task.create(task) |> arango
+    {:ok, %{"id" => task_id}} = Task.create(task) |> arango()
 
-    task = Task.task(task_id) |> arango
+    task = Task.task(task_id) |> arango()
     {:ok, result} = task
     assert {
       :ok, %{
@@ -130,9 +130,9 @@ defmodule TaskTest do
       },
       period: 2
     }
-    assert {:ok, _} = Task.create_with_id("foobar", task) |> arango
+    assert {:ok, _} = Task.create_with_id("foobar", task) |> arango()
 
-    task = Task.task("foobar") |> arango
+    task = Task.task("foobar") |> arango()
     {:ok, result} = task
     assert {
       :ok, %{

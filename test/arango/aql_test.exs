@@ -9,7 +9,7 @@ defmodule AqlTest do
     # no functions yet
     assert {
       :ok, []
-    } == Aql.functions() |> arango
+    } == Aql.functions() |> arango()
   end
 
   test "Create AQL user function" do
@@ -24,7 +24,7 @@ defmodule AqlTest do
         "code" => 201,
         "error" => false,
       }
-    } == Aql.create_function(aql_function) |> arango
+    } == Aql.create_function(aql_function) |> arango()
 
     # replaced returns 200
     assert {
@@ -32,7 +32,7 @@ defmodule AqlTest do
         "code" => 200,
         "error" => false,
       }
-    } == Aql.create_function(aql_function) |> arango
+    } == Aql.create_function(aql_function) |> arango()
 
     # function should be there
     assert {
@@ -42,7 +42,7 @@ defmodule AqlTest do
           "code" => "function (celsius) { return celsius * 1.8 + 32; }",
         }
       ]
-    } == Aql.functions() |> arango
+    } == Aql.functions() |> arango()
   end
 
   test "Remove existing AQL user function" do
@@ -51,8 +51,8 @@ defmodule AqlTest do
       code: "function (celsius) { return celsius * 1.8 + 32; }",
     }
 
-    {:ok, _} = Aql.create_function(aql_function) |> arango
-    {:ok, functions} = Aql.functions() |> arango
+    {:ok, _} = Aql.create_function(aql_function) |> arango()
+    {:ok, functions} = Aql.functions() |> arango()
     assert Enum.count(functions) == 1
 
     # deletes
@@ -61,7 +61,7 @@ defmodule AqlTest do
           "code" => 200,
           "error" => false,
       }
-    } == Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango
+    } == Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
 
     # already deleted
     assert {
@@ -71,7 +71,7 @@ defmodule AqlTest do
         "errorMessage" => "user function '%s()' not found",
         "errorNum" => 1582
       }
-    } == Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango
+    } == Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
   end
 
   test "Explain an AQL query (valid query)", ctx do
