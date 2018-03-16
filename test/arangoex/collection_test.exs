@@ -15,8 +15,7 @@ defmodule CollectionTest do
 
     assert names == [
       "_apps", "_aqlfunctions", "_frontend", "_graphs", "_jobs", "_modules",
-      "_queues", "_routing", "_statistics", "_statistics15", "_statisticsRaw",
-      "_users"
+      "_queues", "_routing", "_statistics", "_statistics15", "_statisticsRaw", "_users"
     ]
   end
 

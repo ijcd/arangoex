@@ -40,27 +40,27 @@ defmodule TaskTest do
           "period" => 1,
           "type" => "periodic"
         },
-        %{
-          "database" => "_system",
-          "id" => "statistics-gc",
-          "name" => "statistics-gc",
-          "period" => 450,
-          "type" => "periodic"
-        },
-        %{
-          "database" => "_system",
-          "id" => "statistics-collector",
-          "name" => "statistics-collector",
-          "period" => 10,
-          "type" => "periodic"
-        },
-        %{
-          "database" => "_system",
-          "id" => "statistics-average-collector",
-          "name" => "statistics-average-collector",
-          "period" => 900,
-          "type" => "periodic"
-        },
+        # %{
+        #   "database" => "_system",
+        #   "id" => "statistics-gc",
+        #   "name" => "statistics-gc",
+        #   "period" => 450,
+        #   "type" => "periodic"
+        # },
+        # %{
+        #   "database" => "_system",
+        #   "id" => "statistics-collector",
+        #   "name" => "statistics-collector",
+        #   "period" => 10,
+        #   "type" => "periodic"
+        # },
+        # %{
+        #   "database" => "_system",
+        #   "id" => "statistics-average-collector",
+        #   "name" => "statistics-average-collector",
+        #   "period" => 900,
+        #   "type" => "periodic"
+        # },
       ] = Enum.sort(tasks)
   end
 

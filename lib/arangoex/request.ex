@@ -24,13 +24,13 @@ defmodule Arangoex.Request do
 
     def client(base_url) do
       Tesla.build_client [
-        {Tesla.Middleware.Tuples, nil},
+        # {Tesla.Middleware.Tuples, nil},
         {Tesla.Middleware.BaseUrl, base_url}
       ]
     end
 
     def go(client, options) do
-      Tesla.request(client, options)
+      request(client, options)
       |> decode_response
     end
 

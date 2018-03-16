@@ -37,6 +37,6 @@ defmodule WalTest do
   test "looks up running transactions" do
     {:ok, transactions} = Wal.transactions() |> arango
 
-    assert %{"minLastCollected" => nil, "minLastSealed" => nil, "runningTransactions" => 0} = transactions
+    assert %{"minLastCollected" => nil, "minLastSealed" => nil, "runningTransactions" => _} = transactions
   end
 end

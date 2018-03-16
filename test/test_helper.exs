@@ -47,6 +47,7 @@ defmodule Arangoex.TestCase do
   alias Arangoex.Collection
   alias Arangoex.Aql
   alias Arangoex.Task
+  alias Arangoex.Wal
 
   using do
     quote do
@@ -55,6 +56,8 @@ defmodule Arangoex.TestCase do
   end
 
   setup do
+    {:ok, properties} = Wal.set_properties(throttleWhenPending: 0) |> arango
+
     # remember original dbs, users, tasks
     {:ok, original_dbs} = Database.databases() |> arango
     {:ok, original_users} = User.users() |> arango

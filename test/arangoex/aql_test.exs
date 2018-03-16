@@ -240,10 +240,10 @@ end
         "code" => 200,
         "error" => false,
         "enabled" => true,
-        "trackSlowQueries" => true,
+        "maxQueryStringLength" => 4096,
         "maxSlowQueries" => 64,
         "slowQueryThreshold" => 10,
-        "maxQueryStringLength" => 4096,
+        "trackSlowQueries" => true
       }
     } == Aql.query_properties() |> on_db(ctx)
   end
