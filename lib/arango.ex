@@ -35,7 +35,7 @@ defmodule Arango do
   # @spec request(Arango.Operation.t) :: term
   # @spec request(Arango.Operation.t, Keyword.t) :: ok_error(term)
   def request(op, config_overrides \\ []) do
-    Arango.Request.perform(op, Arango.Config.new(op.endpoint, config_overrides)) 
+    Arango.Request.perform(op, config_overrides) 
   end
 
   # @doc """

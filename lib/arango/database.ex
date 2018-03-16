@@ -62,15 +62,14 @@ defmodule Arango.Database do
 
   GET /_api/database/current
   """
-  @type show_database_opts_opts :: [{:name, String.t}]
-  @spec database(show_database_opts_opts) :: Arango.ok_error(t)
-  def database(opts \\ []) do
+  # @type show_database_opts :: [{:name, String.t}]
+  @spec database() :: Arango.ok_error(t)
+  def database() do
     %Request{
       endpoint: :database,
       http_method: :get,
       path: "database/current",
       ok_decoder: __MODULE__.DatabaseDecoder,
-      config_overrides: [database_name: Keyword.get(opts, :name)],
     }
   end
 

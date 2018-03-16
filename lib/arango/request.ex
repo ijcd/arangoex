@@ -53,10 +53,8 @@ defmodule Arango.Request do
     query: %{},
     body: nil,
     encode_body: true,
+    database_name: nil,
     ok_decoder: nil,
-
-    # This is awkward, thing more about how to handle database_name, etc, in the operation
-    config_overrides: [],
   ]
   use ExConstructor
 
@@ -69,22 +67,21 @@ defmodule Arango.Request do
     query: Map.t,
     body: Map.t | String.t,
     encode_body: boolean(),
+    database_name: String.t,
     ok_decoder: module(),
-    config_overrides: Keyword.t,
   }
 
   # @type httpoison_response :: {:ok, HTTPossison.Response.t | HTTPoison.AsyncResponse.t} | {:error, HTTPoison.Error.t}
 
-  def perform(%__MODULE__{} = operation, config) do
-    config = Map.merge(config, Enum.into(operation.config_overrides, %{}))
+  def perform(%__MODULE__{} = op, call_config) do
+    config =
+      Arango.Config.new(op.endpoint, call_config)
 
-    operation =
-      %{database_name: config[:database_name]}
-      |> Map.merge(operation)
+    op = %{op | database_name: config[:database_name]}
 
     if config[:debug_requests] do
       IO.puts("=================================================")
-      IO.inspect(operation, label: "OPERATION")
+      IO.inspect(op, label: "OPERATION")
       IO.inspect(config, label: "CONFIG")
     end
 
@@ -94,14 +91,14 @@ defmodule Arango.Request do
       port: config.port,
     } |> URI.to_string
 
-    path = path_for_operation(operation)
+    path = path_for_operation(op)
 
     headers =
       auth_headers(config)
       |> Map.merge(config.headers |> Enum.into(%{}))
-      |> Map.merge(Map.get(operation, :headers, %{}) |> Enum.into(%{}))
+      |> Map.merge(Map.get(op, :headers, %{}) |> Enum.into(%{}))
 
-    body = encode_body(operation, config)
+    body = encode_body(op, config)
 
     if config[:debug_requests] do
       IO.inspect(base_url, label: "BASE_URL")
@@ -113,9 +110,9 @@ defmodule Arango.Request do
     client = ApiConn.client(base_url)
 
     response = ApiConn.go(client,
-      method: operation.http_method,
+      method: op.http_method,
       url: path,                              # Tesla will build onto the client's base_Url
-      query: operation.query,
+      query: op.query,
       headers: headers,
       body: body,
     )
@@ -123,7 +120,7 @@ defmodule Arango.Request do
     decoded =
       response
       |> decode_adapter_response
-      |> decode_operation_response(operation)
+      |> decode_operation_response(op)
 
     if config[:debug_requests] do
       IO.inspect(response, label: "RESPONSE")
@@ -148,7 +145,7 @@ defmodule Arango.Request do
   # defp encode_body(%{} = data) when data == %{}, do: ""
   defp encode_body(%{body: body, encode_body: false}, _config), do: body
   defp encode_body(%{body: %{__struct__: _} = body}, config), do: encode_body(%{body: map_without_nil_values(body)}, config)
-  defp encode_body(%{body: body}, config) when body != nil, do: config[:json_codec].encode!(body)
+  defp encode_body(%{body: body}, _) when body != nil, do: Poison.encode!(body)
   defp encode_body(%{http_method: :post}, _), do: ""
   defp encode_body(%{http_method: :patch}, _), do: ""
   defp encode_body(%{http_method: :put}, _), do: ""

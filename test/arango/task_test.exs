@@ -76,7 +76,7 @@ defmodule TaskTest do
 
     task = %Task{
       name: "SampleTask",
-      command: "(function(params) { require('@arangodb').print(params); })(params)",
+      command: "(function (params) { require('@arangodb/statistics').historianAverage(); } )(params);",
       params: %{
         foo: "fooey",
         bar: "barey"
@@ -93,7 +93,7 @@ defmodule TaskTest do
   test "fetch a task by id" do
     task = %Task{
       name: "SampleTask",
-      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)",
+      command: "(function (params) { require('@arangodb/statistics').historianAverage(); } )(params);",
       params: %{
         foo: "fooey",
         bar: "barey"
@@ -117,13 +117,13 @@ defmodule TaskTest do
         "type" => "periodic"
       }
     } = task
-    assert Regex.match?(~r/myparams/, result["command"])
+    assert Regex.match?(~r/historianAverage/, result["command"])
   end
 
   test "create a task by id" do
     task = %Task{
       name: "SampleTask",
-      command: "(function(myparams) { require('@arangodb').print(myparams); })(myparams)",
+      command: "(function (params) { require('@arangodb/statistics').historianAverage(); } )(params);",
       params: %{
         foo: "fooey",
         bar: "barey"
@@ -147,6 +147,6 @@ defmodule TaskTest do
         "type" => "periodic"
       }
     } = task
-    assert Regex.match?(~r/myparams/, result["command"])
+    assert Regex.match?(~r/historianAverage/, result["command"])
   end
  end

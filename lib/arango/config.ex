@@ -8,8 +8,11 @@ defmodule Arango.Config do
   # and then finally any config specified for the particular endpoint
 
   @common_config [
-    # TODO: do something with debug_requests
-    :http_client, :json_codec, :debug_requests, :retries, :username, :password, :host
+    :debug_requests,
+    # :retries,           # TODO: implement this
+    :username,
+    :password,
+    :host
   ]
 
   @type t :: %{} | Keyword.t
@@ -18,12 +21,12 @@ defmodule Arango.Config do
   Builds a complete set of config for an operation.
 
   1) Defaults are pulled from `Arango.Config.Defaults`
-  2) Common values set via e.g `config :Arango` are merged in.
-  3) Keys set on the individual api e.g `config :Arango, :replication` are merged in
+  2) Common values set via e.g `config :arango` are merged in.
+  3) Keys set on the individual api e.g `config :arango, :replication` are merged in
   4) Finally, any configuration overrides are merged in
   """
-  def new(endpoint, opts \\ []) do
-    overrides = Map.new(opts)
+  def new(endpoint, overrides \\ []) do
+    overrides = Enum.into(overrides, %{})
 
     endpoint
     |> build_base(overrides)
@@ -32,8 +35,8 @@ defmodule Arango.Config do
 
   def build_base(endpoint, overrides \\ %{}) do
     defaults = Arango.Config.Defaults.get(endpoint)
-    common_config = Application.get_all_env(:Arango) |> Map.new |> Map.take(@common_config)
-    endpoint_config = Application.get_env(:Arango, endpoint, []) |> Map.new
+    common_config = Application.get_all_env(:arango) |> Map.new |> Map.take(@common_config)
+    endpoint_config = Application.get_env(:arango, endpoint, []) |> Map.new
 
     defaults
     |> Map.merge(common_config)
@@ -83,14 +86,12 @@ defmodule Arango.Config do
 
       headers: %{"Accept" => "*/*"},
 
-      json_codec: Poison,
-
-      # TODO: use these
-      retries: [
-        max_attempts: 10,
-        base_backoff_in_ms: 10,
-        max_backoff_in_ms: 10_000
-      ],
+      # # TODO: use these
+      # retries: [
+      #   max_attempts: 10,
+      #   base_backoff_in_ms: 10,
+      #   max_backoff_in_ms: 10_000
+      # ],
     }
 
     @defaults %{

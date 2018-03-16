@@ -30,7 +30,7 @@ defmodule DatabaseTest do
     assert (after_dbs -- original_dbs) == [new_dbname]
 
     # assert metadata
-    {:ok, _db_info} = Database.database(name: new_dbname) |> arango()
+    {:ok, _db_info} = Database.database() |> arango(database_name: new_dbname)
 
     # assert users
     {:ok, %User{user: "admin"}} = User.user("admin") |> arango()
@@ -61,13 +61,13 @@ defmodule DatabaseTest do
 
   test "looks up database information" do
     # lookup _system
-    {:ok, db} = Database.database(name: "_system") |> arango()
+    {:ok, db} = Database.database() |> arango(database_name: "_system")
     %Arango.Database{id: "1", isSystem: true, name: "_system", path: "/var/lib/arangodb3/databases/database-1", users: nil} = db
 
     # lookup a newly minted db
     new_dbname = Faker.Lorem.word
     {:ok, true} = Database.create(name: new_dbname) |> arango()
-    {:ok, db} = Database.database(name: new_dbname) |> arango()
+    {:ok, db} = Database.database() |> arango(database_name: new_dbname)
     %Arango.Database{id: _, isSystem: false, name: ^new_dbname, path: _, users: nil} = db
   end
 

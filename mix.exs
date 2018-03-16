@@ -2,7 +2,7 @@ defmodule Arango.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :Arango,
+    [app: :arango,
      version: "0.1.0",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
@@ -11,7 +11,7 @@ defmodule Arango.Mixfile do
 
      # Docs
      # name: "MyApp",
-     source_url: "https://github.com/ijcd/Arango",
+     source_url: "https://github.com/ijcd/arango",
      # homepage_url: "http://YOUR_PROJECT_HOMEPAGE",
      # docs: [main: "MyApp", # The main page in the docs
      #        logo: "path/to/logo.png",
@@ -37,7 +37,7 @@ defmodule Arango.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:tesla, "~> 0.7.1"},
+      {:tesla, "~> 0.10.0"},
       {:poison, ">= 1.0.0"},
       # {:ibrowse, "~> 4.4", only: [:dev, :test]},
       # {:hackney, "~> 1.8", only: [:dev, :test]},
