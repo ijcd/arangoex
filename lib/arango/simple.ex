@@ -118,7 +118,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/range
   """
-  @lint {Credo.Check.Refactor.FunctionArity, false}
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   @spec range(Collection.t, String.t, float, float, keyword) :: Arango.ok_error(map)
   def range(collection, attribute_name, left, right, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :closed])
@@ -255,7 +255,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/within
   """
-  @lint {Credo.Check.Refactor.FunctionArity, false}
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   @spec within(Collection.t, float, float, float, keyword) :: Arango.ok_error(map)
   def within(collection, latitude, longitude, radius, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :distance, :geo])
@@ -279,7 +279,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/within-rectangle
   """
-  @lint {Credo.Check.Refactor.FunctionArity, false}
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   @spec within_rectangle(Collection.t, float, float, float, float, keyword) :: Arango.ok_error(map)
   def within_rectangle(collection, latitude1, longitude1, latitude2, longitude2, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :geo])

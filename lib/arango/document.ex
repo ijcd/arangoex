@@ -96,13 +96,13 @@ defmodule Arango.Document do
     }
   end
 
+  @doc """
+  Update document(s)
+
+  PATCH /_api/document/{collection} or PATCH /_api/document/{document-handle}
+  """
   def update(collection, docs, opts \\ [])
 
-  @doc """
-  Update documents
-
-  PATCH /_api/document/{collection}
-  """
   @spec update(Collection.t, [map], keyword) :: Arango.ok_error([map])
   def update(collection, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
@@ -117,11 +117,6 @@ defmodule Arango.Document do
     }
   end
 
-  @doc """
-  Update document
-
-  PATCH /_api/document/{document-handle}
-  """
   @spec update(map, map, keyword) :: Arango.ok_error(map)
   def update(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
@@ -139,13 +134,13 @@ defmodule Arango.Document do
     }
   end
 
+  @doc """
+  Replace document(s)
+
+  PUT /_api/document/{collection} or PUT /_api/document/{document-handle}
+  """
   def replace(collection, docs, opts \\ [])
 
-  @doc """
-  Replace documents
-
-  PUT /_api/document/{collection}
-  """
   @spec replace(Collection.t, [map], keyword) :: Arango.ok_error([map])
   def replace(collection, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
@@ -160,11 +155,6 @@ defmodule Arango.Document do
     }
   end
 
-  @doc """
-  Replace document
-
-  PUT /_api/document/{document-handle}
-  """
   @spec replace(t, map) :: Arango.ok_error(t | [t])
   def replace(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])

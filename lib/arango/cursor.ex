@@ -15,7 +15,6 @@ defmodule Arango.Cursor do
       :cache,
       :memory_limit,
       :ttl,
-      :bind_vars,
       :profile,
       :optimizer_rules,
       :satellite_sync_wait,
