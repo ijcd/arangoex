@@ -47,7 +47,6 @@ defmodule Arango.TestCase do
   alias Arango.Collection
   alias Arango.Aql
   alias Arango.Task
-  alias Arango.Wal
 
   using do
     quote do
@@ -56,12 +55,10 @@ defmodule Arango.TestCase do
   end
 
   setup do
-    {:ok, _properties} = Wal.set_properties(throttleWhenPending: 0) |> arango()
-
     # remember original dbs, users, tasks
     {:ok, original_dbs} = Database.databases() |> arango()
     {:ok, original_users} = User.users() |> arango()
-    {:ok, original_funcs} = Aql.functions() |> arango()
+    {:ok, %{"result" => original_funcs}} = Aql.functions() |> arango()
     {:ok, original_tasks} = Task.tasks() |> arango()
 
     new_db_name = Faker.Lorem.word
@@ -84,8 +81,9 @@ defmodule Arango.TestCase do
       end
 
       # cleanup any new functions that have appeared
-      {:ok, after_funcs} = Aql.functions() |> arango()
-      for function <- (after_funcs -- original_funcs) do
+      {:ok, %{"result" => after_funcs}} = Aql.functions() |> arango()
+      original_func_names = original_funcs |> Enum.map(& &1["name"])
+      for function <- after_funcs, function["name"] not in original_func_names do
         {:ok, _} = Aql.delete_function(function["name"]) |> arango()
       end
 
