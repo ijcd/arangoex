@@ -2,6 +2,10 @@ defmodule GraphTraversalTest do
   use Arango.TestCase
   doctest Arango
 
+  # The /_api/traversal endpoint was removed in ArangoDB 3.12.
+  # All tests in this module are skipped until traversal is reimplemented via AQL.
+  @moduletag :skip
+
   alias Arango.GraphTraversal
   alias Arango.Graph
 

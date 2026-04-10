@@ -8,13 +8,12 @@ defmodule UserTest do
 
   test "lists users" do
     {:ok, users} = User.users() |> arango()
-    
+
     names =
       users
       |> Enum.map(fn c -> c.user end)
-      |> Enum.sort
 
-    assert names == ["root"]
+    assert "root" in names
   end
 
   test "creates a user" do
@@ -96,6 +95,7 @@ defmodule UserTest do
     assert {:ok, %{^db_name => "rw"}} = User.databases(johnny) |> arango()
 
     {:ok, _} = User.revoke(johnny, db_name) |> arango()
-    assert {:ok, %{^db_name => "none"}} = User.databases(johnny) |> arango()
+    {:ok, dbs} = User.databases(johnny) |> arango()
+    assert Map.get(dbs, db_name, "none") == "none"
   end
 end

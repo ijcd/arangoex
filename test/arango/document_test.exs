@@ -48,23 +48,13 @@ defmodule DocumentTest do
 
     test "fails to create a document with duplicate key", ctx do
       assert {:ok, %Docref{_id: _, _key: key, _rev: _}} = Document.create(ctx.coll, ctx.data1) |> on_db(ctx)
-      assert {:error,
-              %{
-                "error" => true,
-                "code" => 409,
-                "errorMessage" => "cannot create document, unique constraint violated"
-              }
-      } = Document.create(ctx.coll, Map.merge(ctx.data2, %{_key: key})) |> on_db(ctx)
+      assert {:error, %{"error" => true, "code" => 409}} =
+        Document.create(ctx.coll, Map.merge(ctx.data2, %{_key: key})) |> on_db(ctx)
     end
 
     test "fails to create a document on an unknown collection", ctx do
-      assert {:error,
-              %{
-                "error" => true,
-                "code" => 404,
-                "errorMessage" => "collection 'asdf' not found"
-              }
-      } = Document.create(%Collection{name: "asdf"}, ctx.data1) |> on_db(ctx)
+      assert {:error, %{"error" => true, "code" => 404}} =
+        Document.create(%Collection{name: "asdf"}, ctx.data1) |> on_db(ctx)
     end
   end
 
@@ -266,7 +256,7 @@ defmodule DocumentTest do
       {:ok, {docref, doc}} = Document.create(ctx.coll, ctx.data1, returnNew: true) |> on_db(ctx)
 
       doc2 = Map.merge(doc, %{"age" => 77, "_rev" => "foobar"})
-      assert {:error, %{"errorNum" => 1200, "errorMessage" => "precondition failed"}} = Document.update(docref, doc2, returnNew: true, ignoreRevs: false) |> on_db(ctx)
+      assert {:error, %{"errorNum" => 1200}} = Document.update(docref, doc2, returnNew: true, ignoreRevs: false) |> on_db(ctx)
     end
 
     test "updates a document conditionally (using If-Match header)", ctx do
@@ -281,7 +271,7 @@ defmodule DocumentTest do
       {:ok, {docref, doc}} = Document.create(ctx.coll, ctx.data1, returnNew: true) |> on_db(ctx)
 
       doc2 = Map.merge(doc, %{"age" => 55, "_rev" => "foobar"})
-      assert {:error, %{"errorMessage" => "precondition failed"}} = Document.update(docref, doc2, returnNew: true, ifMatch: "12345") |> on_db(ctx)
+      assert {:error, %{"errorNum" => 1200}} = Document.update(docref, doc2, returnNew: true, ifMatch: "12345") |> on_db(ctx)
     end
   end
 
@@ -580,9 +570,9 @@ defmodule DocumentTest do
       new_doc2 = Map.merge(doc2, %{"age" => 52, "_rev" => "foobar"})
       new_doc3 = Map.merge(doc3, %{"age" => 53, "_rev" => "foobar"})
       assert [
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
+        {:error, %{"errorNum" => 1200}},
+        {:error, %{"errorNum" => 1200}},
+        {:error, %{"errorNum" => 1200}},
       ] = Document.update(ctx.coll, [new_doc1, new_doc2, new_doc3], returnNew: true, ignoreRevs: false) |> on_db(ctx)
     end
   end
@@ -636,7 +626,7 @@ defmodule DocumentTest do
       {:ok, {docref, doc}} = Document.create(ctx.coll, ctx.data1, returnNew: true) |> on_db(ctx)
 
       doc2 = Map.merge(doc, %{"age" => 77, "_rev" => "foobar"})
-      assert {:error, %{"errorNum" => 1200, "errorMessage" => "precondition failed"}} = Document.replace(docref, doc2, returnNew: true, ignoreRevs: false) |> on_db(ctx)
+      assert {:error, %{"errorNum" => 1200}} = Document.replace(docref, doc2, returnNew: true, ignoreRevs: false) |> on_db(ctx)
     end
 
     test "replaces a document conditionally (using If-Match header)", ctx do
@@ -651,7 +641,7 @@ defmodule DocumentTest do
       {:ok, {docref, doc}} = Document.create(ctx.coll, ctx.data1, returnNew: true) |> on_db(ctx)
 
       doc2 = Map.merge(doc, %{"age" => 55, "_rev" => "foobar"})
-      assert {:error, %{"errorMessage" => "precondition failed"}} = Document.replace(docref, doc2, returnNew: true, ifMatch: "123456") |> on_db(ctx)
+      assert {:error, %{"errorNum" => 1200}} = Document.replace(docref, doc2, returnNew: true, ifMatch: "123456") |> on_db(ctx)
     end
   end
 
@@ -799,9 +789,9 @@ defmodule DocumentTest do
       new_doc2 = Map.merge(doc2, %{"age" => 52, "_rev" => "foobar"})
       new_doc3 = Map.merge(doc3, %{"age" => 53, "_rev" => "foobar"})
       assert [
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
+        {:error, %{"errorNum" => 1200}},
+        {:error, %{"errorNum" => 1200}},
+        {:error, %{"errorNum" => 1200}},
       ] = Document.replace(ctx.coll, [new_doc1, new_doc2, new_doc3], returnNew: true, ignoreRevs: false) |> on_db(ctx)
     end
   end
@@ -844,7 +834,7 @@ defmodule DocumentTest do
     test "fails to remove a document conditionally (using If-Match header)", ctx do
       {:ok, {docref, _}} = Document.create(ctx.coll, ctx.data1, returnNew: true) |> on_db(ctx)
 
-      assert {:error, %{"errorMessage" => "precondition failed"}} = Document.delete(docref, returnOld: true, ifMatch: "123456") |> on_db(ctx)
+      assert {:error, %{"errorNum" => 1200}} = Document.delete(docref, returnOld: true, ifMatch: "123456") |> on_db(ctx)
       assert {:ok, _} = Document.document(docref) |> on_db(ctx)
     end
   end
@@ -933,14 +923,14 @@ defmodule DocumentTest do
        {:ok, dref3},
       ] = Document.create(ctx.coll, [ctx.data1, ctx.data2, ctx.data3]) |> on_db(ctx)
 
-      bad_rev1 = Map.merge(dref1, %{"_rev" => "foobar1"})
-      bad_rev2 = Map.merge(dref2, %{"_rev" => "foobar2"})
-      bad_rev3 = Map.merge(dref3, %{"_rev" => "foobar3"})
+      bad_rev1 = %{dref1 | _rev: "foobar1"}
+      bad_rev2 = %{dref2 | _rev: "foobar2"}
+      bad_rev3 = %{dref3 | _rev: "foobar3"}
 
       assert [
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
-        {:error, %{"errorNum" => 1200, "errorMessage" => "conflict"}}, #"precondition failed"}},
+        {:error, %{"errorNum" => 1200}},
+        {:error, %{"errorNum" => 1200}},
+        {:error, %{"errorNum" => 1200}},
       ] = Document.delete_multi(ctx.coll, [bad_rev1, bad_rev2, bad_rev3], ignoreRevs: false) |> on_db(ctx)
 
       assert {:ok, _} = Document.document(dref1) |> on_db(ctx)

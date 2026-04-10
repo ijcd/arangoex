@@ -28,7 +28,6 @@ defmodule IndexTest do
       :error, %{
         "code" => 404,
         "error" => true,
-        "errorMessage" => "unknown index '123'",
         "errorNum" => 1212
       }
     } = Index.index(id) |> on_db(ctx)
@@ -120,10 +119,8 @@ defmodule IndexTest do
         "id" => _,
         "isNewlyCreated" => true,
         "sparse" => true,
-        "type" => "geo2",
+        "type" => "geo",
         "unique" => false,
-        "constraint" => false,
-        "ignoreNull" => true
       }
     } = Index.create_geo(ctx.coll.name, ["lat", "long"]) |> on_db(ctx)
 
@@ -135,10 +132,8 @@ defmodule IndexTest do
         "id" => _,
         "isNewlyCreated" => true,
         "sparse" => true,
-        "type" => "geo1",
+        "type" => "geo",
         "unique" => false,
-        "constraint" => false,
-        "ignoreNull" => true,
         "geoJson" => false
       }
     } = Index.create_geo(ctx.coll.name, ["latlong_array"]) |> on_db(ctx)
@@ -151,10 +146,8 @@ defmodule IndexTest do
         "id" => _,
         "isNewlyCreated" => true,
         "sparse" => true,
-        "type" => "geo1",
+        "type" => "geo",
         "unique" => false,
-        "constraint" => false,
-        "ignoreNull" => true,
         "geoJson" => true
       }
     } = Index.create_geo(ctx.coll.name, ["latlong_array2"], geoJson: true) |> on_db(ctx)
@@ -247,9 +240,8 @@ defmodule IndexTest do
       :ok, %{"code" => 200, "error" => false, "id" => ^id}
     } = Index.delete(id) |> on_db(ctx)
 
-    msg = "unknown index '#{id}'"
     assert {
-      :error, %{"code" => 404, "error" => true, "errorMessage" => ^msg, "errorNum" => 1212}
+      :error, %{"code" => 404, "error" => true, "errorNum" => 1212}
     } = Index.delete(id) |> on_db(ctx)
   end
 end

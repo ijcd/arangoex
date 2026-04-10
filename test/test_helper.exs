@@ -61,8 +61,8 @@ defmodule Arango.TestCase do
     {:ok, %{"result" => original_funcs}} = Aql.functions() |> arango()
     {:ok, original_tasks} = Task.tasks() |> arango()
 
-    new_db_name = Faker.Lorem.word
-    new_coll_name = Faker.Lorem.word
+    new_db_name = "test_#{Faker.Lorem.word}_#{System.unique_integer([:positive])}"
+    new_coll_name = "test_#{Faker.Lorem.word}_#{System.unique_integer([:positive])}"
 
     {:ok, _} = Database.create(name: new_db_name) |> arango()
     {:ok, coll} = Collection.create(new_coll_name) |> arango(database_name: new_db_name)

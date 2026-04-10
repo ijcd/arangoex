@@ -136,10 +136,9 @@ defmodule Arango.Request do
   defp path_for_operation(%{path: path, system_only: true}), do: "/_api/#{path}"
   defp path_for_operation(%{path: path, database_name: db_name}), do: "/_db/#{db_name}/_api/#{path}"
 
-  # defp encode_body(%{} = data) when data == %{}, do: ""
   defp encode_body(%{body: body, encode_body: false}, _config), do: body
   defp encode_body(%{body: %{__struct__: _} = body}, config), do: encode_body(%{body: map_without_nil_values(body)}, config)
-  defp encode_body(%{body: body}, _) when body != nil, do: Jason.encode!(body)
+  defp encode_body(%{body: body}, _) when body != nil, do: Jason.encode!(sanitize_for_json(body))
   defp encode_body(%{http_method: :post}, _), do: ""
   defp encode_body(%{http_method: :patch}, _), do: ""
   defp encode_body(%{http_method: :put}, _), do: ""
@@ -148,10 +147,13 @@ defmodule Arango.Request do
 
   def map_without_nil_values(%{__struct__: _} = struct) do
     struct
-    |> Map.from_struct
-    |> Enum.filter(fn {_, v} -> v != nil end)
-    |> Enum.into(%{})
+    |> Map.from_struct()
+    |> Map.reject(fn {_k, v} -> is_nil(v) end)
   end
+
+  defp sanitize_for_json(list) when is_list(list), do: Enum.map(list, &sanitize_for_json/1)
+  defp sanitize_for_json(%{__struct__: _} = struct), do: struct |> Map.from_struct() |> Map.reject(fn {_k, v} -> is_nil(v) end)
+  defp sanitize_for_json(other), do: other
 
   defp decode_headers(headers) do
     case List.keyfind(headers, "etag", 0) do

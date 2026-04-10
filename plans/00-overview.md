@@ -6,7 +6,8 @@ Target: ArangoDB 3.12+, modern Elixir, HTTP+JSON only.
 
 | # | Plan | Status |
 |---|------|--------|
-| 1 | [Deps modernization](./01-deps-modernization.md) | planned |
+| 1 | [Deps modernization](./01-deps-modernization.md) | done |
+| 1a | [Test harness & generation](./01a-test-harness.md) | in progress |
 | 2 | [Extract macros](./02-extract-macros.md) | planned |
 | 3 | [Remove dead modules](./03-remove-dead-modules.md) | planned |
 | 4 | [Update existing modules to 3.12](./04-update-existing.md) | planned |
