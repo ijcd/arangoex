@@ -1,8 +1,7 @@
 defmodule Arango.GraphEdge do
   @moduledoc "ArangoDB Graph Edge methods"
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :graph_edge
 
   @doc """
   Read in or outbound edges
@@ -16,11 +15,10 @@ defmodule Arango.GraphEdge do
               nil -> Utils.opts_to_query([vertex: vertex_id], [:vertex])
             end
 
-    %Request{
-      endpoint: :graph_edge,
-      http_method: :get,
+    request(
+      method: :get,
       path: "edges/#{collection_name}",
-      query: query,
-    }
+      query: query
+    )
   end
 end

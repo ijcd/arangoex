@@ -1,8 +1,7 @@
 defmodule Arango.Administration do
   @moduledoc "ArangoDB Administration methods"
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :administration
 
   @doc """
   Return the required version of the database
@@ -11,11 +10,7 @@ defmodule Arango.Administration do
   """
   @spec database_version() :: Arango.ok_error(map)
   def database_version() do
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
-      path: "/_admin/database/target-version"
-    }
+    request(method: :get, path: "/_admin/database/target-version")
   end
 
   @doc """
@@ -28,13 +23,12 @@ defmodule Arango.Administration do
     headers = Utils.opts_to_headers(header_opts, [:*])
     query = Utils.opts_to_query(query_opts, [:*])
 
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
+    request(
+      method: :get,
       headers: headers,
       path: "/_admin/echo",
       query: query
-    }
+    )
   end
 
   @doc """
@@ -46,12 +40,11 @@ defmodule Arango.Administration do
   def log(opts \\ []) do
     query = Utils.opts_to_query(opts, [:upto, :level, :start, :size, :offset, :search, :sort])
 
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
+    request(
+      method: :get,
       path: "/_admin/log",
-      query: query,
-    }
+      query: query
+    )
   end
 
   @doc """
@@ -64,13 +57,12 @@ defmodule Arango.Administration do
     headers = Utils.opts_to_headers(header_opts, [:*])
     query = Utils.opts_to_query(query_opts, [:*])
 
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
+    request(
+      method: :get,
       headers: headers,
       path: "/_admin/long_echo",
-      query: query,
-    }
+      query: query
+    )
   end
 
   @doc """
@@ -81,11 +73,7 @@ defmodule Arango.Administration do
   @deprecated "Removed in API v1/4.0; routing handled internally."
   @spec reload_routing() :: Arango.ok_error(map)
   def reload_routing() do
-    %Request{
-      endpoint: :administration,
-      http_method: :post,
-      path: "/_admin/routing/reload"
-    }
+    request(method: :post, path: "/_admin/routing/reload")
   end
 
   @doc """
@@ -95,11 +83,7 @@ defmodule Arango.Administration do
   """
   @spec server_id() :: Arango.ok_error(map)
   def server_id() do
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
-      path: "/_admin/server/id"
-    }
+    request(method: :get, path: "/_admin/server/id")
   end
 
   @doc """
@@ -109,11 +93,7 @@ defmodule Arango.Administration do
   """
   @spec server_role() :: Arango.ok_error(map)
   def server_role() do
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
-      path: "/_admin/server/role"
-    }
+    request(method: :get, path: "/_admin/server/role")
   end
 
   @doc """
@@ -123,11 +103,7 @@ defmodule Arango.Administration do
   """
   @spec shutdown() :: Arango.ok_error(map)
   def shutdown() do
-    %Request{
-      endpoint: :administration,
-      http_method: :delete,
-      path: "/_admin/shutdown"
-    }
+    request(method: :delete, path: "/_admin/shutdown")
   end
 
   @doc """
@@ -139,12 +115,11 @@ defmodule Arango.Administration do
   def sleep(opts \\ []) do
     query = Utils.opts_to_query(opts, [:duration])
 
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
+    request(
+      method: :get,
       path: "/_admin/sleep",
-      query: query,
-    }
+      query: query
+    )
   end
 
   @doc """
@@ -155,11 +130,7 @@ defmodule Arango.Administration do
   @deprecated "Removed in API v1/4.0. Use Administration.metrics/0 (Prometheus format) when added in Phase 4."
   @spec statistics() :: Arango.ok_error(map)
   def statistics() do
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
-      path: "/_admin/statistics"
-    }
+    request(method: :get, path: "/_admin/statistics")
   end
 
   @doc """
@@ -170,11 +141,7 @@ defmodule Arango.Administration do
   @deprecated "Removed in API v1/4.0. Use Administration.metrics/0 (Prometheus format) when added in Phase 4."
   @spec statistics_description() :: Arango.ok_error(map)
   def statistics_description() do
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
-      path: "/_admin/statistics-description"
-    }
+    request(method: :get, path: "/_admin/statistics-description")
   end
 
   @doc """
@@ -184,11 +151,7 @@ defmodule Arango.Administration do
   """
   @spec test() :: Arango.ok_error(map)
   def test() do
-    %Request{
-      endpoint: :administration,
-      http_method: :post,
-      path: "/_admin/test"
-    }
+    request(method: :post, path: "/_admin/test")
   end
 
   @doc """
@@ -198,11 +161,7 @@ defmodule Arango.Administration do
   """
   @spec time() :: Arango.ok_error(map)
   def time() do
-    %Request{
-      endpoint: :administration,
-      http_method: :get,
-      path: "/_admin/time"
-    }
+    request(method: :get, path: "/_admin/time")
   end
 
   @doc """
@@ -212,12 +171,11 @@ defmodule Arango.Administration do
   """
   @spec endpoints() :: Arango.ok_error(map)
   def endpoints() do
-    %Request{
-      endpoint: :administration,
+    request(
+      method: :get,
       system_only: true,           # or just /_api? Same thing?
-      http_method: :get,
       path: "endpoint"
-    }
+    )
   end
 
   @doc """
@@ -227,11 +185,10 @@ defmodule Arango.Administration do
   """
   @spec version() :: Arango.ok_error(map)
   def version() do
-    %Request{
-      endpoint: :administration,
+    request(
+      method: :get,
       system_only: true,           # or just /_api? Same thing?
-      http_method: :get,
       path: "version"
-    }
+    )
   end
 end

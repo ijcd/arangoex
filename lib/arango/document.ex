@@ -1,9 +1,8 @@
 defmodule Arango.Document do
   @moduledoc "ArangoDB Document methods"
 
-  alias Arango.Request
+  use Arango.API, endpoint: :document
   alias Arango.Collection
-  alias Arango.Utils
 
   defmodule Docref do
     @moduledoc false
@@ -28,14 +27,13 @@ defmodule Arango.Document do
   def create(collection, document, opts \\ []) do
     query = Utils.opts_to_query(opts, [:waitForSync, :returnNew])
 
-    %Request{
-      endpoint: :document,
-      http_method: :post,
+    request(
+      method: :post,
       path: "document/#{collection.name}",
       query: query,
       body: document,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   @doc """
@@ -47,12 +45,11 @@ defmodule Arango.Document do
   def header(document, opts \\ []) do
     headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch])
 
-    %Request{
-      endpoint: :document,
-      http_method: :head,
+    request(
+      method: :head,
       path: "document/#{document._id}",
-      headers: headers,
-    }
+      headers: headers
+    )
   end
 
   @doc """
@@ -64,12 +61,11 @@ defmodule Arango.Document do
   def document(document, opts \\ []) do
     headers = Utils.opts_to_headers(opts, [:ifNoneMatch, :ifMatch])
 
-    %Request{
-      endpoint: :document,
-      http_method: :get,
+    request(
+      method: :get,
       path: "document/#{document._id}",
-      headers: headers,
-    }
+      headers: headers
+    )
   end
 
   @doc """
@@ -88,12 +84,11 @@ defmodule Arango.Document do
       true -> raise "unknown type: #{type}"
     end
 
-    %Request{
-      endpoint: :document,
-      http_method: :put,
+    request(
+      method: :put,
       path: "simple/all-keys",
-      body: body,
-    }
+      body: body
+    )
   end
 
   @doc """
@@ -107,14 +102,13 @@ defmodule Arango.Document do
   def update(collection, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    %Request{
-      endpoint: :document,
-      http_method: :patch,
+    request(
+      method: :patch,
       path: "document/#{collection.name}",
       query: query,
       body: new_docs,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   @spec update(map, map, keyword) :: Arango.ok_error(map)
@@ -123,15 +117,14 @@ defmodule Arango.Document do
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
     query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    %Request{
-      endpoint: :document,
-      http_method: :patch,
+    request(
+      method: :patch,
       path: "document/#{document._id}",
       query: query,
       headers: headers,
       body: new_document,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   @doc """
@@ -145,14 +138,13 @@ defmodule Arango.Document do
   def replace(collection, new_docs, opts) when is_list(new_docs) do
     query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    %Request{
-      endpoint: :document,
-      http_method: :put,
+    request(
+      method: :put,
       path: "document/#{collection.name}",
       query: query,
       body: new_docs,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   @spec replace(t, map) :: Arango.ok_error(t | [t])
@@ -161,15 +153,14 @@ defmodule Arango.Document do
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
     query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
 
-    %Request{
-      endpoint: :document,
-      http_method: :put,
+    request(
+      method: :put,
       path: "document/#{document._id}",
       query: query,
       body: new_document,
       headers: headers,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   @doc """
@@ -181,14 +172,13 @@ defmodule Arango.Document do
   def delete_multi(collection, docs, opts \\ []) when is_list(docs) do
     query = Utils.opts_to_query(opts, [:waitForSync, :ignoreRevs, :returnOld])
 
-    %Request{
-      endpoint: :document,
-      http_method: :delete,
+    request(
+      method: :delete,
       path: "document/#{collection.name}",
       query: query,
       body: docs,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   @doc """
@@ -202,14 +192,13 @@ defmodule Arango.Document do
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
     query = Utils.opts_to_query(query_opts, [:waitForSync, :returnOld])
 
-    %Request{
-      endpoint: :document,
-      http_method: :delete,
+    request(
+      method: :delete,
       path: "document/#{document._id}",
       query: query,
       headers: headers,
-      ok_decoder: __MODULE__.DocumentDecoder,
-    }
+      ok_decoder: __MODULE__.DocumentDecoder
+    )
   end
 
   defmodule DocumentDecoder do

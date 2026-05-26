@@ -1,8 +1,7 @@
 defmodule Arango.Collection do
   @moduledoc "ArangoDB Collection methods"
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :collection
 
   defstruct [
     id: nil,
@@ -49,12 +48,7 @@ defmodule Arango.Collection do
   """
   @spec collections() :: Arango.ok_error(t)
   def collections() do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection",
-      ok_decoder: __MODULE__.CollectionDecoder,
-    }
+    request(method: :get, path: "collection", ok_decoder: __MODULE__.CollectionDecoder)
   end
 
   @doc """
@@ -65,13 +59,7 @@ defmodule Arango.Collection do
   @spec create(t | String.t) :: Arango.ok_error(t)
   def create(name) when is_binary(name), do: create(%__MODULE__{name: name})
   def create(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :post,
-      path: "collection",
-      body: collection,
-      ok_decoder: __MODULE__.CollectionDecoder,
-    }
+    request(method: :post, path: "collection", body: collection, ok_decoder: __MODULE__.CollectionDecoder)
   end
 
   @doc """
@@ -81,11 +69,7 @@ defmodule Arango.Collection do
   """
   @spec drop(t) :: Arango.ok_error(map)
   def drop(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :delete,
-      path: "collection/#{collection.name}",
-    }
+    request(method: :delete, path: "collection/#{collection.name}")
   end
 
   @doc """
@@ -95,12 +79,7 @@ defmodule Arango.Collection do
   """
   @spec collection(t) :: Arango.ok_error(t)
   def collection(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection/#{collection.name}",
-      ok_decoder: __MODULE__.CollectionDecoder,
-    }
+    request(method: :get, path: "collection/#{collection.name}", ok_decoder: __MODULE__.CollectionDecoder)
   end
 
   @doc """
@@ -111,12 +90,7 @@ defmodule Arango.Collection do
   @deprecated "No-op on RocksDB. Removed in API v1/4.0."
   @spec load(t) :: Arango.ok_error(map)
   def load(collection, count \\ true) do
-    %Request{
-      endpoint: :collection,
-      http_method: :put,
-      path: "collection/#{collection.name}/load",
-      body: %{count: count},
-    }
+    request(method: :put, path: "collection/#{collection.name}/load", body: %{count: count})
   end
 
   @doc """
@@ -127,11 +101,7 @@ defmodule Arango.Collection do
   @deprecated "No-op on RocksDB. Removed in API v1/4.0."
   @spec unload(t) :: Arango.ok_error(map)
   def unload(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :put,
-      path: "collection/#{collection.name}/unload",
-    }
+    request(method: :put, path: "collection/#{collection.name}/unload")
   end
 
   @doc """
@@ -141,11 +111,7 @@ defmodule Arango.Collection do
   """
   @spec checksum(t) :: Arango.ok_error(map)
   def checksum(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection/#{collection.name}/checksum",
-    }
+    request(method: :get, path: "collection/#{collection.name}/checksum")
   end
 
   @doc """
@@ -155,11 +121,7 @@ defmodule Arango.Collection do
   """
   @spec count(t) :: Arango.ok_error(map)
   def count(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection/#{collection.name}/count",
-    }
+    request(method: :get, path: "collection/#{collection.name}/count")
   end
 
   @doc """
@@ -169,11 +131,7 @@ defmodule Arango.Collection do
   """
   @spec figures(t) :: Arango.ok_error(map)
   def figures(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection/#{collection.name}/figures",
-    }
+    request(method: :get, path: "collection/#{collection.name}/figures")
   end
 
   @doc """
@@ -183,11 +141,7 @@ defmodule Arango.Collection do
   """
   @spec properties(t) :: Arango.ok_error(map)
   def properties(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection/#{collection.name}/properties",
-    }
+    request(method: :get, path: "collection/#{collection.name}/properties")
   end
 
   @doc """
@@ -199,12 +153,11 @@ defmodule Arango.Collection do
   def set_properties(collection, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:waitForSync, :journalSize])
 
-    %Request{
-      endpoint: :collection,
-      http_method: :put,
+    request(
+      method: :put,
       path: "collection/#{collection.name}/properties",
-      body: properties,
-    }
+      body: properties
+    )
   end
 
   @doc """
@@ -214,12 +167,7 @@ defmodule Arango.Collection do
   """
   @spec rename(t, String.t) :: Arango.ok_error(map)
   def rename(collection, new_name) do
-    %Request{
-      endpoint: :collection,
-      http_method: :put,
-      path: "collection/#{collection.name}/rename",
-      body: %{name: new_name},
-    }
+    request(method: :put, path: "collection/#{collection.name}/rename", body: %{name: new_name})
   end
 
   @doc """
@@ -229,11 +177,7 @@ defmodule Arango.Collection do
   """
   @spec revision(t) :: Arango.ok_error(map)
   def revision(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :get,
-      path: "collection/#{collection.name}/revision",
-    }
+    request(method: :get, path: "collection/#{collection.name}/revision")
   end
 
   @doc """
@@ -243,11 +187,7 @@ defmodule Arango.Collection do
   """
   @spec rotate(t) :: Arango.ok_error(map)
   def rotate(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :put,
-      path: "collection/#{collection.name}/rotate",
-    }
+    request(method: :put, path: "collection/#{collection.name}/rotate")
   end
 
   @doc """
@@ -257,11 +197,7 @@ defmodule Arango.Collection do
   """
   @spec truncate(t) :: Arango.ok_error(map)
   def truncate(collection) do
-    %Request{
-      endpoint: :collection,
-      http_method: :put,
-      path: "collection/#{collection.name}/truncate",
-    }
+    request(method: :put, path: "collection/#{collection.name}/truncate")
   end
 
   defmodule CollectionDecoder do

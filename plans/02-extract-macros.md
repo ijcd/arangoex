@@ -1,6 +1,6 @@
 # Phase 2: Extract Macros
 
-Status: planned
+Status: done — `Arango.API` macro at `lib/arango/api.ex` provides `use Arango.API, endpoint: :foo` (pins `@endpoint`, aliases `Request`/`Utils`) and `request(method: X, path: Y, ...)` (builds `%Request{}` with endpoint pre-filled, `:method` → `:http_method`). All 14 API modules converted: administration, aql, collection, cursor, database, document, graph, graph_edge, index, simple, task, transaction, user, wal. Decoder helpers deferred — too many shapes (PlainDecoder, struct-list/single, custom list+to_document) for a single macro to be a win. 210 pass / 0 fail / 11 skip.
 
 ## Goal
 
@@ -47,6 +47,16 @@ end
 2. Convert `Collection` module as proof of concept
 3. Run collection tests to verify
 4. Convert remaining modules one at a time, testing each
+
+## Pre-coding tasks
+
+Before writing the macros, we need to:
+
+1. **Pick 5-10 representative call sites** from different modules and write before/after pairs by hand. This validates the macro design holds up across the variety of patterns (simple GET, POST with body, opts splitting, decoder-using, system_only, etc.).
+2. **Decide on quoted-syntax mechanics**:
+   - `@endpoint` module attribute or implicit from `use` macro?
+   - How does the macro know about the module's nested decoders?
+3. **Decide test strategy**: do macros get their own unit tests, or only integration via existing module tests?
 
 ## Files to Change
 

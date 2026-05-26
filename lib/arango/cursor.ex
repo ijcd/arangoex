@@ -1,7 +1,7 @@
 defmodule Arango.Cursor do
   @moduledoc "ArangoDB Cursor methods"
 
-  alias Arango.Request
+  use Arango.API, endpoint: :cursor
 
   defmodule Cursor do
     @moduledoc false
@@ -138,12 +138,11 @@ defmodule Arango.Cursor do
       top_level
       |> Map.merge(if Enum.any?(options), do: %{"options" => options}, else: %{})
 
-    %Request{
-      endpoint: :cursor,
-      http_method: :post,
+    request(
+      method: :post,
       path: "cursor",
       body: cursor_request
-    }
+    )
   end
 
   # @doc """
@@ -153,11 +152,10 @@ defmodule Arango.Cursor do
   # """
   @spec cursor_delete(Cursor.t) :: Arango.ok_error(map)
   def cursor_delete(cursor_id) do
-    %Request{
-      endpoint: :cursor,
-      http_method: :delete,
+    request(
+      method: :delete,
       path: "cursor/#{cursor_id}"
-    }
+    )
   end
 
   # @doc """
@@ -167,10 +165,9 @@ defmodule Arango.Cursor do
   # """
   @spec cursor_next(Cursor.t) :: Arango.ok_error(map)
   def cursor_next(cursor_id) do
-    %Request{
-      endpoint: :cursor,
-      http_method: :put,
+    request(
+      method: :put,
       path: "cursor/#{cursor_id}"
-    }
+    )
   end
 end

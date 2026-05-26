@@ -1,7 +1,7 @@
 defmodule Arango.Graph do
   @moduledoc "ArangoDB Graph methods"
 
-  alias Arango.Request
+  use Arango.API, endpoint: :graph
 
   defmodule EdgeDefinition do
     @moduledoc false
@@ -58,11 +58,7 @@ defmodule Arango.Graph do
   """
   @spec graphs() :: Arango.ok_error(map)
   def graphs() do
-    %Request{
-      endpoint: :graph,
-      http_method: :get,
-      path: "gharial"
-    }
+    request(method: :get, path: "gharial")
   end
 
   @doc """
@@ -78,12 +74,7 @@ defmodule Arango.Graph do
       "orphanCollections" => orphan_collections
     }
 
-    %Request{
-      endpoint: :graph,
-      http_method: :post,
-      path: "gharial",
-      body: body
-    }
+    request(method: :post, path: "gharial", body: body)
   end
 
   @doc """
@@ -93,11 +84,7 @@ defmodule Arango.Graph do
   """
   @spec drop(String.t) :: Arango.ok_error(map)
   def drop(graph_name) do
-    %Request{
-      endpoint: :graph,
-      http_method: :delete,
-      path: "gharial/#{graph_name}"
-    }
+    request(method: :delete, path: "gharial/#{graph_name}")
   end
 
   @doc """
@@ -107,11 +94,7 @@ defmodule Arango.Graph do
   """
   @spec graph(String.t) :: Arango.ok_error(map)
   def graph(graph_name) do
-    %Request{
-      endpoint: :graph,
-      http_method: :get,
-      path: "gharial/#{graph_name}"
-    }
+    request(method: :get, path: "gharial/#{graph_name}")
   end
 
   @doc """
@@ -121,11 +104,7 @@ defmodule Arango.Graph do
   """
   @spec edges(String.t) :: Arango.ok_error(map)
   def edges(graph_name) do
-    %Request{
-      endpoint: :graph,
-      http_method: :get,
-      path: "gharial/#{graph_name}/edge"
-    }
+    request(method: :get, path: "gharial/#{graph_name}/edge")
   end
 
   @doc """
@@ -137,12 +116,7 @@ defmodule Arango.Graph do
   def extend_edge_definintions(graph_name, edge_definition) do
     body = Map.from_struct(edge_definition)
 
-    %Request{
-      endpoint: :graph,
-      http_method: :post,
-      path: "gharial/#{graph_name}/edge",
-      body: body
-    }
+    request(method: :post, path: "gharial/#{graph_name}/edge", body: body)
   end
 
   @doc """
@@ -158,12 +132,7 @@ defmodule Arango.Graph do
       "_to" => edge.to,
     } |> Map.merge(edge.data || %{})
 
-    %Request{
-      endpoint: :graph,
-      http_method: :post,
-      path: "gharial/#{graph_name}/edge/#{collection_name}",
-      body: body
-    }
+    request(method: :post, path: "gharial/#{graph_name}/edge/#{collection_name}", body: body)
   end
 
   @doc """
@@ -173,11 +142,7 @@ defmodule Arango.Graph do
   """
   @spec edge_delete(String.t, String.t, String.t) :: Arango.ok_error(map)
   def edge_delete(graph_name, collection_name, edge_key) do
-    %Request{
-      endpoint: :graph,
-      http_method: :delete,
-      path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}"
-    }
+    request(method: :delete, path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}")
   end
 
   @doc """
@@ -187,11 +152,7 @@ defmodule Arango.Graph do
   """
   @spec edge(String.t, String.t, String.t) :: Arango.ok_error(map)
   def edge(graph_name, collection_name, edge_key) do
-    %Request{
-      endpoint: :graph,
-      http_method: :get,
-      path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}"
-    }
+    request(method: :get, path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}")
   end
 
   @doc """
@@ -201,12 +162,11 @@ defmodule Arango.Graph do
   """
   @spec edge_update(String.t, String.t, String.t, map) :: Arango.ok_error(map)
   def edge_update(graph_name, collection_name, edge_key, edge_body) do
-    %Request{
-      endpoint: :graph,
-      http_method: :patch,
+    request(
+      method: :patch,
       path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}",
       body: edge_body
-    }
+    )
   end
 
   @doc """
@@ -222,12 +182,11 @@ defmodule Arango.Graph do
       "_to" => edge.to,
     } |> Map.merge(edge.data || %{})
 
-    %Request{
-      endpoint: :graph,
-      http_method: :put,
+    request(
+      method: :put,
       path: "gharial/#{graph_name}/edge/#{collection_name}/#{edge_key}",
       body: body
-    }
+    )
   end
 
   @doc """
@@ -237,11 +196,7 @@ defmodule Arango.Graph do
   """
   @spec edge_definition_delete(String.t, String.t) :: Arango.ok_error(map)
   def edge_definition_delete(graph_name, edge_definition_name) do
-    %Request{
-      endpoint: :graph,
-      http_method: :delete,
-      path: "gharial/#{graph_name}/edge/#{edge_definition_name}"
-    }
+    request(method: :delete, path: "gharial/#{graph_name}/edge/#{edge_definition_name}")
   end
 
   @doc """
@@ -251,12 +206,11 @@ defmodule Arango.Graph do
   """
   @spec edge_definition_replace(String.t, String.t, EdgeDefinition.t) :: Arango.ok_error(map)
   def edge_definition_replace(graph_name, edge_definition_name, edge_definition) do
-    %Request{
-      endpoint: :graph,
-      http_method: :put,
+    request(
+      method: :put,
       path: "gharial/#{graph_name}/edge/#{edge_definition_name}",
       body: edge_definition
-    }
+    )
   end
 
   @doc """
@@ -266,11 +220,7 @@ defmodule Arango.Graph do
   """
   @spec vertex_collections(String.t) :: Arango.ok_error(map)
   def vertex_collections(graph_name) do
-    %Request{
-      endpoint: :graph,
-      http_method: :get,
-      path: "gharial/#{graph_name}/vertex",
-    }
+    request(method: :get, path: "gharial/#{graph_name}/vertex")
   end
 
   @doc """
@@ -282,12 +232,7 @@ defmodule Arango.Graph do
   def vertex_collection_create(graph_name, vertex_collection) do
     body = Map.from_struct(vertex_collection)
 
-    %Request{
-      endpoint: :graph,
-      http_method: :post,
-      path: "gharial/#{graph_name}/vertex",
-      body: body
-    }
+    request(method: :post, path: "gharial/#{graph_name}/vertex", body: body)
   end
 
   @doc """
@@ -297,11 +242,7 @@ defmodule Arango.Graph do
   """
   @spec vertex_collection_delete(String.t, String.t) :: Arango.ok_error(map)
   def vertex_collection_delete(graph_name, collection_name) do
-    %Request{
-      endpoint: :graph,
-      http_method: :delete,
-      path: "gharial/#{graph_name}/vertex/#{collection_name}",
-    }
+    request(method: :delete, path: "gharial/#{graph_name}/vertex/#{collection_name}")
   end
 
   @doc """
@@ -311,12 +252,11 @@ defmodule Arango.Graph do
   """
   @spec vertex_create(String.t, String.t, map) :: Arango.ok_error(map)
   def vertex_create(graph_name, collection_name, vertex_body) do
-    %Request{
-      endpoint: :graph,
-      http_method: :post,
+    request(
+      method: :post,
       path: "gharial/#{graph_name}/vertex/#{collection_name}",
       body: vertex_body
-    }
+    )
   end
 
   @doc """
@@ -326,11 +266,7 @@ defmodule Arango.Graph do
   """
   @spec vertex_delete(String.t, String.t, String.t) :: Arango.ok_error(map)
   def vertex_delete(graph_name, collection_name, vertex_key) do
-    %Request{
-      endpoint: :graph,
-      http_method: :delete,
-      path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
-    }
+    request(method: :delete, path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}")
   end
 
   @doc """
@@ -340,11 +276,7 @@ defmodule Arango.Graph do
   """
   @spec vertex(String.t, String.t, String.t) :: Arango.ok_error(map)
   def vertex(graph_name, collection_name, vertex_key) do
-    %Request{
-      endpoint: :graph,
-      http_method: :get,
-      path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
-    }
+    request(method: :get, path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}")
   end
 
   @doc """
@@ -354,12 +286,11 @@ defmodule Arango.Graph do
   """
   @spec vertex_update(String.t, String.t, String.t, map) :: Arango.ok_error(map)
   def vertex_update(graph_name, collection_name, vertex_key, vertex_body) do
-    %Request{
-      endpoint: :graph,
-      http_method: :patch,
+    request(
+      method: :patch,
       path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
       body: vertex_body
-    }
+    )
   end
 
   @doc """
@@ -369,11 +300,10 @@ defmodule Arango.Graph do
   """
   @spec vertex_replace(String.t, String.t, String.t, map) :: Arango.ok_error(map)
   def vertex_replace(graph_name, collection_name, vertex_key, vertex_body) do
-    %Request{
-      endpoint: :graph,
-      http_method: :put,
+    request(
+      method: :put,
       path: "gharial/#{graph_name}/vertex/#{collection_name}/#{vertex_key}",
       body: vertex_body
-    }
+    )
   end
 end

@@ -9,8 +9,7 @@ defmodule Arango.Simple do
   > removed when ArangoDB 4.0 (API v1) becomes the default.
   """
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :simple
   alias Arango.Collection
 
   @deprecation "Use AQL via Arango.Cursor.create/1. Removed in v1/4.0."
@@ -26,12 +25,7 @@ defmodule Arango.Simple do
     vars = Utils.opts_to_vars(opts, [:skip, :limit])
     body = Map.merge(%{collection: collection.name}, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/all",
-      body: body,
-    }
+    request(method: :put, path: "simple/all", body: body)
   end
 
   @doc """
@@ -42,12 +36,7 @@ defmodule Arango.Simple do
   @deprecated @deprecation
   @spec any(Collection.t) :: Arango.ok_error(map)
   def any(collection) do
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/any",
-      body: %{collection: collection.name},
-    }
+    request(method: :put, path: "simple/any", body: %{collection: collection.name})
   end
 
   @doc """
@@ -61,12 +50,7 @@ defmodule Arango.Simple do
     vars = Utils.opts_to_vars(opts, [:skip, :limit])
     body = Map.merge(%{collection: collection.name, example: example}, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/by-example",
-      body: body,
-    }
+    request(method: :put, path: "simple/by-example", body: body)
   end
 
   @doc """
@@ -77,12 +61,11 @@ defmodule Arango.Simple do
   @deprecated @deprecation
   @spec find_by_example(Collection.t, map) :: Arango.ok_error(map)
   def find_by_example(collection, example) do
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
+    request(
+      method: :put,
       path: "simple/first-example",
-      body: %{collection: collection.name, example: example},
-    }
+      body: %{collection: collection.name, example: example}
+    )
   end
 
   @doc """
@@ -100,12 +83,7 @@ defmodule Arango.Simple do
       "query" => query
     }, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/fulltext",
-      body: body,
-    }
+    request(method: :put, path: "simple/fulltext", body: body)
   end
 
   @doc """
@@ -121,12 +99,7 @@ defmodule Arango.Simple do
       "keys" => keys
     }
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/lookup-by-keys",
-      body: body,
-    }
+    request(method: :put, path: "simple/lookup-by-keys", body: body)
   end
 
   @doc """
@@ -146,12 +119,7 @@ defmodule Arango.Simple do
       "right" => right,
     }, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/range",
-      body: body,
-    }
+    request(method: :put, path: "simple/range", body: body)
   end
 
   @doc """
@@ -169,12 +137,7 @@ defmodule Arango.Simple do
       "options" => Map.merge(%{}, vars)
     }
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/remove-by-example",
-      body: body,
-    }
+    request(method: :put, path: "simple/remove-by-example", body: body)
   end
 
   @doc """
@@ -192,12 +155,7 @@ defmodule Arango.Simple do
       "options" => Map.merge(%{}, vars)
     }
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/remove-by-keys",
-      body: body,
-    }
+    request(method: :put, path: "simple/remove-by-keys", body: body)
   end
 
   @doc """
@@ -216,12 +174,7 @@ defmodule Arango.Simple do
       "options" => Map.merge(%{}, vars)
     }
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/replace-by-example",
-      body: body,
-    }
+    request(method: :put, path: "simple/replace-by-example", body: body)
   end
 
   @doc """
@@ -240,12 +193,7 @@ defmodule Arango.Simple do
       "options" => Map.merge(%{}, vars)
     }
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/update-by-example",
-      body: body,
-    }
+    request(method: :put, path: "simple/update-by-example", body: body)
   end
 
 
@@ -264,12 +212,7 @@ defmodule Arango.Simple do
       "longitude" => longitude,
     }, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/near",
-      body: body,
-    }
+    request(method: :put, path: "simple/near", body: body)
   end
 
   @doc """
@@ -289,12 +232,7 @@ defmodule Arango.Simple do
       "radius" => radius,
     }, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/within",
-      body: body,
-    }
+    request(method: :put, path: "simple/within", body: body)
   end
 
   @doc """
@@ -315,11 +253,6 @@ defmodule Arango.Simple do
       "longitude2" => longitude2,
     }, vars)
 
-    %Request{
-      endpoint: :simple,
-      http_method: :put,
-      path: "simple/within-rectangle",
-      body: body,
-    }
+    request(method: :put, path: "simple/within-rectangle", body: body)
   end
 end
