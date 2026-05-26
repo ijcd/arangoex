@@ -11,6 +11,8 @@ defmodule Arango.Aql do
 
   alias Arango.Request
 
+  @aql_function_deprecation "AQL user functions are removed in API v1/4.0. Inline the logic into your AQL queries."
+
   defmodule Function do
     @moduledoc false
 
@@ -84,6 +86,7 @@ defmodule Arango.Aql do
   #
   # GET /_api/aqlfunction
   # """
+  @deprecated @aql_function_deprecation
   @spec functions() :: Arango.ok_error(map)
   def functions() do
     %Request{
@@ -99,6 +102,7 @@ defmodule Arango.Aql do
   #
   # POST /_api/aqlfunction
   # """
+  @deprecated @aql_function_deprecation
   @spec create_function(Function.t) :: Arango.ok_error(map)
   def create_function(function) do
     %Request{
@@ -115,6 +119,7 @@ defmodule Arango.Aql do
 
   DELETE /_api/aqlfunction/{name}
   """
+  @deprecated @aql_function_deprecation
   @spec delete_function(String.t) :: Arango.ok_error(map)
   def delete_function(name) do
     %Request{

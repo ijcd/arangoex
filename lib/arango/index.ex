@@ -106,6 +106,7 @@ defmodule Arango.Index do
 
   POST /_api/index#hash
   """
+  @deprecated "Use Index.create_persistent/3. Hash indexes are unified into persistent in 3.12 and removed in v1/4.0."
   @spec create_hash(String.t, [String.t], keyword) :: Arango.ok_error(map)
   def create_hash(collection_name, field_names, opts \\ []) when is_list(field_names) do
     query = Utils.opts_to_query([collection: collection_name], [:collection])
@@ -150,6 +151,7 @@ defmodule Arango.Index do
 
   POST /_api/index#skiplist
   """
+  @deprecated "Use Index.create_persistent/3. Skiplist indexes are unified into persistent in 3.12 and removed in v1/4.0."
   @spec create_skiplist(String.t, [String.t], keyword) :: Arango.ok_error(map)
   def create_skiplist(collection_name, field_names, opts \\ []) when is_list(field_names) do
     query = Utils.opts_to_query([collection: collection_name], [:collection])

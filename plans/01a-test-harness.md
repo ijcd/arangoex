@@ -1,46 +1,17 @@
 # Phase 1a: Test Harness & Test Generation Strategy
 
-Status: in progress
+Status: done — 226 pass / 0 fail / 4 skip against ArangoDB 3.12 (commit `5d7cfcc`).
 
-## Current State (after Phase 1)
+## Current State
 
-Test harness works against ArangoDB 3.12.9 via Docker.
+Test harness runs green against ArangoDB 3.12 via Docker.
 
 ```
 docker compose up -d
 ARANGO_HOST=localhost ARANGO_USER=root ARANGO_PASSWORD=test mix test
 ```
 
-### Per-Module Results (226 tests, 94 failures, 4 skipped)
-
-| Module | Pass | Fail | Skip | Notes |
-|--------|------|------|------|-------|
-| utils | 5 | 0 | 0 | All pass |
-| user | 7 | 1 | 0 | Nearly there |
-| cursor | 8 | 4 | 0 | Mostly pass |
-| database | 5 | 2 | 0 | Faker word collision + assertion |
-| index | 7 | 3 | 0 | hash/skiplist deprecated |
-| administration | 8 | 7 | 1 | Response shape changes |
-| aql | 10 | 9 | 3 | Response format changes |
-| collection | 7 | 8 | 0 | Hardcoded system collection names |
-| document | 43 | 22 | 0 | Jason.Encoder needed for structs |
-| simple | 11 | 3 | 0 | Deprecated but mostly works |
-| transaction | 2 | 3 | 0 | JS transactions deprecated |
-| task | 1 | 4 | 0 | Response format changes |
-| graph | 7 | 14 | 0 | Major changes |
-| graph_edge | 0 | 1 | 0 | |
-| graph_traversal | 0 | 15 | 0 | /_api/traversal removed in 3.12 |
-| wal | 1 | 3 | 0 | Endpoints gone (RocksDB) |
-| bulk/cluster/job/replication | 0 | 0 | 0 | Stubbed, no tests |
-
-### Failure Categories
-
-1. **Response shape changes** (~30%) — ArangoDB 3.12 returns different/extra fields
-2. **Hardcoded assertions** (~25%) — Tests check exact values that changed
-3. **Jason.Encoder missing** (~15%) — Poison encoded any struct, Jason needs @derive
-4. **Deprecated/removed endpoints** (~15%) — graph_traversal, wal, hash/skiplist index
-5. **Faker collisions** (~5%) — Short random words produce duplicate names
-6. **Actual API changes** (~10%) — Transaction, task, graph API evolution
+The 4 skips are tests for endpoints removed in 3.12 (`/_admin/execute`, `/_admin/sleep`, `/_admin/test`, `long_echo` timing) — they're documented with `@tag :skip` and a comment naming the removal.
 
 ## Test Generation Strategy
 

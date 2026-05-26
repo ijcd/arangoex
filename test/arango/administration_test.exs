@@ -20,14 +20,6 @@ defmodule AdministrationTest do
     assert %{"bar" => "2", "foo" => "1"} = result["parameters"]
   end
 
-  @tag :skip
-  # execute endpoint was removed in ArangoDB 3.12
-  test "executes a program" do
-    assert {
-      :ok, %{"code" => 200, "error" => false}
-    } == Administration.execute("1") |> arango()
-  end
-
   test "reads global logs from the server" do
     assert {
       :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}

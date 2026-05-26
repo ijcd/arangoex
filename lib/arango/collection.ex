@@ -108,6 +108,7 @@ defmodule Arango.Collection do
 
   PUT /_api/collection/{collection-name}/load
   """
+  @deprecated "No-op on RocksDB. Removed in API v1/4.0."
   @spec load(t) :: Arango.ok_error(map)
   def load(collection, count \\ true) do
     %Request{
@@ -123,6 +124,7 @@ defmodule Arango.Collection do
 
   PUT /_api/collection/{collection-name}/unload
   """
+  @deprecated "No-op on RocksDB. Removed in API v1/4.0."
   @spec unload(t) :: Arango.ok_error(map)
   def unload(collection) do
     %Request{
