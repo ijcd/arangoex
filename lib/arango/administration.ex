@@ -173,7 +173,7 @@ defmodule Arango.Administration do
   def endpoints() do
     request(
       method: :get,
-      system_only: true,           # or just /_api? Same thing?
+      system_only: true,
       path: "endpoint"
     )
   end
@@ -187,7 +187,7 @@ defmodule Arango.Administration do
   def version() do
     request(
       method: :get,
-      system_only: true,           # or just /_api? Same thing?
+      system_only: true,
       path: "version"
     )
   end

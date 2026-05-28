@@ -35,7 +35,7 @@ defmodule Arango.Wal do
 
     request(
       method: :put,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "/_admin/wal/flush",
       body: flush_opts
     )
@@ -50,7 +50,7 @@ defmodule Arango.Wal do
   def properties() do
     request(
       method: :get,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "/_admin/wal/properties",
       ok_decoder: __MODULE__.WalDecoder
     )
@@ -69,7 +69,7 @@ defmodule Arango.Wal do
 
     request(
       method: :put,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "/_admin/wal/properties",
       body: wal_properties,
       ok_decoder: __MODULE__.WalDecoder
@@ -85,7 +85,7 @@ defmodule Arango.Wal do
   def transactions() do
     request(
       method: :get,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "/_admin/wal/transactions"
     )
   end

@@ -106,11 +106,11 @@ defmodule Arango.Cursor do
     }
   end
 
-  # @doc """
-  # Create cursor
-  #
-  # POST /_api/cursor
-  # """
+  @doc """
+  Create cursor
+
+  POST /_api/cursor
+  """
   @spec cursor_create(Cursor.t) :: Arango.ok_error(map)
   def cursor_create(cursor) do
     query = Map.get(cursor, :query)
@@ -145,11 +145,11 @@ defmodule Arango.Cursor do
     )
   end
 
-  # @doc """
-  # Delete cursor
+  @doc """
+  Delete cursor
 
-  # DELETE /_api/cursor/{cursor-identifier}
-  # """
+  DELETE /_api/cursor/{cursor-identifier}
+  """
   @spec cursor_delete(Cursor.t) :: Arango.ok_error(map)
   def cursor_delete(cursor_id) do
     request(
@@ -158,11 +158,11 @@ defmodule Arango.Cursor do
     )
   end
 
-  # @doc """
-  # Read next batch from cursor
+  @doc """
+  Read next batch from cursor
 
-  # PUT /_api/cursor/{cursor-identifier}
-  # """
+  PUT /_api/cursor/{cursor-identifier}
+  """
   @spec cursor_next(Cursor.t) :: Arango.ok_error(map)
   def cursor_next(cursor_id) do
     request(

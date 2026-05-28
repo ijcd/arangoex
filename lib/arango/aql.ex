@@ -81,31 +81,31 @@ defmodule Arango.Aql do
     }
   end
 
-  # @doc """
-  # Return registered AQL user functions
-  #
-  # GET /_api/aqlfunction
-  # """
+  @doc """
+  Return registered AQL user functions
+
+  GET /_api/aqlfunction
+  """
   @deprecated @aql_function_deprecation
   @spec functions() :: Arango.ok_error(map)
   def functions() do
     request(
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       method: :get,
       path: "aqlfunction"
     )
   end
 
-  # @doc """
-  # Create AQL user function
-  #
-  # POST /_api/aqlfunction
-  # """
+  @doc """
+  Create AQL user function
+
+  POST /_api/aqlfunction
+  """
   @deprecated @aql_function_deprecation
   @spec create_function(Function.t) :: Arango.ok_error(map)
   def create_function(function) do
     request(
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       method: :post,
       path: "aqlfunction",
       body: function
@@ -121,17 +121,17 @@ defmodule Arango.Aql do
   @spec delete_function(String.t) :: Arango.ok_error(map)
   def delete_function(name) do
     request(
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       method: :delete,
       path: "aqlfunction/#{name}"
     )
   end
 
-  # @doc """
-  # Explain an AQL query
-  #
-  # POST /_api/explain
-  # """
+  @doc """
+  Explain an AQL query
+
+  POST /_api/explain
+  """
   @spec explain_query(Keyword.t) :: Arango.ok_error(map)
   def explain_query(query, options \\ %{}) do
     # TODO: this is surely simplified with a reduce
@@ -158,11 +158,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Parse an AQL query
-  #
-  # POST /_api/query
-  # """
+  @doc """
+  Parse an AQL query
+
+  POST /_api/query
+  """
   @spec validate_query(String.t) :: Arango.ok_error(map)
   def validate_query(query) do
     request(
@@ -172,11 +172,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Clears any results in the AQL query cache
-  #
-  # DELETE /_api/query-cache
-  # """
+  @doc """
+  Clears any results in the AQL query cache
+
+  DELETE /_api/query-cache
+  """
   @spec clear_query_cache() :: Arango.ok_error(map)
   def clear_query_cache() do
     request(
@@ -185,11 +185,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Returns the global properties for the AQL query cache
-  #
-  # GET /_api/query-cache/properties
-  # """
+  @doc """
+  Returns the global properties for the AQL query cache
+
+  GET /_api/query-cache/properties
+  """
   @spec query_cache_properties() :: Arango.ok_error(map)
   def query_cache_properties() do
     request(
@@ -198,11 +198,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Globally adjusts the AQL query result cache properties
-  #
-  # PUT /_api/query-cache/properties
-  # """
+  @doc """
+  Globally adjusts the AQL query result cache properties
+
+  PUT /_api/query-cache/properties
+  """
   @spec set_query_cache_properties(Keyword.t) :: Arango.ok_error(map)
   def set_query_cache_properties(options \\ %{}) do
     options = Enum.into(options, %{})
@@ -222,11 +222,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Returns the currently running AQL queries
-  #
-  # GET /_api/query/current
-  # """
+  @doc """
+  Returns the currently running AQL queries
+
+  GET /_api/query/current
+  """
   @spec current_queries() :: Arango.ok_error(map)
   def current_queries() do
     request(
@@ -235,11 +235,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Returns the properties for the AQL query tracking
-  #
-  # GET /_api/query/properties
-  # """
+  @doc """
+  Returns the properties for the AQL query tracking
+
+  GET /_api/query/properties
+  """
   @spec query_properties() :: Arango.ok_error(map)
   def query_properties() do
     request(
@@ -248,11 +248,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Changes the properties for the AQL query tracking
-  #
-  # PUT /_api/query/properties
-  # """
+  @doc """
+  Changes the properties for the AQL query tracking
+
+  PUT /_api/query/properties
+  """
   @spec set_query_properties(Keyword.t) :: Arango.ok_error(map)
   def set_query_properties(options \\ %{}) do
     options = Enum.into(options, %{})
@@ -278,11 +278,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Clears the list of slow AQL queries
-  #
-  # DELETE /_api/query/slow
-  # """
+  @doc """
+  Clears the list of slow AQL queries
+
+  DELETE /_api/query/slow
+  """
   @spec clear_slow_queries() :: Arango.ok_error(map)
   def clear_slow_queries() do
     request(
@@ -291,11 +291,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Returns the list of slow AQL queries
-  #
-  # GET /_api/query/slow
-  # """
+  @doc """
+  Returns the list of slow AQL queries
+
+  GET /_api/query/slow
+  """
   @spec slow_queries() :: Arango.ok_error(map)
   def slow_queries() do
     request(
@@ -304,11 +304,11 @@ defmodule Arango.Aql do
     )
   end
 
-  # @doc """
-  # Kills a running AQL query
-  #
-  # DELETE /_api/query/{query-id}
-  # """
+  @doc """
+  Kills a running AQL query
+
+  DELETE /_api/query/{query-id}
+  """
   @spec kill_query(String.t) :: Arango.ok_error(map)
   def kill_query(query_id) do
     request(

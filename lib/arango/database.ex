@@ -94,7 +94,7 @@ defmodule Arango.Database do
   def user_databases() do
     request(
       method: :get,
-      system_only: true,           # or just /_api? Same thing?
+      system_only: true,
       path: "database/user",
       ok_decoder: __MODULE__.PlainDecoder
     )
