@@ -1,8 +1,7 @@
 defmodule Arango.Index do
   @moduledoc "ArangoDB Index methods"
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :index
 
   @doc """
   Read index
@@ -11,11 +10,7 @@ defmodule Arango.Index do
   """
   @spec index(String.t) :: Arango.ok_error(map)
   def index(index_handle) do
-    %Request{
-      endpoint: :index,
-      http_method: :get,
-      path: "index/#{index_handle}",
-    }
+    request(method: :get, path: "index/#{index_handle}")
   end
 
   @doc """
@@ -27,12 +22,7 @@ defmodule Arango.Index do
   def indexes(collection_name) do
     query = Utils.opts_to_query([collection: collection_name], [:collection])
 
-    %Request{
-      endpoint: :index,
-      http_method: :get,
-      path: "index",
-      query: query,
-    }
+    request(method: :get, path: "index", query: query)
   end
 
   @doc """
@@ -50,13 +40,7 @@ defmodule Arango.Index do
       "minLength" => properties["minLength"] || 0
     }
 
-    %Request{
-      endpoint: :index,
-      http_method: :post,
-      path: "index/",
-      query: query,
-      body: body,
-    }
+    request(method: :post, path: "index/", query: query, body: body)
   end
 
   @doc """
@@ -68,13 +52,7 @@ defmodule Arango.Index do
   def create_general(collection_name, body) do
     query = Utils.opts_to_query([collection: collection_name], [:collection])
 
-    %Request{
-      endpoint: :index,
-      http_method: :post,
-      path: "index/",
-      query: query,
-      body: body,
-    }
+    request(method: :post, path: "index/", query: query, body: body)
   end
 
   @doc """
@@ -92,13 +70,7 @@ defmodule Arango.Index do
       "geoJson" => properties["geoJson"] || false
     }
 
-    %Request{
-      endpoint: :index,
-      http_method: :post,
-      path: "index/",
-      query: query,
-      body: body,
-    }
+    request(method: :post, path: "index/", query: query, body: body)
   end
 
   @doc """
@@ -115,13 +87,7 @@ defmodule Arango.Index do
       |> Utils.opts_to_vars([:unique, :sparse])
       |> Map.merge(%{"type" => "hash", "fields" => field_names})
 
-    %Request{
-      endpoint: :index,
-      http_method: :post,
-      path: "index/",
-      query: query,
-      body: body,
-    }
+    request(method: :post, path: "index/", query: query, body: body)
   end
 
   @doc """
@@ -137,13 +103,7 @@ defmodule Arango.Index do
       |> Utils.opts_to_vars([:unique, :sparse])
       |> Map.merge(%{"type" => "persistent", "fields" => field_names})
 
-    %Request{
-      endpoint: :index,
-      http_method: :post,
-      path: "index/",
-      query: query,
-      body: body,
-    }
+    request(method: :post, path: "index/", query: query, body: body)
   end
 
   @doc """
@@ -160,13 +120,7 @@ defmodule Arango.Index do
       |> Utils.opts_to_vars([:unique, :sparse])
       |> Map.merge(%{"type" => "skiplist", "fields" => field_names})
 
-    %Request{
-      endpoint: :index,
-      http_method: :post,
-      path: "index/",
-      query: query,
-      body: body,
-    }
+    request(method: :post, path: "index/", query: query, body: body)
   end
 
   @doc """
@@ -176,10 +130,6 @@ defmodule Arango.Index do
   """
   @spec delete(String.t) :: Arango.ok_error(map)
   def delete(index_handle) do
-    %Request{
-      endpoint: :index,
-      http_method: :delete,
-      path: "index/#{index_handle}",
-    }
+    request(method: :delete, path: "index/#{index_handle}")
   end
 end

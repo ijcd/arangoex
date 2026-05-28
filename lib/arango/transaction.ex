@@ -1,7 +1,7 @@
 defmodule Arango.Transaction do
   @moduledoc "ArangoDB Transaction methods"
 
-  alias Arango.Request
+  use Arango.API, endpoint: :transaction
 
   defmodule Transaction do
     @moduledoc false
@@ -76,11 +76,10 @@ defmodule Arango.Transaction do
       |> Map.merge(if t.lock_timeout, do: %{"lockTimeout" => t.lock_timeout}, else: %{})
       |> Map.merge(if t.wait_for_sync, do: %{"waitForSync" => t.wait_for_sync}, else: %{})
 
-    %Request{
-      endpoint: :transaction,
-      http_method: :post,
+    request(
+      method: :post,
       path: "transaction",
-      body: body,
-    }
+      body: body
+    )
   end
 end

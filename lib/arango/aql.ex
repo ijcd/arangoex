@@ -9,7 +9,7 @@
 defmodule Arango.Aql do
   @moduledoc "ArangoDB AQL methods"
 
-  alias Arango.Request
+  use Arango.API, endpoint: :aql
 
   @aql_function_deprecation "AQL user functions are removed in API v1/4.0. Inline the logic into your AQL queries."
 
@@ -89,12 +89,11 @@ defmodule Arango.Aql do
   @deprecated @aql_function_deprecation
   @spec functions() :: Arango.ok_error(map)
   def functions() do
-    %Request{
-      endpoint: :aql,
+    request(
       system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
+      method: :get,
       path: "aqlfunction"
-    }
+    )
   end
 
   # @doc """
@@ -105,13 +104,12 @@ defmodule Arango.Aql do
   @deprecated @aql_function_deprecation
   @spec create_function(Function.t) :: Arango.ok_error(map)
   def create_function(function) do
-    %Request{
-      endpoint: :aql,
+    request(
       system_only: true,   # or just /_api? Same thing?
-      http_method: :post,
+      method: :post,
       path: "aqlfunction",
-      body: function,
-    }
+      body: function
+    )
   end
 
   @doc """
@@ -122,12 +120,11 @@ defmodule Arango.Aql do
   @deprecated @aql_function_deprecation
   @spec delete_function(String.t) :: Arango.ok_error(map)
   def delete_function(name) do
-    %Request{
-      endpoint: :aql,
+    request(
       system_only: true,   # or just /_api? Same thing?
-      http_method: :delete,
-      path: "aqlfunction/#{name}",
-    }
+      method: :delete,
+      path: "aqlfunction/#{name}"
+    )
   end
 
   # @doc """
@@ -154,12 +151,11 @@ defmodule Arango.Aql do
       %{query: query}
       |> Map.merge(if Enum.any?(opts), do: %{"options" => opts}, else: %{})
 
-    %Request{
-      endpoint: :aql,
-      http_method: :post,
+    request(
+      method: :post,
       path: "explain",
-      body: explain_request,
-    }
+      body: explain_request
+    )
   end
 
   # @doc """
@@ -169,12 +165,11 @@ defmodule Arango.Aql do
   # """
   @spec validate_query(String.t) :: Arango.ok_error(map)
   def validate_query(query) do
-    %Request{
-      endpoint: :aql,
-      http_method: :post,
+    request(
+      method: :post,
       path: "query",
-      body: %{query: query},
-    }
+      body: %{query: query}
+    )
   end
 
   # @doc """
@@ -184,11 +179,10 @@ defmodule Arango.Aql do
   # """
   @spec clear_query_cache() :: Arango.ok_error(map)
   def clear_query_cache() do
-    %Request{
-      endpoint: :aql,
-      http_method: :delete,
-      path: "query-cache",
-    }
+    request(
+      method: :delete,
+      path: "query-cache"
+    )
   end
 
   # @doc """
@@ -198,11 +192,10 @@ defmodule Arango.Aql do
   # """
   @spec query_cache_properties() :: Arango.ok_error(map)
   def query_cache_properties() do
-    %Request{
-      endpoint: :aql,
-      http_method: :get,
-      path: "query-cache/properties",
-    }
+    request(
+      method: :get,
+      path: "query-cache/properties"
+    )
   end
 
   # @doc """
@@ -222,12 +215,11 @@ defmodule Arango.Aql do
       |> Map.merge(if max_results, do: %{"maxResults" => max_results}, else: %{})
       |> Map.merge(if mode, do: %{"mode" => mode}, else: %{})
 
-    %Request{
-      endpoint: :aql,
-      http_method: :put,
+    request(
+      method: :put,
       path: "query-cache/properties",
-      body: opts,
-    }
+      body: opts
+    )
   end
 
   # @doc """
@@ -237,11 +229,10 @@ defmodule Arango.Aql do
   # """
   @spec current_queries() :: Arango.ok_error(map)
   def current_queries() do
-    %Request{
-      endpoint: :aql,
-      http_method: :get,
-      path: "query/current",
-    }
+    request(
+      method: :get,
+      path: "query/current"
+    )
   end
 
   # @doc """
@@ -251,11 +242,10 @@ defmodule Arango.Aql do
   # """
   @spec query_properties() :: Arango.ok_error(map)
   def query_properties() do
-    %Request{
-      endpoint: :aql,
-      http_method: :get,
-      path: "query/properties",
-    }
+    request(
+      method: :get,
+      path: "query/properties"
+    )
   end
 
   # @doc """
@@ -281,12 +271,11 @@ defmodule Arango.Aql do
       |> Map.merge(if track_slow_queries, do: %{"trackSlowqueries" => track_slow_queries}, else: %{})
       |> Map.merge(if max_query_string_length, do: %{"maxQuerystringlength" => max_query_string_length}, else: %{})
 
-    %Request{
-      endpoint: :aql,
-      http_method: :put,
+    request(
+      method: :put,
       path: "query/properties",
-      body: opts,
-    }
+      body: opts
+    )
   end
 
   # @doc """
@@ -296,11 +285,10 @@ defmodule Arango.Aql do
   # """
   @spec clear_slow_queries() :: Arango.ok_error(map)
   def clear_slow_queries() do
-    %Request{
-      endpoint: :aql,
-      http_method: :delete,
-      path: "query/slow",
-    }
+    request(
+      method: :delete,
+      path: "query/slow"
+    )
   end
 
   # @doc """
@@ -310,11 +298,10 @@ defmodule Arango.Aql do
   # """
   @spec slow_queries() :: Arango.ok_error(map)
   def slow_queries() do
-    %Request{
-      endpoint: :aql,
-      http_method: :get,
-      path: "query/slow",
-    }
+    request(
+      method: :get,
+      path: "query/slow"
+    )
   end
 
   # @doc """
@@ -324,10 +311,9 @@ defmodule Arango.Aql do
   # """
   @spec kill_query(String.t) :: Arango.ok_error(map)
   def kill_query(query_id) do
-    %Request{
-      endpoint: :aql,
-      http_method: :delete,
-      path: "query/#{query_id}",
-    }
+    request(
+      method: :delete,
+      path: "query/#{query_id}"
+    )
   end
 end

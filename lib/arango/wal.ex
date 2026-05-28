@@ -1,8 +1,7 @@
 defmodule Arango.Wal do
   @moduledoc "ArangoDB Wal methods"
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :wal
 
   defstruct [
     :allowOversizeEntries,
@@ -34,13 +33,12 @@ defmodule Arango.Wal do
   def flush(opts \\ []) do
     flush_opts = Utils.opts_to_vars(opts, [:waitForSync, :waitForCollector])
 
-    %Request{
-      endpoint: :wal,
+    request(
+      method: :put,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :put,
       path: "/_admin/wal/flush",
-      body: flush_opts,
-    }
+      body: flush_opts
+    )
   end
 
   @doc """
@@ -50,13 +48,12 @@ defmodule Arango.Wal do
   """
   @spec properties() :: Arango.ok_error(t)
   def properties() do
-    %Request{
-      endpoint: :wal,
+    request(
+      method: :get,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
       path: "/_admin/wal/properties",
-      ok_decoder: __MODULE__.WalDecoder,
-    }
+      ok_decoder: __MODULE__.WalDecoder
+    )
   end
 
   @doc """
@@ -70,14 +67,13 @@ defmodule Arango.Wal do
     defaults = %__MODULE__{} |> Map.from_struct |> Map.keys
     wal_properties = Utils.opts_to_vars(properties, defaults)
 
-    %Request{
-      endpoint: :wal,
+    request(
+      method: :put,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :put,
       path: "/_admin/wal/properties",
       body: wal_properties,
-      ok_decoder: __MODULE__.WalDecoder,
-    }
+      ok_decoder: __MODULE__.WalDecoder
+    )
   end
 
   @doc """
@@ -87,12 +83,11 @@ defmodule Arango.Wal do
   """
   @spec transactions() :: Arango.ok_error(map)
   def transactions() do
-    %Request{
-      endpoint: :wal,
+    request(
+      method: :get,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
-      path: "/_admin/wal/transactions",
-    }
+      path: "/_admin/wal/transactions"
+    )
   end
 
   defmodule WalDecoder do

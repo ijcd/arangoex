@@ -8,7 +8,7 @@ defmodule Arango.Task do
   > scheduler (cron, Quantum, Oban) instead.
   """
 
-  alias Arango.Request
+  use Arango.API, endpoint: :task
 
   @deprecation "Removed in API v1/4.0. Use an external scheduler (cron, Quantum, Oban)."
 
@@ -46,13 +46,12 @@ defmodule Arango.Task do
   @deprecated @deprecation
   @spec create(t) :: Arango.ok_error(map)
   def create(task) do
-    %Request{
-      endpoint: :task,
-      system_only: true,   # or just /_api? Same thing?
-      http_method: :post,
+    request(
+      system_only: true,
+      method: :post,
       path: "tasks",
       body: task
-    }
+    )
   end
 
   @doc """
@@ -63,12 +62,11 @@ defmodule Arango.Task do
   @deprecated @deprecation
   @spec tasks() :: Arango.ok_error(map)
   def tasks() do
-    %Request{
-      endpoint: :task,
-      system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
-      path: "tasks",
-    }
+    request(
+      system_only: true,
+      method: :get,
+      path: "tasks"
+    )
   end
 
   @doc """
@@ -79,12 +77,11 @@ defmodule Arango.Task do
   @deprecated @deprecation
   @spec delete(String.t) :: Arango.ok_error(map)
   def delete(task_id) do
-    %Request{
-      endpoint: :task,
-      system_only: true,   # or just /_api? Same thing?
-      http_method: :delete,
-      path: "tasks/#{task_id}",
-    }
+    request(
+      system_only: true,
+      method: :delete,
+      path: "tasks/#{task_id}"
+    )
   end
 
   @doc """
@@ -95,12 +92,11 @@ defmodule Arango.Task do
   @deprecated @deprecation
   @spec task(String.t) :: Arango.ok_error(map)
   def task(task_id) do
-    %Request{
-      endpoint: :task,
-      system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
-      path: "tasks/#{task_id}",
-    }
+    request(
+      system_only: true,
+      method: :get,
+      path: "tasks/#{task_id}"
+    )
   end
 
   @doc """
@@ -111,12 +107,11 @@ defmodule Arango.Task do
   @deprecated @deprecation
   @spec create_with_id(String.t, Task.t) :: Arango.ok_error(map)
   def create_with_id(task_id, task) do
-    %Request{
-      endpoint: :task,
-      system_only: true,   # or just /_api? Same thing?
-      http_method: :put,
+    request(
+      system_only: true,
+      method: :put,
       path: "tasks/#{task_id}",
-      body: task,
-    }
+      body: task
+    )
   end
 end

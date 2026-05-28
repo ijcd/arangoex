@@ -1,7 +1,7 @@
 defmodule Arango.Database do
   @moduledoc "ArangoDB Database methods"
 
-  alias Arango.Request
+  use Arango.API, endpoint: :database
 
   defstruct [
     :id,
@@ -31,14 +31,13 @@ defmodule Arango.Database do
   def create(database \\ [])
   def create(%__MODULE__{name: name}), do: create(name: name)
   def create(opts) do
-    %Request{
-      endpoint: :database,
+    request(
+      method: :post,
       system_only: true,
-      http_method: :post,
       path: "database",
       body: opts |> Keyword.take([:name, :users]) |> Enum.into(%{}),
-      ok_decoder: __MODULE__.PlainDecoder,
-    }
+      ok_decoder: __MODULE__.PlainDecoder
+    )
   end
 
   @doc """
@@ -48,13 +47,12 @@ defmodule Arango.Database do
   """
   @spec drop(String.t) :: Arango.ok_error(true)
   def drop(db_name) do
-    %Request{
-      endpoint: :database,
+    request(
+      method: :delete,
       system_only: true,
-      http_method: :delete,
       path: "database/#{db_name}",
-      ok_decoder: __MODULE__.PlainDecoder,
-    }
+      ok_decoder: __MODULE__.PlainDecoder
+    )
   end
 
   @doc """
@@ -65,12 +63,11 @@ defmodule Arango.Database do
   # @type show_database_opts :: [{:name, String.t}]
   @spec database() :: Arango.ok_error(t)
   def database() do
-    %Request{
-      endpoint: :database,
-      http_method: :get,
+    request(
+      method: :get,
       path: "database/current",
-      ok_decoder: __MODULE__.DatabaseDecoder,
-    }
+      ok_decoder: __MODULE__.DatabaseDecoder
+    )
   end
 
   @doc """
@@ -80,13 +77,12 @@ defmodule Arango.Database do
   """
   @spec databases() :: Arango.ok_error([String.t])
   def databases() do
-    %Request{
-      endpoint: :database,
+    request(
+      method: :get,
       system_only: true,
-      http_method: :get,
       path: "database",
-      ok_decoder: __MODULE__.PlainDecoder,
-    }
+      ok_decoder: __MODULE__.PlainDecoder
+    )
   end
 
   @doc """
@@ -96,13 +92,12 @@ defmodule Arango.Database do
   """
   @spec user_databases() :: Arango.ok_error([String.t])
   def user_databases() do
-    %Request{
-      endpoint: :database,
+    request(
+      method: :get,
       system_only: true,           # or just /_api? Same thing?
-      http_method: :get,
       path: "database/user",
-      ok_decoder: __MODULE__.PlainDecoder,
-    }
+      ok_decoder: __MODULE__.PlainDecoder
+    )
   end
 
   defmodule DatabaseDecoder do

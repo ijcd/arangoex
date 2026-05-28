@@ -1,8 +1,7 @@
 defmodule Arango.User do
   @moduledoc "ArangoDB User methods"
 
-  alias Arango.Request
-  alias Arango.Utils
+  use Arango.API, endpoint: :user
 
   defstruct [
     user: nil,
@@ -31,14 +30,13 @@ defmodule Arango.User do
   def create(user \\ [])
   def create(%__MODULE__{user: name}), do: create(user: name)
   def create(opts) do
-    %Request{
-      endpoint: :user,
+    request(
+      method: :post,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :post,
       path: "user",
       body: opts |> Keyword.take([:user, :passwd, :active, :extra]) |> Enum.into(%{}),
-      ok_decoder: __MODULE__.UserDecoder,
-    }
+      ok_decoder: __MODULE__.UserDecoder
+    )
   end
 
   @doc """
@@ -49,12 +47,11 @@ defmodule Arango.User do
   @spec remove(t | String.t) :: Arango.ok_error(map)
   def remove(%__MODULE__{user: name}), do: remove(name)
   def remove(name) do
-    %Request{
-      endpoint: :user,
+    request(
+      method: :delete,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :delete,
-      path: "user/#{name}",
-    }
+      path: "user/#{name}"
+    )
   end
 
   @doc """
@@ -64,13 +61,12 @@ defmodule Arango.User do
   """
   @spec users() :: Arango.ok_error([t])
   def users() do
-    %Request{
-      endpoint: :user,
-            system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
+    request(
+      method: :get,
+      system_only: true,   # or just /_api? Same thing?
       path: "user",
-      ok_decoder: __MODULE__.UserDecoder,
-    }
+      ok_decoder: __MODULE__.UserDecoder
+    )
   end
 
   @doc """
@@ -81,13 +77,12 @@ defmodule Arango.User do
   @spec user(String.t | t) :: Arango.ok_error(t)
   def user(%__MODULE__{user: name}), do: user(name)
   def user(name) do
-    %Request{
-      endpoint: :user,
+    request(
+      method: :get,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
       path: "user/#{name}",
-      ok_decoder: __MODULE__.UserDecoder,
-    }
+      ok_decoder: __MODULE__.UserDecoder
+    )
   end
 
   @doc """
@@ -99,14 +94,13 @@ defmodule Arango.User do
   def update(user, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
 
-    %Request{
-      endpoint: :user,
+    request(
+      method: :patch,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :patch,
       path: "user/#{user.user}",
       body: properties,
-      ok_decoder: __MODULE__.UserDecoder,
-    }
+      ok_decoder: __MODULE__.UserDecoder
+    )
   end
 
   @doc """
@@ -118,14 +112,13 @@ defmodule Arango.User do
   def replace(user, opts \\ []) do
     properties = Utils.opts_to_vars(opts, [:passwd, :active, :extra])
 
-    %Request{
-      endpoint: :user,
+    request(
+      method: :put,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :put,
       path: "user/#{user.user}",
       body: properties,
-      ok_decoder: __MODULE__.UserDecoder,
-    }
+      ok_decoder: __MODULE__.UserDecoder
+    )
   end
 
   @doc """
@@ -136,13 +129,12 @@ defmodule Arango.User do
   @spec databases(String.t | t) :: Arango.ok_error([String.t])
   def databases(%__MODULE__{user: name}), do: databases(name)
   def databases(user_name) do
-    %Request{
-      endpoint: :user,
+    request(
+      method: :get,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :get,
       path: "user/#{user_name}/database",
-      ok_decoder: __MODULE__.PlainDecoder,
-    }
+      ok_decoder: __MODULE__.PlainDecoder
+    )
   end
 
   @doc """
@@ -153,13 +145,12 @@ defmodule Arango.User do
   @spec grant(t, Database.t) :: Arango.ok_error([String.t])
   def grant(%__MODULE__{user: user_name}, database_name), do: grant(user_name, database_name)
   def grant(user_name, database_name) do
-    %Request{
-      endpoint: :user,
+    request(
+      method: :put,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :put,
       path: "user/#{user_name}/database/#{database_name}",
-      body: %{grant: "rw"},
-    }
+      body: %{grant: "rw"}
+    )
   end
 
   @doc """
@@ -170,13 +161,12 @@ defmodule Arango.User do
   @spec revoke(t, Database.t) :: Arango.ok_error([String.t])
   def revoke(%__MODULE__{user: user_name}, database_name), do: revoke(user_name, database_name)
   def revoke(user_name, database_name) do
-    %Request{
-      endpoint: :user,
+    request(
+      method: :put,
       system_only: true,   # or just /_api? Same thing?
-      http_method: :put,
       path: "user/#{user_name}/database/#{database_name}",
-      body: %{grant: "none"},
-    }
+      body: %{grant: "none"}
+    )
   end
 
   defmodule UserDecoder do
