@@ -122,21 +122,22 @@ defmodule Arango.Cursor do
     optimizer_rules = Map.get(cursor, :optimizer_rules)
 
     top_level =
-      %{}
-      |> Map.merge(if query, do: %{"query" => query}, else: %{})
-      |> Map.merge(if bind_vars, do: %{"bindVars" => Enum.into(bind_vars, %{})}, else: %{})
-      |> Map.merge(if count, do: %{"count" => count}, else: %{})
-      |> Map.merge(if batch_size, do: %{"batchSize" => batch_size}, else: %{})
+      Utils.compact(%{
+        "query" => query,
+        "bindVars" => bind_vars && Enum.into(bind_vars, %{}),
+        "count" => count,
+        "batchSize" => batch_size
+      })
 
     options =
-      %{}
-      |> Map.merge(if full_count, do: %{"fullCount" => full_count}, else: %{})
-      |> Map.merge(if max_plans, do: %{"maxPlans" => max_plans}, else: %{})
-      |> Map.merge(if optimizer_rules, do: %{"optimizer" => %{"rules" => optimizer_rules}}, else: %{})
+      Utils.compact(%{
+        "fullCount" => full_count,
+        "maxPlans" => max_plans,
+        "optimizer" => optimizer_rules && %{"rules" => optimizer_rules}
+      })
 
     cursor_request =
-      top_level
-      |> Map.merge(if Enum.any?(options), do: %{"options" => options}, else: %{})
+      if map_size(options) > 0, do: Map.put(top_level, "options", options), else: top_level
 
     request(
       method: :post,

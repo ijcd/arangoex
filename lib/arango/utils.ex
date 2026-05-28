@@ -1,6 +1,13 @@
 defmodule Arango.Utils do
   @moduledoc false
 
+  @doc """
+  Drops keys whose value is `nil`, returning a map safe to send as a
+  request body. Explicit `false` is kept — omit a boolean only by passing `nil`.
+  """
+  @spec compact(map) :: map
+  def compact(map), do: Map.reject(map, fn {_k, v} -> is_nil(v) end)
+
   @spec opts_to_headers(keyword, [atom]) :: keyword
   def opts_to_headers(opts, permitted \\ []) do
     opts

@@ -222,17 +222,27 @@ end
     }} = Aql.query_properties() |> on_db(ctx)
   end
 
-  @tag :skip
   test "Changes the properties for the AQL query tracking", ctx do
-    assert {
-      :ok, %{
-        "enabled" => false,
-        "trackSlowQueries" => false,
-        "maxSlowQueries" => 128,
-        "slowQueryThreshold" => 20,
-        "maxQueryStringLength" => 2048,
-      }
-    } == Aql.set_query_properties(enabled: false, track_slow_queries: false, max_slow_queries: 128, slow_query_threshold: 20, max_query_string_length: 2048) |> on_db(ctx)
+    {:ok, _} =
+      Aql.set_query_properties(
+        track_slow_queries: true,
+        max_slow_queries: 128,
+        slow_query_threshold: 20,
+        max_query_string_length: 2048
+      )
+      |> on_db(ctx)
+
+    assert {:ok, %{
+      "trackSlowQueries" => true,
+      "maxSlowQueries" => 128,
+      "slowQueryThreshold" => 20,
+      "maxQueryStringLength" => 2048
+    }} = Aql.query_properties() |> on_db(ctx)
+  end
+
+  test "set_query_properties transmits enabled: false (regression: false must not be dropped)", ctx do
+    {:ok, _} = Aql.set_query_properties(enabled: false) |> on_db(ctx)
+    assert {:ok, %{"enabled" => false}} = Aql.query_properties() |> on_db(ctx)
   end
 
   test "Clears the list of slow AQL queries", ctx do
