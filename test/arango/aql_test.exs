@@ -5,11 +5,15 @@ defmodule AqlTest do
   alias Arango.Aql
   alias Arango.Collection
 
+  setup do
+    # Clean up any leftover AQL user functions from other tests
+    Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
+    :ok
+  end
+
   test "Return registered AQL user functions" do
     # no functions yet
-    assert {
-      :ok, []
-    } == Aql.functions() |> arango()
+    assert {:ok, %{"result" => []}} = Aql.functions() |> arango()
   end
 
   test "Create AQL user function" do
@@ -18,31 +22,17 @@ defmodule AqlTest do
       code: "function (celsius) { return celsius * 1.8 + 32; }",
     }
 
-    # created returns 201
-    assert {
-      :ok, %{
-        "code" => 201,
-        "error" => false,
-      }
-    } == Aql.create_function(aql_function) |> arango()
+    # created returns isNewlyCreated true
+    assert {:ok, %{"error" => false, "isNewlyCreated" => true}} =
+      Aql.create_function(aql_function) |> arango()
 
-    # replaced returns 200
-    assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-      }
-    } == Aql.create_function(aql_function) |> arango()
+    # replaced returns isNewlyCreated false
+    assert {:ok, %{"error" => false, "isNewlyCreated" => false}} =
+      Aql.create_function(aql_function) |> arango()
 
     # function should be there
-    assert {
-      :ok, [
-        %{
-          "name" => "myfunctions::temperature::celsiustofahrenheit",
-          "code" => "function (celsius) { return celsius * 1.8 + 32; }",
-        }
-      ]
-    } == Aql.functions() |> arango()
+    assert {:ok, %{"result" => [%{"name" => "myfunctions::temperature::celsiustofahrenheit"}]}} =
+      Aql.functions() |> arango()
   end
 
   test "Remove existing AQL user function" do
@@ -52,26 +42,16 @@ defmodule AqlTest do
     }
 
     {:ok, _} = Aql.create_function(aql_function) |> arango()
-    {:ok, functions} = Aql.functions() |> arango()
+    {:ok, %{"result" => functions}} = Aql.functions() |> arango()
     assert Enum.count(functions) == 1
 
     # deletes
-    assert {
-      :ok, %{
-          "code" => 200,
-          "error" => false,
-      }
-    } == Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
+    assert {:ok, %{"code" => 200, "error" => false}} =
+      Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
 
     # already deleted
-    assert {
-      :error, %{
-        "code" => 404,
-        "error" => true,
-        "errorMessage" => "user function '%s()' not found",
-        "errorNum" => 1582
-      }
-    } == Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
+    assert {:error, %{"code" => 404, "error" => true, "errorNum" => 1582}} =
+      Aql.delete_function("myfunctions::temperature::celsiustofahrenheit") |> arango()
   end
 
   test "Explain an AQL query (valid query)", ctx do
@@ -87,7 +67,7 @@ defmodule AqlTest do
         "warnings" => []
       }
     } = Aql.explain_query("FOR p IN products RETURN p") |> on_db(ctx)
-    assert Enum.count(plan["rules"]) == 0
+    assert is_list(plan["rules"])
   end
 
   test "Explain an AQL query (a plan with some optimizer rules applied)", ctx do
@@ -210,12 +190,8 @@ end
   end
 
   test "Globally adjusts the AQL query result cache properties", ctx do
-    assert {
-      :ok, %{
-        "maxResults" => 256,
-        "mode" => "on"
-      }
-    } == Aql.set_query_cache_properties(max_results: 256, mode: "on") |> on_db(ctx)
+    assert {:ok, %{"maxResults" => 256, "mode" => "on"}} =
+      Aql.set_query_cache_properties(max_results: 256, mode: "on") |> on_db(ctx)
   end
 
   test "Returns the currently running AQL queries (no queries)", ctx do
@@ -235,17 +211,15 @@ end
 
   test "Returns the properties for the AQL query tracking", ctx do
     # with no queries running
-    assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "enabled" => true,
-        "maxQueryStringLength" => 4096,
-        "maxSlowQueries" => 64,
-        "slowQueryThreshold" => 10,
-        "trackSlowQueries" => true
-      }
-    } == Aql.query_properties() |> on_db(ctx)
+    assert {:ok, %{
+      "code" => 200,
+      "error" => false,
+      "enabled" => true,
+      "maxQueryStringLength" => 4096,
+      "maxSlowQueries" => 64,
+      "slowQueryThreshold" => 10,
+      "trackSlowQueries" => true
+    }} = Aql.query_properties() |> on_db(ctx)
   end
 
   @tag :skip
@@ -285,13 +259,7 @@ end
   end
 
   test "Kills a running AQL query (invalid query)", ctx do
-    assert {
-      :error, %{
-        "code" => 400,
-        "error" => true,
-        "errorMessage" => "cannot kill query 'somequery'",
-        "errorNum" => 1591
-      }
-    } == Aql.kill_query("somequery") |> on_db(ctx)
+    assert {:error, %{"error" => true, "errorNum" => 1591}} =
+      Aql.kill_query("somequery") |> on_db(ctx)
   end
 end

@@ -38,25 +38,6 @@ defmodule Arango.Administration do
   end
 
   @doc """
-  Execute program
-
-  POST /_admin/execute
-  """
-  @spec execute(String.t, keyword) :: Arango.ok_error(map)
-  def execute(code, opts \\ []) do
-    query = Utils.opts_to_query(opts, [:returnAsJson])
-
-    %Request{
-      endpoint: :administration,
-      http_method: :post,
-      body: code,
-      path: "/_admin/execute",
-      query: query,
-      encode_body: false
-    }
-  end
-
-  @doc """
   Read global logs from the server
 
   GET /_admin/log
@@ -97,6 +78,7 @@ defmodule Arango.Administration do
 
   POST /_admin/routing/reload
   """
+  @deprecated "Removed in API v1/4.0; routing handled internally."
   @spec reload_routing() :: Arango.ok_error(map)
   def reload_routing() do
     %Request{
@@ -170,6 +152,7 @@ defmodule Arango.Administration do
 
   GET /_admin/statistics
   """
+  @deprecated "Removed in API v1/4.0. Use Administration.metrics/0 (Prometheus format) when added in Phase 4."
   @spec statistics() :: Arango.ok_error(map)
   def statistics() do
     %Request{
@@ -184,6 +167,7 @@ defmodule Arango.Administration do
 
   GET /_admin/statistics-description
   """
+  @deprecated "Removed in API v1/4.0. Use Administration.metrics/0 (Prometheus format) when added in Phase 4."
   @spec statistics_description() :: Arango.ok_error(map)
   def statistics_description() do
     %Request{

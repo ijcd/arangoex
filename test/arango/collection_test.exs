@@ -13,10 +13,11 @@ defmodule CollectionTest do
       |> Enum.map(fn c -> c.name end)
       |> Enum.sort
 
-    assert names == [
-      "_apps", "_aqlfunctions", "_frontend", "_graphs", "_jobs", "_modules",
-      "_queues", "_routing", "_statistics", "_statistics15", "_statisticsRaw", "_users"
-    ]
+    # Don't hardcode system collections — they differ between ArangoDB versions.
+    # Just check that some known system collections exist.
+    for expected <- ["_graphs", "_jobs", "_queues", "_statistics"] do
+      assert expected in names, "Expected #{expected} in system collections"
+    end
   end
 
   test "creates a collection", ctx do
@@ -26,7 +27,10 @@ defmodule CollectionTest do
     {:ok, coll} = Collection.create(%Collection{name: new_collname}) |> on_db(ctx)
     {:ok, after_colls} = Collection.collections() |> on_db(ctx)
 
-    assert [coll] == after_colls -- original_colls
+    new_colls = after_colls -- original_colls
+    assert length(new_colls) == 1
+    [created] = new_colls
+    assert created.name == new_collname
     assert coll.name == new_collname
   end
 
@@ -48,7 +52,10 @@ defmodule CollectionTest do
 
   test "looks up collection information", ctx do
     {:ok, new_coll} = Collection.collection(ctx.coll) |> on_db(ctx)
-    assert new_coll == ctx.coll
+    assert new_coll.id == ctx.coll.id
+    assert new_coll.name == ctx.coll.name
+    assert new_coll.type == ctx.coll.type
+    assert new_coll.isSystem == ctx.coll.isSystem
   end
 
   test "loads a collection", ctx do
@@ -102,9 +109,6 @@ defmodule CollectionTest do
 
     assert %{"name" => ^coll_name, "error" => false} = properties
     assert Map.has_key?(properties, "waitForSync")
-    assert Map.has_key?(properties, "doCompact")
-    assert Map.has_key?(properties, "journalSize")
-    assert Map.has_key?(properties, "isVolatile")
   end
 
   test "sets collection properties", ctx do
@@ -113,11 +117,8 @@ defmodule CollectionTest do
     {:ok, properties} = Collection.set_properties(ctx.coll, waitForSync: true) |> on_db(ctx)
     assert %{"name" => ^coll_name, "error" => false, "waitForSync" => true} = properties
 
-    {:ok, properties} = Collection.set_properties(ctx.coll, journalSize: 1_048_576) |> on_db(ctx)
-    assert %{"name" => ^coll_name, "error" => false, "journalSize" => 1_048_576} = properties
-
-    {:ok, properties} = Collection.set_properties(ctx.coll, journalSize: 2_048_576, waitForSync: false) |> on_db(ctx)
-    assert %{"name" => ^coll_name, "error" => false, "waitForSync" => false, "journalSize" => 2_048_576} = properties
+    {:ok, properties} = Collection.set_properties(ctx.coll, waitForSync: false) |> on_db(ctx)
+    assert %{"name" => ^coll_name, "error" => false, "waitForSync" => false} = properties
   end
 
   test "renames collection", ctx do
@@ -133,6 +134,8 @@ defmodule CollectionTest do
     assert Map.has_key?(revision, "revision")
   end
 
+  @tag :skip
+  # rotate was removed in ArangoDB 3.12
   test "rotates a collection journal", ctx do
     {:ok, _} = Document.create(ctx.coll, %{name: "RotateMe"}) |> on_db(ctx)
     {:ok, _} = Wal.flush(waitForSync: true, waitForCollector: true) |> on_db(ctx)

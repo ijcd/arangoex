@@ -6,13 +6,13 @@ defmodule DatabaseTest do
   alias Arango.User  
 
   test "creates a database" do
-    new_dbname = Faker.Lorem.word
+    new_dbname = "testcreate_#{System.unique_integer([:positive])}"
 
-    {:ok, original_dbs} = Database.databases() |> arango() 
+    {:ok, original_dbs} = Database.databases() |> arango()
     {:ok, true} = Database.create(name: new_dbname) |> arango()
     {:ok, after_dbs} = Database.databases() |> arango()
-    
-    assert (after_dbs -- original_dbs) == [new_dbname]
+
+    assert new_dbname in (after_dbs -- original_dbs)
   end
 
   test "creates a database with users" do
@@ -39,8 +39,9 @@ defmodule DatabaseTest do
   end
 
   test "fails to create a database" do
-    new_dbname = "#$%^&"
-    {:error, %{"error" => true, "errorMessage" => "database name invalid"}} = Database.create(name: new_dbname) |> arango()
+    new_dbname = ""
+    {:error, %{"error" => true, "errorNum" => error_num}} = Database.create(name: new_dbname) |> arango()
+    assert error_num in [1208, 1229]
   end
 
   test "drops a database" do
@@ -62,13 +63,13 @@ defmodule DatabaseTest do
   test "looks up database information" do
     # lookup _system
     {:ok, db} = Database.database() |> arango(database_name: "_system")
-    %Arango.Database{id: "1", isSystem: true, name: "_system", path: "/var/lib/arangodb3/databases/database-1", users: nil} = db
+    assert %Arango.Database{isSystem: true, name: "_system"} = db
 
     # lookup a newly minted db
-    new_dbname = Faker.Lorem.word
+    new_dbname = "testlookup_#{System.unique_integer([:positive])}"
     {:ok, true} = Database.create(name: new_dbname) |> arango()
     {:ok, db} = Database.database() |> arango(database_name: new_dbname)
-    %Arango.Database{id: _, isSystem: false, name: ^new_dbname, path: _, users: nil} = db
+    assert %Arango.Database{isSystem: false, name: ^new_dbname} = db
   end
 
   test "lists existing databases" do

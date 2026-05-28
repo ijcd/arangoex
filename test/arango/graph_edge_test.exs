@@ -6,7 +6,7 @@ defmodule GraphEdgeTest do
   alias Arango.GraphEdge
 
   test "Read in or outbound edges", ctx do
-    {:ok, _} = Graph.create("social", [%Graph.EdgeDefinition{collection: "people", from: ["person"], to: ["person"]}]) |> on_db(ctx)
+    {:ok, _} = Graph.create("social", [%{collection: "people", from: ["person"], to: ["person"]}]) |> on_db(ctx)
     {:ok, %{"vertex" => %{"_id" => amy_id}}} = Graph.vertex_create("social", "person", %{_key: "Amy", name: "Amy"}) |> on_db(ctx)
     {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create("social", "person", %{_key: "Brad", name: "Brad"}) |> on_db(ctx)
     {:ok, %{"vertex" => %{"_id" => _}}} = Graph.vertex_create("social", "person", %{_key: "Cindy", name: "Cindy"}) |> on_db(ctx)

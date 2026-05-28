@@ -1,7 +1,16 @@
 defmodule Arango.Task do
-  @moduledoc "ArangoDB Administration methods"
+  @moduledoc """
+  ArangoDB server-side scheduled tasks.
+
+  > #### Deprecated {: .warning}
+  >
+  > The `/_api/tasks/*` endpoints are removed in API v1/4.0. Use an external
+  > scheduler (cron, Quantum, Oban) instead.
+  """
 
   alias Arango.Request
+
+  @deprecation "Removed in API v1/4.0. Use an external scheduler (cron, Quantum, Oban)."
 
   defstruct [
     :name,
@@ -34,6 +43,7 @@ defmodule Arango.Task do
 
   POST /_api/tasks
   """
+  @deprecated @deprecation
   @spec create(t) :: Arango.ok_error(map)
   def create(task) do
     %Request{
@@ -50,6 +60,7 @@ defmodule Arango.Task do
 
   GET /_api/tasks
   """
+  @deprecated @deprecation
   @spec tasks() :: Arango.ok_error(map)
   def tasks() do
     %Request{
@@ -65,6 +76,7 @@ defmodule Arango.Task do
 
   DELETE /_api/tasks/{id}
   """
+  @deprecated @deprecation
   @spec delete(String.t) :: Arango.ok_error(map)
   def delete(task_id) do
     %Request{
@@ -80,6 +92,7 @@ defmodule Arango.Task do
 
   GET /_api/tasks/{id}
   """
+  @deprecated @deprecation
   @spec task(String.t) :: Arango.ok_error(map)
   def task(task_id) do
     %Request{
@@ -95,6 +108,7 @@ defmodule Arango.Task do
 
   PUT /_api/tasks/{id}
   """
+  @deprecated @deprecation
   @spec create_with_id(String.t, Task.t) :: Arango.ok_error(map)
   def create_with_id(task_id, task) do
     %Request{

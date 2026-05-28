@@ -61,6 +61,7 @@ defmodule Arango.Transaction do
 
   POST /_api/transaction
   """
+  @deprecated "JS-based transactions removed in API v1/4.0. Use Arango.Transaction.Stream (Phase 5)."
   @spec transaction(Transaction.t) :: Arango.ok_error(map)
   def transaction(t) do
     collections =

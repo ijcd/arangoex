@@ -1,15 +1,26 @@
 defmodule Arango.Simple do
-  @moduledoc "ArangoDB Simple methods"
+  @moduledoc """
+  ArangoDB Simple Queries.
+
+  > #### Deprecated {: .warning}
+  >
+  > The `/_api/simple/*` endpoints have been deprecated since ArangoDB 3.4.
+  > Use AQL via `Arango.Cursor.create/1` instead. These endpoints will be
+  > removed when ArangoDB 4.0 (API v1) becomes the default.
+  """
 
   alias Arango.Request
   alias Arango.Utils
   alias Arango.Collection
+
+  @deprecation "Use AQL via Arango.Cursor.create/1. Removed in v1/4.0."
 
   @doc """
   Return all documents
 
   PUT /_api/simple/all
   """
+  @deprecated @deprecation
   @spec all(Collection.t, keyword) :: Arango.ok_error(map)
   def all(collection, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit])
@@ -28,6 +39,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/any
   """
+  @deprecated @deprecation
   @spec any(Collection.t) :: Arango.ok_error(map)
   def any(collection) do
     %Request{
@@ -43,6 +55,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/by-example
   """
+  @deprecated @deprecation
   @spec query_by_example(Collection.t, map, keyword) :: Arango.ok_error(map)
   def query_by_example(collection, example, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit])
@@ -61,6 +74,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/first-example
   """
+  @deprecated @deprecation
   @spec find_by_example(Collection.t, map) :: Arango.ok_error(map)
   def find_by_example(collection, example) do
     %Request{
@@ -76,6 +90,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/fulltext
   """
+  @deprecated @deprecation
   @spec query_fulltext(Collection.t, String.t, String.t, keyword) :: Arango.ok_error(map)
   def query_fulltext(collection, attribute_name, query, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :index])
@@ -98,6 +113,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/lookup-by-keys
   """
+  @deprecated @deprecation
   @spec lookup_by_keys(Collection.t, [String.t]) :: Arango.ok_error(map)
   def lookup_by_keys(collection, keys) do
     body = %{
@@ -118,7 +134,8 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/range
   """
-  @lint {Credo.Check.Refactor.FunctionArity, false}
+  @deprecated @deprecation
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   @spec range(Collection.t, String.t, float, float, keyword) :: Arango.ok_error(map)
   def range(collection, attribute_name, left, right, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :closed])
@@ -142,6 +159,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/remove-by-example
   """
+  @deprecated @deprecation
   @spec remove_by_example(Collection.t, map) :: Arango.ok_error(map)
   def remove_by_example(collection, example, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:limit, :waitForSync])
@@ -164,6 +182,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/remove-by-keys
   """
+  @deprecated @deprecation
   @spec remove_by_keys(Collection.t, [String.t], keyword) :: Arango.ok_error(map)
   def remove_by_keys(collection, keys, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:returnOld, :silent, :waitForSync])
@@ -186,6 +205,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/replace-by-example
   """
+  @deprecated @deprecation
   @spec replace_by_example(Collection.t, map, map, keyword) :: Arango.ok_error(map)
   def replace_by_example(collection, example, new_value, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:limit, :waitForSync])
@@ -209,6 +229,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/update-by-example
   """
+  @deprecated @deprecation
   @spec update_by_example(Collection.t, map, map, keyword) :: Arango.ok_error(map)
   def update_by_example(collection, example, new_value, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:keepNull, :mergeObjects, :limit, :waitForSync])
@@ -233,6 +254,7 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/near
   """
+  @deprecated @deprecation
   @spec near(Collection.t, float, float, keyword) :: Arango.ok_error(map)
   def near(collection, latitude, longitude, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :distance, :geo])
@@ -255,7 +277,8 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/within
   """
-  @lint {Credo.Check.Refactor.FunctionArity, false}
+  @deprecated @deprecation
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   @spec within(Collection.t, float, float, float, keyword) :: Arango.ok_error(map)
   def within(collection, latitude, longitude, radius, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :distance, :geo])
@@ -279,7 +302,8 @@ defmodule Arango.Simple do
 
   PUT /_api/simple/within-rectangle
   """
-  @lint {Credo.Check.Refactor.FunctionArity, false}
+  @deprecated @deprecation
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   @spec within_rectangle(Collection.t, float, float, float, float, keyword) :: Arango.ok_error(map)
   def within_rectangle(collection, latitude1, longitude1, latitude2, longitude2, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :geo])

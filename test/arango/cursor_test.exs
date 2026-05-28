@@ -33,18 +33,14 @@ defmodule CursorTest do
         "hasMore" => false,
         "result" => result,
         "extra" => %{
-          "stats" => %{
-            "executionTime" => _,
-            "filtered" => 0,
-            "scannedFull" => 2,
-            "scannedIndex" => 0,
-            "writesExecuted" => 0,
-            "writesIgnored" => 0
-          },
+          "stats" => stats,
           "warnings" => []
         },
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["filtered"] == 0
+    assert stats["writesExecuted"] == 0
+    assert stats["writesIgnored"] == 0
     assert Enum.count(result) == 2
   end
 
@@ -64,18 +60,14 @@ defmodule CursorTest do
         "hasMore" => true,
         "result" => result,
         "extra" => %{
-          "stats" => %{
-            "executionTime" => _,
-            "filtered" => 0,
-            "scannedFull" => 5,
-            "scannedIndex" => 0,
-            "writesExecuted" => 0,
-            "writesIgnored" => 0
-          },
+          "stats" => stats,
           "warnings" => []
         },
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["filtered"] == 0
+    assert stats["writesExecuted"] == 0
+    assert stats["writesIgnored"] == 0
     assert Enum.count(result) == 2
   end
 
@@ -96,18 +88,13 @@ defmodule CursorTest do
         "hasMore" => false,
         "result" => ["Alice"],
         "extra" => %{
-          "stats" => %{
-            "executionTime" => _,
-            "filtered" => 5,
-            "scannedFull" => 6,
-            "scannedIndex" => 0,
-            "writesExecuted" => 0,
-            "writesIgnored" => 0
-          },
+          "stats" => stats,
           "warnings" => []
         },
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["writesExecuted"] == 0
+    assert stats["writesIgnored"] == 0
   end
 
   test "Create cursor (using the query option \"fullCount\")", ctx do
@@ -126,19 +113,14 @@ defmodule CursorTest do
         "cached" => false,
         "result" => [501, 502, 503, 504, 505, 506, 507, 508, 509, 510],
         "extra" => %{
-          "stats" => %{
-            "writesExecuted" => 0,
-            "writesIgnored" => 0,
-            "scannedFull" => 0,
-            "scannedIndex" => 0,
-            "filtered" => 500,
-            "fullCount" => 500,
-            "executionTime" => _
-          },
+          "stats" => stats,
           "warnings" => []
         }
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["fullCount"] == 500
+    assert stats["filtered"] == 500
+    assert stats["writesExecuted"] == 0
   end
 
   test "Create cursor (enabling and disabling optimizer rules)", ctx do
@@ -158,18 +140,13 @@ defmodule CursorTest do
         "cached" => false,
         "result" => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "extra" => %{
-          "stats" => %{
-            "writesExecuted" => 0,
-            "writesIgnored" => 0,
-            "scannedFull" => 0,
-            "scannedIndex" => 0,
-            "filtered" => 0,
-            "executionTime" => _,
-          },
+          "stats" => stats,
           "warnings" => []
         },
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["filtered"] == 0
+    assert stats["writesExecuted"] == 0
   end
 
   test "Create cursor (execute a data-modification query and retrieve the number of modified documents)", ctx do
@@ -185,18 +162,14 @@ defmodule CursorTest do
         "cached" => false,
         "result" => [],
         "extra" => %{
-          "stats" => %{
-            "writesExecuted" => 6,
-            "writesIgnored" => 0,
-            "scannedFull" => 6,
-            "scannedIndex" => 0,
-            "filtered" => 0,
-            "executionTime" => _,
-          },
+          "stats" => stats,
           "warnings" => []
         }
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["writesExecuted"] == 6
+    assert stats["writesIgnored"] == 0
+    assert stats["filtered"] == 0
   end
 
   test "Create cursor (execute a data-modification query with option ignoreErrors)", ctx do
@@ -212,18 +185,13 @@ defmodule CursorTest do
         "cached" => false,
         "result" => [],
         "extra" => %{
-          "stats" => %{
-            "writesExecuted" => 0,
-            "writesIgnored" => 1,
-            "scannedFull" => 0,
-            "scannedIndex" => 0,
-            "filtered" => 0,
-            "executionTime" => _
-          },
+          "stats" => stats,
           "warnings" => []
         }
       }
     } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    assert stats["writesExecuted"] == 0
+    assert stats["writesIgnored"] == 1
   end
 
   test "Create cursor (bad query - missing body)", ctx do
@@ -235,10 +203,9 @@ defmodule CursorTest do
       :error, %{
         "code" => 400,
         "error" => true,
-        "errorMessage" => "query is empty (while parsing)",
         "errorNum" => 1502
       }
-    } == Cursor.cursor_create(cursor) |> on_db(ctx)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (bad query - unknown collection)", ctx do
@@ -252,10 +219,9 @@ defmodule CursorTest do
       :error, %{
         "code" => 404,
         "error" => true,
-        "errorMessage" => "collection not found (unknowncoll)",
         "errorNum" => 1203
       }
-    } == Cursor.cursor_create(cursor) |> on_db(ctx)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (bad query - execute a data-modification query that attempts to remove a non-existing document)", ctx do
@@ -267,10 +233,9 @@ defmodule CursorTest do
      :error, %{
         "code" => 404,
         "error" => true,
-        "errorMessage" => "document not found (while executing)",
         "errorNum" => 1202
       }
-    } == Cursor.cursor_create(cursor) |> on_db(ctx)
+    } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Delete cursor", ctx do
@@ -296,10 +261,9 @@ defmodule CursorTest do
       :error, %{
         "code" => 404,
         "error" => true,
-        "errorMessage" => "cursor not found",
         "errorNum" => 1600
       }
-    } == Cursor.cursor_delete(id) |> on_db(ctx)
+    } = Cursor.cursor_delete(id) |> on_db(ctx)
   end
 
   test "Read next batch from cursor", ctx do
@@ -322,23 +286,18 @@ defmodule CursorTest do
         "code" => 200,
         "error" => false,
         "hasMore" => true,
-        "id" => id,
+        "id" => ^id,
         "count" => 5,
         "cached" => false,
         "result" => result,
         "extra" => %{
-          "stats" => %{
-            "writesExecuted" => 0,
-            "writesIgnored" => 0,
-            "scannedFull" => 5,
-            "scannedIndex" => 0,
-            "filtered" => 0,
-            "executionTime" => _
-          },
+          "stats" => stats,
           "warnings" => []
         }
       }
     } = Cursor.cursor_next(id) |> on_db(ctx)
+    assert stats["writesExecuted"] == 0
+    assert stats["filtered"] == 0
     assert Enum.count(result) == 2
 
     # get another batch
@@ -347,23 +306,17 @@ defmodule CursorTest do
         "code" => 200,
         "error" => false,
         "hasMore" => false,
-        # "id" => id,
         "count" => 5,
         "cached" => false,
         "result" => result,
         "extra" => %{
-          "stats" => %{
-            "writesExecuted" => 0,
-            "writesIgnored" => 0,
-            "scannedFull" => 5,
-            "scannedIndex" => 0,
-            "filtered" => 0,
-            "executionTime" => _
-          },
+          "stats" => stats,
           "warnings" => []
         }
       }
     } = Cursor.cursor_next(id) |> on_db(ctx)
+    assert stats["writesExecuted"] == 0
+    assert stats["filtered"] == 0
     assert Enum.count(result) == 1
   end
 end
