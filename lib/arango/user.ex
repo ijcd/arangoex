@@ -32,7 +32,7 @@ defmodule Arango.User do
   def create(opts) do
     request(
       method: :post,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user",
       body: opts |> Keyword.take([:user, :passwd, :active, :extra]) |> Enum.into(%{}),
       ok_decoder: __MODULE__.UserDecoder
@@ -49,7 +49,7 @@ defmodule Arango.User do
   def remove(name) do
     request(
       method: :delete,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{name}"
     )
   end
@@ -63,7 +63,7 @@ defmodule Arango.User do
   def users() do
     request(
       method: :get,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user",
       ok_decoder: __MODULE__.UserDecoder
     )
@@ -79,7 +79,7 @@ defmodule Arango.User do
   def user(name) do
     request(
       method: :get,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{name}",
       ok_decoder: __MODULE__.UserDecoder
     )
@@ -96,7 +96,7 @@ defmodule Arango.User do
 
     request(
       method: :patch,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{user.user}",
       body: properties,
       ok_decoder: __MODULE__.UserDecoder
@@ -114,7 +114,7 @@ defmodule Arango.User do
 
     request(
       method: :put,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{user.user}",
       body: properties,
       ok_decoder: __MODULE__.UserDecoder
@@ -131,7 +131,7 @@ defmodule Arango.User do
   def databases(user_name) do
     request(
       method: :get,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{user_name}/database",
       ok_decoder: __MODULE__.PlainDecoder
     )
@@ -147,7 +147,7 @@ defmodule Arango.User do
   def grant(user_name, database_name) do
     request(
       method: :put,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{user_name}/database/#{database_name}",
       body: %{grant: "rw"}
     )
@@ -163,7 +163,7 @@ defmodule Arango.User do
   def revoke(user_name, database_name) do
     request(
       method: :put,
-      system_only: true,   # or just /_api? Same thing?
+      system_only: true,
       path: "user/#{user_name}/database/#{database_name}",
       body: %{grant: "none"}
     )
