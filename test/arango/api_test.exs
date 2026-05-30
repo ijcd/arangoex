@@ -41,4 +41,33 @@ defmodule Arango.APITest do
     assert op.system_only == true
     assert op.encode_body == false
   end
+
+  test "unknown keyword key fails at compile time" do
+    src = """
+    defmodule BadKey do
+      use Arango.API, endpoint: :sample
+      def boom, do: request(method: :get, pathh: "x")
+    end
+    """
+
+    assert_raise KeyError, ~r/key :pathh not found/, fn ->
+      Code.compile_string(src)
+    end
+  end
+
+  test "non-literal opts raises ArgumentError at compile time" do
+    src = """
+    defmodule BadOpts do
+      use Arango.API, endpoint: :sample
+      def boom do
+        opts = [method: :get, path: "x"]
+        request(opts)
+      end
+    end
+    """
+
+    assert_raise ArgumentError, ~r/request\/1 requires a literal keyword list/, fn ->
+      Code.compile_string(src)
+    end
+  end
 end
