@@ -12,13 +12,28 @@ Arango (formerly Arangoex) — low-level Elixir driver for ArangoDB. Build `Aran
 
 ```bash
 mix deps.get
+mix verify                                # format + compile-w-as-errors + credo + dialyzer
 mix test                                  # all tests (requires running ArangoDB)
 mix test test/arango/database_test.exs    # single file
 mix test --only line:42                   # single test by line
 mix credo
-mix dialyzer                              # first run builds PLT — slow
+mix dialyzer                              # first run builds PLT — slow (~3 min)
 mix test.watch                            # dev only: test + credo + dialyzer on change
 ```
+
+`mix verify` runs every static gate CI runs except the integration tests. Use it before pushing if you skipped the pre-push hook.
+
+## CI and pre-commit hooks
+
+CI lives at `.github/workflows/ci.yml`. Every PR runs: `mix compile --warnings-as-errors`, `mix format --check-formatted`, `mix credo`, `mix dialyzer`, and `mix test` against an `arangodb:3.12` service container. The PLT is cached per `mix.lock` hash so subsequent runs are fast.
+
+Local hooks via `lefthook` (configured in `lefthook.yml`):
+- **pre-commit** (parallel): `format`, `credo`, `compile --warnings-as-errors`
+- **pre-push**: `dialyzer`
+
+One-time after cloning: `lefthook install` (writes `.git/hooks/{pre-commit,pre-push}`). `lefthook` itself is installed via Homebrew (already on this machine per `dot_config/nix/darwin/homebrew.nix`).
+
+**Dialyzer's ignored warnings.** `.dialyzer_ignore.exs` suppresses one class of warnings: `invalid_contract` on the API-builder functions. Those functions return `%Arango.Request{}` but their `@spec`s describe the eventual post-execution shape (`Arango.ok_error(...)`) because that's what users see when they `|> Arango.request()` the op. Rewriting ~80 specs to `:: Arango.Request.t()` is a separate follow-up; until then the ignore file documents the design tension explicitly and CI still gates every other warning class.
 
 ## ArangoDB for Tests
 

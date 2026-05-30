@@ -1,0 +1,24 @@
+# Run `lefthook install` once after cloning to activate these hooks.
+#
+# Pre-commit runs the fast static gates on every commit. Dialyzer is
+# slow on first build (PLT) and is moved to pre-push. Integration tests
+# need a running ArangoDB and only run in CI.
+#
+# Skip a hook for an individual commit with `lefthook --no-tty run pre-commit` or
+# `git commit --no-verify`. Avoid the latter unless you've already run `mix verify`
+# locally.
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: mix format --check-formatted
+    credo:
+      run: mix credo
+    compile:
+      run: mix compile --warnings-as-errors
+
+pre-push:
+  commands:
+    dialyzer:
+      run: mix dialyzer

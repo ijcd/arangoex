@@ -17,3 +17,6 @@ erl_crash.dump
 *.ez
 
 .envrc
+
+# Dialyzer PLTs — regenerable from mix.lock; cached separately in CI.
+/priv/plts/

@@ -1,22 +1,28 @@
+# credo:disable-for-this-file Credo.Check.Warning.IoInspect
+# The IO.inspect calls in perform/2 are gated by config[:debug_requests] and
+# are part of this module's public debug contract (see `darango`/`don_db`
+# helpers in the test harness). They're a feature, not a stray debug aid.
 defmodule Arango.Request do
   require Logger
 
   defmodule ApiConn do
+    @moduledoc false
     use Tesla
 
     defmodule Response do
+      @moduledoc false
       defstruct [:status, :headers, :body]
 
       @type t :: %__MODULE__{
-        status: pos_integer(),
-        headers: [{String.t(), String.t()}],
-        body: nil | String.t()
-      }
+              status: pos_integer(),
+              headers: [{String.t(), String.t()}],
+              body: nil | String.t()
+            }
     end
 
-    adapter {Tesla.Adapter.Finch, name: Arango.Finch}
+    adapter({Tesla.Adapter.Finch, name: Arango.Finch})
 
-    plug Tesla.Middleware.Headers, [{"user-agent", "Arango"}, {"content-type", "application/json"}]
+    plug(Tesla.Middleware.Headers, [{"user-agent", "Arango"}, {"content-type", "application/json"}])
 
     def client(base_url) do
       Tesla.client([
@@ -39,32 +45,31 @@ defmodule Arango.Request do
   Makes requests to ArangoDB
   """
 
-  defstruct [
-    endpoint: nil,
-    system_only: false,
-    http_method: nil,
-    headers: %{},
-    path: nil,
-    query: %{},
-    body: nil,
-    encode_body: true,
-    database_name: nil,
-    ok_decoder: nil,
-  ]
+  defstruct endpoint: nil,
+            system_only: false,
+            http_method: nil,
+            headers: %{},
+            path: nil,
+            query: %{},
+            body: nil,
+            encode_body: true,
+            database_name: nil,
+            ok_decoder: nil
+
   use ExConstructor
 
   @type t :: %__MODULE__{
-    endpoint: atom(),
-    system_only: boolean(),
-    http_method: :get | :post | :put | :patch | :delete,
-    headers: Keyword.t,
-    path: String.t,
-    query: Map.t,
-    body: Map.t | String.t,
-    encode_body: boolean(),
-    database_name: String.t,
-    ok_decoder: module(),
-  }
+          endpoint: atom(),
+          system_only: boolean(),
+          http_method: :get | :post | :put | :patch | :delete,
+          headers: Keyword.t(),
+          path: String.t(),
+          query: map(),
+          body: map() | String.t(),
+          encode_body: boolean(),
+          database_name: String.t(),
+          ok_decoder: module()
+        }
 
   def perform(%__MODULE__{} = op, call_config) do
     config =
@@ -78,11 +83,7 @@ defmodule Arango.Request do
       IO.inspect(config, label: "CONFIG")
     end
 
-    base_url = %URI{
-      scheme: config.scheme,
-      host: config.host,
-      port: config.port,
-    } |> URI.to_string
+    base_url = "#{config.scheme}://#{config.host}:#{config.port}"
 
     path = path_for_operation(op)
 
@@ -103,13 +104,15 @@ defmodule Arango.Request do
 
     client = ApiConn.client(base_url)
 
-    response = ApiConn.go(client,
-      method: op.http_method,
-      url: path,                              # Tesla will build onto the client's base_Url
-      query: op.query,
-      headers: headers,
-      body: body
-    )
+    response =
+      ApiConn.go(client,
+        method: op.http_method,
+        # Tesla will build onto the client's base_Url
+        url: path,
+        query: op.query,
+        headers: headers,
+        body: body
+      )
 
     decoded =
       response
@@ -124,12 +127,13 @@ defmodule Arango.Request do
     decoded
   end
 
-  @spec auth_headers(Map.t) :: Map.t
+  @spec auth_headers(map()) :: map()
   def auth_headers(%{use_auth: :basic, username: username, password: password}) do
     %{"Authorization" => "Basic " <> Base.encode64("#{username}:#{password}")}
   end
+
   def auth_headers(%{use_auth: :bearer, password: password}) do
-    %{"Authorization" =>  "Bearer #{password}"}
+    %{"Authorization" => "Bearer #{password}"}
   end
 
   defp path_for_operation(%{path: "/" <> path}), do: "/#{path}"
@@ -137,7 +141,10 @@ defmodule Arango.Request do
   defp path_for_operation(%{path: path, database_name: db_name}), do: "/_db/#{db_name}/_api/#{path}"
 
   defp encode_body(%{body: body, encode_body: false}, _config), do: body
-  defp encode_body(%{body: %{__struct__: _} = body}, config), do: encode_body(%{body: map_without_nil_values(body)}, config)
+
+  defp encode_body(%{body: %{__struct__: _} = body}, config),
+    do: encode_body(%{body: map_without_nil_values(body)}, config)
+
   defp encode_body(%{body: body}, _) when body != nil, do: Jason.encode!(sanitize_for_json(body))
   defp encode_body(%{http_method: :post}, _), do: ""
   defp encode_body(%{http_method: :patch}, _), do: ""
@@ -152,13 +159,17 @@ defmodule Arango.Request do
   end
 
   defp sanitize_for_json(list) when is_list(list), do: Enum.map(list, &sanitize_for_json/1)
-  defp sanitize_for_json(%{__struct__: _} = struct), do: struct |> Map.from_struct() |> Map.reject(fn {_k, v} -> is_nil(v) end)
+
+  defp sanitize_for_json(%{__struct__: _} = struct),
+    do: struct |> Map.from_struct() |> Map.reject(fn {_k, v} -> is_nil(v) end)
+
   defp sanitize_for_json(other), do: other
 
   defp text_content_type?(headers) do
     Enum.any?(headers, fn
       {k, v} when is_binary(k) and is_binary(v) ->
         String.downcase(k) == "content-type" and String.starts_with?(v, "text/")
+
       _ ->
         false
     end)
@@ -170,20 +181,24 @@ defmodule Arango.Request do
         headers
         |> List.keyreplace("etag", 0, {"etag", Jason.decode!(etag)})
         |> Enum.into(%{})
+
       nil ->
         Enum.into(headers, %{})
     end
   end
 
   # TODO: second arg of Map.t should be an operation type
-  @spec decode_operation_response(Arango.ok_error(any()), Map.t) :: Map.t
-  defp decode_operation_response({:ok, response}, %{ok_decoder: decoder}) when decoder != nil, do: decoder.decode_ok(response)
+  @spec decode_operation_response(Arango.ok_error(any()), map()) :: map()
+  defp decode_operation_response({:ok, response}, %{ok_decoder: decoder}) when decoder != nil,
+    do: decoder.decode_ok(response)
+
   defp decode_operation_response(response, _), do: response
 
   # @spec decode_adapter_response(httpoison_response) :: Arango.ok_error(any())
   defp decode_adapter_response(response) do
     case response do
-      {:ok, %ApiConn.Response{status: status, headers: headers, body: body}} when status >= 200 and status < 300 ->
+      {:ok, %ApiConn.Response{status: status, headers: headers, body: body}}
+      when status >= 200 and status < 300 ->
         if text_content_type?(headers) do
           {:ok, body}
         else
@@ -193,18 +208,23 @@ defmodule Arango.Request do
             _ -> {:ok, decode_headers(headers)}
           end
         end
-      {:ok, %ApiConn.Response{status: status, headers: headers, body: body}}  ->
+
+      {:ok, %ApiConn.Response{status: status, headers: headers, body: body}} ->
         try do
           {:error, Jason.decode!(body)}
         rescue
-          _ -> {:error, %{
-                   status: status,
-                   headers: headers,
-                   body: body,
-                   response: response
-                }}
+          _ ->
+            {:error,
+             %{
+               status: status,
+               headers: headers,
+               body: body,
+               response: response
+             }}
         end
-      {:error, _} = e -> e
+
+      {:error, _} = e ->
+        e
     end
   end
 end

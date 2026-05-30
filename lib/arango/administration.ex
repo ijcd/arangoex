@@ -221,7 +221,7 @@ defmodule Arango.Administration do
   response is `text/plain`, so the body comes through the request layer
   as a raw string — no `ok_decoder` needed.
   """
-  @spec metrics() :: Arango.ok_error(String.t)
+  @spec metrics() :: Arango.ok_error(String.t())
   def metrics() do
     request(method: :get, path: "/_admin/metrics/v2")
   end
@@ -253,7 +253,7 @@ defmodule Arango.Administration do
 
   `mode_value` is `"default"` or `"readonly"`.
   """
-  @spec set_mode(String.t) :: Arango.ok_error(map)
+  @spec set_mode(String.t()) :: Arango.ok_error(map)
   def set_mode(mode_value) do
     request(method: :put, path: "/_admin/server/mode", body: %{mode: mode_value})
   end

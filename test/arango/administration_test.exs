@@ -6,14 +6,19 @@ defmodule AdministrationTest do
 
   test "returns database version" do
     assert {
-      :ok, %{"code" => 200, "error" => false, "version" => _}
-    }  = Administration.database_version() |> arango()
+             :ok,
+             %{"code" => 200, "error" => false, "version" => _}
+           } = Administration.database_version() |> arango()
   end
 
   test "returns echo" do
     assert {
-      :ok, result
-    } = Administration.echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => "3", "yourHeader" => "4"}) |> arango()
+             :ok,
+             result
+           } =
+             Administration.echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => "3", "yourHeader" => "4"})
+             |> arango()
+
     assert is_map(result)
     assert Map.has_key?(result, "headers")
     assert Map.has_key?(result, "parameters")
@@ -22,16 +27,20 @@ defmodule AdministrationTest do
 
   test "reads global logs from the server" do
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log() |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log() |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
     assert is_list(timestamp)
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(upto: 3) |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(upto: 3) |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -39,8 +48,10 @@ defmodule AdministrationTest do
     assert Enum.all?(level, &(&1 <= 3))
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(level: 3) |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(level: 3) |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -48,16 +59,20 @@ defmodule AdministrationTest do
     assert Enum.all?(level, &(&1 == 3))
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(start: 2) |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(start: 2) |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
     assert is_list(timestamp)
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(size: 2) |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(size: 2) |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -65,24 +80,30 @@ defmodule AdministrationTest do
     assert length(level) <= 2
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(offset: 2) |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(offset: 2) |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
     assert is_list(timestamp)
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(search: "foo") |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(search: "foo") |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
     assert is_list(timestamp)
 
     assert {
-      :ok, %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
-    } = Administration.log(sort: "asc") |> arango()
+             :ok,
+             %{"level" => level, "lid" => lid, "text" => text, "timestamp" => timestamp, "totalAmount" => _}
+           } = Administration.log(sort: "asc") |> arango()
+
     assert is_list(level)
     assert is_list(lid)
     assert is_list(text)
@@ -93,32 +114,35 @@ defmodule AdministrationTest do
   # times out
   test "returns long_echo" do
     assert {
-      :ok, %{
-        "client" => _,
-        "cookies" => %{},
-        "database" => "_system",
-        "headers" => %{
-          "accept" => "*/*",
-          "authorization" => _,
-          "content-length" => "0",
-          "host" => _,
-          "user-agent" => _,
-          "my-header" => "3",
-          "your-header" => "4",
-        },
-        "internals" => %{},
-        "parameters" => %{"bar" => "2", "foo" => "1"},
-        "path" => "/",
-        "prefix" => "/",
-        "protocol" => "http",
-        "rawRequestBody" => [],
-        "requestType" => "GET",
-        "server" => _,
-        "suffix" => [],
-        "url" => "/_admin/long_echo?bar=2&foo=1",
-        "user" => "root"
-      }
-    } = Administration.long_echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4}) |> arango()
+             :ok,
+             %{
+               "client" => _,
+               "cookies" => %{},
+               "database" => "_system",
+               "headers" => %{
+                 "accept" => "*/*",
+                 "authorization" => _,
+                 "content-length" => "0",
+                 "host" => _,
+                 "user-agent" => _,
+                 "my-header" => "3",
+                 "your-header" => "4"
+               },
+               "internals" => %{},
+               "parameters" => %{"bar" => "2", "foo" => "1"},
+               "path" => "/",
+               "prefix" => "/",
+               "protocol" => "http",
+               "rawRequestBody" => [],
+               "requestType" => "GET",
+               "server" => _,
+               "suffix" => [],
+               "url" => "/_admin/long_echo?bar=2&foo=1",
+               "user" => "root"
+             }
+           } =
+             Administration.long_echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4})
+             |> arango()
   end
 
   test "reloads routing" do
@@ -128,13 +152,14 @@ defmodule AdministrationTest do
   test "gets the server id" do
     # In single-server mode, this returns an error (not in cluster mode)
     assert {:error, %{"code" => 500, "error" => true}} =
-      Administration.server_id() |> arango()
+             Administration.server_id() |> arango()
   end
 
   test "gets the server role" do
     assert {
-      :ok, %{"code" => 200, "error" => false, "role" => "SINGLE"}
-    } = Administration.server_role() |> arango()
+             :ok,
+             %{"code" => 200, "error" => false, "role" => "SINGLE"}
+           } = Administration.server_role() |> arango()
   end
 
   test "shutdown", ctx do
@@ -148,77 +173,82 @@ defmodule AdministrationTest do
   # sleep endpoint was removed in ArangoDB 3.12
   test "sleep" do
     assert {
-      :ok, %{"code" => 200, "duration" => 0.1, "error" => false}
-    } = Administration.sleep(duration: 0.1) |> arango()
+             :ok,
+             %{"code" => 200, "duration" => 0.1, "error" => false}
+           } = Administration.sleep(duration: 0.1) |> arango()
   end
 
   test "statistics" do
     assert {
-      :ok, %{
-        "client" => %{
-          "bytesReceived" => _,
-          "bytesSent" => _,
-          "connectionTime" => _,
-          "httpConnections" => _,
-          "ioTime" => _,
-          "queueTime" => _,
-          "requestTime" => _,
-          "totalTime" => _,
-        },
-        "code" => 200,
-        "enabled" => true,
-        "error" => false,
-        "http" => %{
-          "requestsAsync" => _,
-          "requestsDelete" => _,
-          "requestsGet" => _,
-          "requestsHead" => _,
-          "requestsOptions" => _,
-          "requestsOther" => _,
-          "requestsPatch" => _,
-          "requestsPost" => _,
-          "requestsPut" => _,
-          "requestsTotal" => _
-        },
-        "server" => %{
-          "physicalMemory" => _,
-          "uptime" => _,
-        },
-        "system" => %{
-          "majorPageFaults" => _,
-          "minorPageFaults" => _,
-          "numberOfThreads" => _,
-          "residentSize" => _,
-          "residentSizePercent" => _,
-          "systemTime" => _,
-          "userTime" => _,
-          "virtualSize" => _
-        },
-        "time" => _
-      }
-    } = Administration.statistics() |> arango()
+             :ok,
+             %{
+               "client" => %{
+                 "bytesReceived" => _,
+                 "bytesSent" => _,
+                 "connectionTime" => _,
+                 "httpConnections" => _,
+                 "ioTime" => _,
+                 "queueTime" => _,
+                 "requestTime" => _,
+                 "totalTime" => _
+               },
+               "code" => 200,
+               "enabled" => true,
+               "error" => false,
+               "http" => %{
+                 "requestsAsync" => _,
+                 "requestsDelete" => _,
+                 "requestsGet" => _,
+                 "requestsHead" => _,
+                 "requestsOptions" => _,
+                 "requestsOther" => _,
+                 "requestsPatch" => _,
+                 "requestsPost" => _,
+                 "requestsPut" => _,
+                 "requestsTotal" => _
+               },
+               "server" => %{
+                 "physicalMemory" => _,
+                 "uptime" => _
+               },
+               "system" => %{
+                 "majorPageFaults" => _,
+                 "minorPageFaults" => _,
+                 "numberOfThreads" => _,
+                 "residentSize" => _,
+                 "residentSizePercent" => _,
+                 "systemTime" => _,
+                 "userTime" => _,
+                 "virtualSize" => _
+               },
+               "time" => _
+             }
+           } = Administration.statistics() |> arango()
   end
 
   test "statistics_description" do
     assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "figures" => figures,
-        "groups" => groups
-      }
-    } = Administration.statistics_description() |> arango()
+             :ok,
+             %{
+               "code" => 200,
+               "error" => false,
+               "figures" => figures,
+               "groups" => groups
+             }
+           } = Administration.statistics_description() |> arango()
 
     assert is_list(figures)
-    assert length(figures) > 0
+    refute Enum.empty?(figures)
     # Check that some known figures exist
     identifiers = Enum.map(figures, & &1["identifier"])
+
     for expected <- ["userTime", "systemTime", "httpConnections", "requestsTotal", "uptime"] do
       assert expected in identifiers
     end
 
     assert is_list(groups)
     group_names = Enum.map(groups, & &1["group"])
+
     for expected <- ["system", "client", "http", "server"] do
       assert expected in group_names
     end
@@ -228,31 +258,35 @@ defmodule AdministrationTest do
   # test endpoint was removed in ArangoDB 3.12
   test "runs tests on the server" do
     assert {
-      :error, %{
-        "code" => 400,
-        "error" => true,
-        "errorNum" => 400,
-        "errorMessage" => "expected attribute 'tests' is missing"
-      }
-    } == Administration.test() |> arango()
+             :error,
+             %{
+               "code" => 400,
+               "error" => true,
+               "errorNum" => 400,
+               "errorMessage" => "expected attribute 'tests' is missing"
+             }
+           } == Administration.test() |> arango()
   end
 
   test "returns the system time" do
     assert {
-      :ok, %{"code" => 200, "error" => false, "time" => _}
-    } = Administration.time() |> arango()
+             :ok,
+             %{"code" => 200, "error" => false, "time" => _}
+           } = Administration.time() |> arango()
   end
 
   test "lists all endpoints" do
     assert {
-      :ok, [%{"endpoint" => "http://0.0.0.0:8529"}]
-    } = Administration.endpoints() |> arango()
+             :ok,
+             [%{"endpoint" => "http://0.0.0.0:8529"}]
+           } = Administration.endpoints() |> arango()
   end
 
   test "fetches the server version" do
     assert {
-      :ok, %{"server" => "arango", "version" => _}
-    } = Administration.version() |> arango()
+             :ok,
+             %{"server" => "arango", "version" => _}
+           } = Administration.version() |> arango()
   end
 
   # === Phase 4 additions ===

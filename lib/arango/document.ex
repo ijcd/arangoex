@@ -12,18 +12,18 @@ defmodule Arango.Document do
   end
 
   @type t :: %__MODULE__.Docref{
-    _key: String.t,
-    _id: String.t,
-    _rev: String.t,
-    _oldRev: String.t,
-  }
+          _key: String.t(),
+          _id: String.t(),
+          _rev: String.t(),
+          _oldRev: String.t()
+        }
 
   @doc """
   Create document
 
   POST /_api/document/{collection}
   """
-  @spec create(Collection.t, map | [map]) :: Arango.ok_error(map | [map])
+  @spec create(Collection.t(), map | [map]) :: Arango.ok_error(map | [map])
   def create(collection, document, opts \\ []) do
     query = Utils.opts_to_query(opts, [:waitForSync, :returnNew, :refillIndexCaches, :versionAttribute])
 
@@ -73,16 +73,18 @@ defmodule Arango.Document do
 
   PUT /_api/simple/all-keys
   """
-  @spec documents(Collection.t, keyword) :: Arango.ok_error(t | [t])
+  @spec documents(Collection.t(), keyword) :: Arango.ok_error(t | [t])
   def documents(collection, opts \\ []) do
     type = Utils.ensure_permitted(opts, [:type])[:type]
-    body = cond do
-      type == :id   -> %{"collection" => collection.name, "type" => "id"}
-      type == :path -> %{"collection" => collection.name, "type" => "path"}
-      type == :key  -> %{"collection" => collection.name, "type" => "key"}
-      type == nil   -> %{"collection" => collection.name}
-      true -> raise "unknown type: #{type}"
-    end
+
+    body =
+      cond do
+        type == :id -> %{"collection" => collection.name, "type" => "id"}
+        type == :path -> %{"collection" => collection.name, "type" => "path"}
+        type == :key -> %{"collection" => collection.name, "type" => "key"}
+        type == nil -> %{"collection" => collection.name}
+        true -> raise "unknown type: #{type}"
+      end
 
     request(
       method: :put,
@@ -98,9 +100,19 @@ defmodule Arango.Document do
   """
   def update(collection, docs, opts \\ [])
 
-  @spec update(Collection.t, [map], keyword) :: Arango.ok_error([map])
+  @spec update(Collection.t(), [map], keyword) :: Arango.ok_error([map])
   def update(collection, new_docs, opts) when is_list(new_docs) do
-    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
+    query =
+      Utils.opts_to_query(opts, [
+        :keepNull,
+        :mergeObjects,
+        :waitForSync,
+        :ignoreRevs,
+        :returnOld,
+        :returnNew,
+        :refillIndexCaches,
+        :versionAttribute
+      ])
 
     request(
       method: :patch,
@@ -115,7 +127,18 @@ defmodule Arango.Document do
   def update(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
-    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
+
+    query =
+      Utils.opts_to_query(query_opts, [
+        :keepNull,
+        :mergeObjects,
+        :waitForSync,
+        :ignoreRevs,
+        :returnOld,
+        :returnNew,
+        :refillIndexCaches,
+        :versionAttribute
+      ])
 
     request(
       method: :patch,
@@ -134,9 +157,19 @@ defmodule Arango.Document do
   """
   def replace(collection, docs, opts \\ [])
 
-  @spec replace(Collection.t, [map], keyword) :: Arango.ok_error([map])
+  @spec replace(Collection.t(), [map], keyword) :: Arango.ok_error([map])
   def replace(collection, new_docs, opts) when is_list(new_docs) do
-    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
+    query =
+      Utils.opts_to_query(opts, [
+        :keepNull,
+        :mergeObjects,
+        :waitForSync,
+        :ignoreRevs,
+        :returnOld,
+        :returnNew,
+        :refillIndexCaches,
+        :versionAttribute
+      ])
 
     request(
       method: :put,
@@ -151,7 +184,18 @@ defmodule Arango.Document do
   def replace(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
-    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
+
+    query =
+      Utils.opts_to_query(query_opts, [
+        :keepNull,
+        :mergeObjects,
+        :waitForSync,
+        :ignoreRevs,
+        :returnOld,
+        :returnNew,
+        :refillIndexCaches,
+        :versionAttribute
+      ])
 
     request(
       method: :put,
@@ -168,7 +212,7 @@ defmodule Arango.Document do
 
   DELETE /_api/document/{collection}
   """
-  @spec delete_multi(Collection.t, [map], keyword) :: Arango.ok_error(t | [t])
+  @spec delete_multi(Collection.t(), [map], keyword) :: Arango.ok_error(t | [t])
   def delete_multi(collection, docs, opts \\ []) when is_list(docs) do
     query = Utils.opts_to_query(opts, [:waitForSync, :ignoreRevs, :returnOld])
 
@@ -202,6 +246,7 @@ defmodule Arango.Document do
   end
 
   defmodule DocumentDecoder do
+    @moduledoc false
     @spec decode_ok(any()) :: Arango.ok_error(any())
     def decode_ok(result) when is_list(result), do: Enum.map(result, &to_document(&1))
     def decode_ok(result), do: to_document(result)

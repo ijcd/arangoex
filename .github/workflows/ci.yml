@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+env:
+  ELIXIR_VERSION: "1.19.5"
+  OTP_VERSION: "28.0"
+  MIX_ENV: test
+
+jobs:
+  ci:
+    name: compile + format + credo + dialyzer + test
+    runs-on: ubuntu-latest
+
+    services:
+      arangodb:
+        image: arangodb:3.12
+        ports:
+          - 8529:8529
+        env:
+          ARANGO_ROOT_PASSWORD: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Elixir / OTP
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+
+      - name: Cache deps + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            mix-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
+
+      - name: Cache PLTs
+        uses: actions/cache@v4
+        with:
+          path: priv/plts
+          key: plt-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            plt-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-
+
+      - name: Install deps
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get --check-locked
+
+      - name: Compile (warnings as errors)
+        run: mix compile --warnings-as-errors
+
+      - name: Format check
+        run: mix format --check-formatted
+
+      - name: Credo
+        run: mix credo
+
+      - name: Create PLT directory
+        run: mkdir -p priv/plts
+
+      - name: Dialyzer
+        run: mix dialyzer
+
+      - name: Wait for ArangoDB
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:8529/_api/version > /dev/null; then
+              echo "ArangoDB ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "ArangoDB failed to start" >&2
+          exit 1
+
+      - name: Test
+        env:
+          ARANGO_HOST: localhost
+          ARANGO_USER: root
+          ARANGO_PASSWORD: test
+        run: mix test

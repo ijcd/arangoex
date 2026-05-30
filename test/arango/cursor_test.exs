@@ -25,19 +25,21 @@ defmodule CursorTest do
     }
 
     assert {
-      :ok, %{
-        "cached" => false,
-        "code" => 201,
-        "error" => false,
-        "count" => 2,
-        "hasMore" => false,
-        "result" => result,
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        },
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "cached" => false,
+               "code" => 201,
+               "error" => false,
+               "count" => 2,
+               "hasMore" => false,
+               "result" => result,
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["filtered"] == 0
     assert stats["writesExecuted"] == 0
     assert stats["writesIgnored"] == 0
@@ -52,19 +54,21 @@ defmodule CursorTest do
     }
 
     assert {
-      :ok, %{
-        "cached" => false,
-        "code" => 201,
-        "error" => false,
-        "count" => 5,
-        "hasMore" => true,
-        "result" => result,
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        },
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "cached" => false,
+               "code" => 201,
+               "error" => false,
+               "count" => 5,
+               "hasMore" => true,
+               "result" => result,
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["filtered"] == 0
     assert stats["writesExecuted"] == 0
     assert stats["writesIgnored"] == 0
@@ -80,19 +84,21 @@ defmodule CursorTest do
     }
 
     assert {
-      :ok, %{
-        "cached" => false,
-        "code" => 201,
-        "error" => false,
-        "count" => 1,
-        "hasMore" => false,
-        "result" => ["Alice"],
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        },
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "cached" => false,
+               "code" => 201,
+               "error" => false,
+               "count" => 1,
+               "hasMore" => false,
+               "result" => ["Alice"],
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["writesExecuted"] == 0
     assert stats["writesIgnored"] == 0
   end
@@ -105,19 +111,21 @@ defmodule CursorTest do
     }
 
     assert {
-      :ok, %{
-        "code" => 201,
-        "error" => false,
-        "hasMore" => false,
-        "count" => 10,
-        "cached" => false,
-        "result" => [501, 502, 503, 504, 505, 506, 507, 508, 509, 510],
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        }
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 201,
+               "error" => false,
+               "hasMore" => false,
+               "count" => 10,
+               "cached" => false,
+               "result" => [501, 502, 503, 504, 505, 506, 507, 508, 509, 510],
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["fullCount"] == 500
     assert stats["filtered"] == 500
     assert stats["writesExecuted"] == 0
@@ -132,41 +140,46 @@ defmodule CursorTest do
     }
 
     assert {
-      :ok, %{
-        "code" => 201,
-        "error" => false,
-        "hasMore" => false,
-        "count" => 10,
-        "cached" => false,
-        "result" => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        },
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 201,
+               "error" => false,
+               "hasMore" => false,
+               "count" => 10,
+               "cached" => false,
+               "result" => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["filtered"] == 0
     assert stats["writesExecuted"] == 0
   end
 
-  test "Create cursor (execute a data-modification query and retrieve the number of modified documents)", ctx do
+  test "Create cursor (execute a data-modification query and retrieve the number of modified documents)",
+       ctx do
     cursor = %Cursor.Cursor{
-      query: "FOR p IN products REMOVE p IN products",
+      query: "FOR p IN products REMOVE p IN products"
     }
 
     assert {
-      :ok, %{
-        "code" => 201,
-        "error" => false,
-        "hasMore" => false,
-        "cached" => false,
-        "result" => [],
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        }
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 201,
+               "error" => false,
+               "hasMore" => false,
+               "cached" => false,
+               "result" => [],
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["writesExecuted"] == 6
     assert stats["writesIgnored"] == 0
     assert stats["filtered"] == 0
@@ -174,38 +187,41 @@ defmodule CursorTest do
 
   test "Create cursor (execute a data-modification query with option ignoreErrors)", ctx do
     cursor = %Cursor.Cursor{
-      query: "REMOVE 'bar' IN products OPTIONS { ignoreErrors: true }",
+      query: "REMOVE 'bar' IN products OPTIONS { ignoreErrors: true }"
     }
 
     assert {
-      :ok, %{
-        "code" => 201,
-        "error" => false,
-        "hasMore" => false,
-        "cached" => false,
-        "result" => [],
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        }
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 201,
+               "error" => false,
+               "hasMore" => false,
+               "cached" => false,
+               "result" => [],
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert stats["writesExecuted"] == 0
     assert stats["writesIgnored"] == 1
   end
 
   test "Create cursor (bad query - missing body)", ctx do
     cursor = %Cursor.Cursor{
-      query: "",
+      query: ""
     }
 
     assert {
-      :error, %{
-        "code" => 400,
-        "error" => true,
-        "errorNum" => 1502
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :error,
+             %{
+               "code" => 400,
+               "error" => true,
+               "errorNum" => 1502
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Create cursor (bad query - unknown collection)", ctx do
@@ -216,26 +232,29 @@ defmodule CursorTest do
     }
 
     assert {
-      :error, %{
-        "code" => 404,
-        "error" => true,
-        "errorNum" => 1203
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :error,
+             %{
+               "code" => 404,
+               "error" => true,
+               "errorNum" => 1203
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
-  test "Create cursor (bad query - execute a data-modification query that attempts to remove a non-existing document)", ctx do
+  test "Create cursor (bad query - execute a data-modification query that attempts to remove a non-existing document)",
+       ctx do
     cursor = %Cursor.Cursor{
       query: "REMOVE 'foo' IN products"
     }
 
     assert {
-     :error, %{
-        "code" => 404,
-        "error" => true,
-        "errorNum" => 1202
-      }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+             :error,
+             %{
+               "code" => 404,
+               "error" => true,
+               "errorNum" => 1202
+             }
+           } = Cursor.cursor_create(cursor) |> on_db(ctx)
   end
 
   test "Delete cursor", ctx do
@@ -249,21 +268,23 @@ defmodule CursorTest do
 
     # delete the cursor
     assert {
-      :ok, %{
-        "code" => 202,
-        "error" => false,
-        "id" => _
-      }
-    } = Cursor.cursor_delete(id) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 202,
+               "error" => false,
+               "id" => _
+             }
+           } = Cursor.cursor_delete(id) |> on_db(ctx)
 
     # cannot delete again
     assert {
-      :error, %{
-        "code" => 404,
-        "error" => true,
-        "errorNum" => 1600
-      }
-    } = Cursor.cursor_delete(id) |> on_db(ctx)
+             :error,
+             %{
+               "code" => 404,
+               "error" => true,
+               "errorNum" => 1600
+             }
+           } = Cursor.cursor_delete(id) |> on_db(ctx)
   end
 
   test "cursor_next/1 uses POST (3.12 documented form)" do
@@ -311,48 +332,53 @@ defmodule CursorTest do
       batch_size: 2
     }
 
-    {:ok, %{
-        "id" => id,
-        "result" => result,
-     }
-    } = Cursor.cursor_create(cursor) |> on_db(ctx)
+    {:ok,
+     %{
+       "id" => id,
+       "result" => result
+     }} = Cursor.cursor_create(cursor) |> on_db(ctx)
+
     assert Enum.count(result) == 2
 
     # get another batch
     assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "hasMore" => true,
-        "id" => ^id,
-        "count" => 5,
-        "cached" => false,
-        "result" => result,
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        }
-      }
-    } = Cursor.cursor_next(id) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 200,
+               "error" => false,
+               "hasMore" => true,
+               "id" => ^id,
+               "count" => 5,
+               "cached" => false,
+               "result" => result,
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_next(id) |> on_db(ctx)
+
     assert stats["writesExecuted"] == 0
     assert stats["filtered"] == 0
     assert Enum.count(result) == 2
 
     # get another batch
     assert {
-      :ok, %{
-        "code" => 200,
-        "error" => false,
-        "hasMore" => false,
-        "count" => 5,
-        "cached" => false,
-        "result" => result,
-        "extra" => %{
-          "stats" => stats,
-          "warnings" => []
-        }
-      }
-    } = Cursor.cursor_next(id) |> on_db(ctx)
+             :ok,
+             %{
+               "code" => 200,
+               "error" => false,
+               "hasMore" => false,
+               "count" => 5,
+               "cached" => false,
+               "result" => result,
+               "extra" => %{
+                 "stats" => stats,
+                 "warnings" => []
+               }
+             }
+           } = Cursor.cursor_next(id) |> on_db(ctx)
+
     assert stats["writesExecuted"] == 0
     assert stats["filtered"] == 0
     assert Enum.count(result) == 1

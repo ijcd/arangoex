@@ -8,10 +8,11 @@ defmodule CollectionTest do
 
   test "lists collections" do
     {:ok, collections} = Collection.collections() |> arango(database_name: "_system")
+
     names =
       collections
       |> Enum.map(fn c -> c.name end)
-      |> Enum.sort
+      |> Enum.sort()
 
     # Don't hardcode system collections — they differ between ArangoDB versions.
     # Just check that some known system collections exist.
@@ -21,7 +22,7 @@ defmodule CollectionTest do
   end
 
   test "creates a collection", ctx do
-    new_collname = Faker.Lorem.word
+    new_collname = Faker.Lorem.word()
 
     {:ok, original_colls} = Collection.collections() |> on_db(ctx)
     {:ok, coll} = Collection.create(%Collection{name: new_collname}) |> on_db(ctx)
@@ -35,7 +36,7 @@ defmodule CollectionTest do
   end
 
   test "drops a collection", ctx do
-    new_coll = %Collection{name: Faker.Lorem.word}
+    new_coll = %Collection{name: Faker.Lorem.word()}
 
     # create one to drop
     {:ok, _} = Collection.create(new_coll) |> on_db(ctx)
@@ -139,7 +140,9 @@ defmodule CollectionTest do
   test "rotates a collection journal", ctx do
     {:ok, _} = Document.create(ctx.coll, %{name: "RotateMe"}) |> on_db(ctx)
     {:ok, _} = Wal.flush(waitForSync: true, waitForCollector: true) |> on_db(ctx)
-    assert {:ok, %{"result" => true, "error" => false, "code" => 200}} = Collection.rotate(ctx.coll) |> on_db(ctx)
+
+    assert {:ok, %{"result" => true, "error" => false, "code" => 200}} =
+             Collection.rotate(ctx.coll) |> on_db(ctx)
   end
 
   test "truncates a collection", ctx do
