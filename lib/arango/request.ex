@@ -155,6 +155,15 @@ defmodule Arango.Request do
   defp sanitize_for_json(%{__struct__: _} = struct), do: struct |> Map.from_struct() |> Map.reject(fn {_k, v} -> is_nil(v) end)
   defp sanitize_for_json(other), do: other
 
+  defp text_content_type?(headers) do
+    Enum.any?(headers, fn
+      {k, v} when is_binary(k) and is_binary(v) ->
+        String.downcase(k) == "content-type" and String.starts_with?(v, "text/")
+      _ ->
+        false
+    end)
+  end
+
   defp decode_headers(headers) do
     case List.keyfind(headers, "etag", 0) do
       {"etag", etag} ->
@@ -175,10 +184,14 @@ defmodule Arango.Request do
   defp decode_adapter_response(response) do
     case response do
       {:ok, %ApiConn.Response{status: status, headers: headers, body: body}} when status >= 200 and status < 300 ->
-        try do
-          {:ok, Jason.decode!(body)}
-        rescue
-          _ -> {:ok, decode_headers(headers)}
+        if text_content_type?(headers) do
+          {:ok, body}
+        else
+          try do
+            {:ok, Jason.decode!(body)}
+          rescue
+            _ -> {:ok, decode_headers(headers)}
+          end
         end
       {:ok, %ApiConn.Response{status: status, headers: headers, body: body}}  ->
         try do
