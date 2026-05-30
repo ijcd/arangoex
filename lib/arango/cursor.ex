@@ -20,6 +20,8 @@ defmodule Arango.Cursor do
       :satellite_sync_wait,
       :full_count,
       :max_plans,
+      :allow_retry,
+      :stream,
     ]
 
     @type t :: %__MODULE__{
@@ -103,6 +105,16 @@ defmodule Arango.Cursor do
       # maxPlans: Limits the maximum number of plans that are created
       # by the AQL query optimizer.
       max_plans: pos_integer,
+
+      # allow_retry: enables the server to keep each returned batch
+      # around so a client can re-request it via cursor_next_batch/2 if
+      # the previous response was lost in transit.
+      allow_retry: boolean,
+
+      # stream: execute the query in streaming mode. Results are
+      # produced lazily and not fully materialized server-side; useful
+      # for large result sets.
+      stream: boolean,
     }
   end
 
@@ -113,37 +125,30 @@ defmodule Arango.Cursor do
   """
   @spec cursor_create(Cursor.t) :: Arango.ok_error(map)
   def cursor_create(cursor) do
-    query = Map.get(cursor, :query)
-    bind_vars = Map.get(cursor, :bind_vars)
-    count = Map.get(cursor, :count)
-    batch_size = Map.get(cursor, :batch_size)
-    full_count = Map.get(cursor, :full_count)
-    max_plans = Map.get(cursor, :max_plans)
     optimizer_rules = Map.get(cursor, :optimizer_rules)
 
     top_level =
       Utils.compact(%{
-        "query" => query,
-        "bindVars" => bind_vars && Enum.into(bind_vars, %{}),
-        "count" => count,
-        "batchSize" => batch_size
+        "query" => Map.get(cursor, :query),
+        "bindVars" => Map.get(cursor, :bind_vars) && Enum.into(Map.get(cursor, :bind_vars), %{}),
+        "count" => Map.get(cursor, :count),
+        "batchSize" => Map.get(cursor, :batch_size),
+        "ttl" => Map.get(cursor, :ttl)
       })
 
     options =
       Utils.compact(%{
-        "fullCount" => full_count,
-        "maxPlans" => max_plans,
+        "fullCount" => Map.get(cursor, :full_count),
+        "maxPlans" => Map.get(cursor, :max_plans),
+        "allowRetry" => Map.get(cursor, :allow_retry),
+        "stream" => Map.get(cursor, :stream),
         "optimizer" => optimizer_rules && %{"rules" => optimizer_rules}
       })
 
     cursor_request =
       if map_size(options) > 0, do: Map.put(top_level, "options", options), else: top_level
 
-    request(
-      method: :post,
-      path: "cursor",
-      body: cursor_request
-    )
+    request(method: :post, path: "cursor", body: cursor_request)
   end
 
   @doc """
@@ -162,13 +167,27 @@ defmodule Arango.Cursor do
   @doc """
   Read next batch from cursor
 
-  PUT /_api/cursor/{cursor-identifier}
+  POST /_api/cursor/{cursor-identifier}
+
+  3.12 documents POST as the form going forward; PUT is still accepted on
+  v0 but will be dropped in v1/4.0.
   """
-  @spec cursor_next(Cursor.t) :: Arango.ok_error(map)
+  @spec cursor_next(String.t) :: Arango.ok_error(map)
   def cursor_next(cursor_id) do
-    request(
-      method: :put,
-      path: "cursor/#{cursor_id}"
-    )
+    request(method: :post, path: "cursor/#{cursor_id}")
+  end
+
+  @doc """
+  Re-fetch a specific batch from a cursor created with `allow_retry: true`.
+
+  POST /_api/cursor/{cursor-identifier}/{batch-identifier}
+
+  Use the `nextBatchId` returned in a prior cursor response as the
+  `batch_id`. The server retains the batch so a client that lost the
+  previous response in transit can request it again.
+  """
+  @spec cursor_next_batch(String.t, String.t) :: Arango.ok_error(map)
+  def cursor_next_batch(cursor_id, batch_id) do
+    request(method: :post, path: "cursor/#{cursor_id}/#{batch_id}")
   end
 end
