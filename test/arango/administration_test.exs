@@ -254,4 +254,76 @@ defmodule AdministrationTest do
       :ok, %{"server" => "arango", "version" => _}
     } = Administration.version() |> arango()
   end
+
+  # === Phase 4 additions ===
+
+  test "engine/0 returns the storage engine name" do
+    assert {:ok, %{"name" => "rocksdb"}} = Administration.engine() |> arango()
+  end
+
+  test "engine_stats/0 returns a counter map" do
+    assert {:ok, map} = Administration.engine_stats() |> arango()
+    assert is_map(map)
+    assert map_size(map) > 0
+  end
+
+  test "metrics/0 returns Prometheus text (text/plain decoded as raw string)" do
+    assert {:ok, body} = Administration.metrics() |> arango()
+    assert is_binary(body)
+    assert String.contains?(body, "arangodb_")
+  end
+
+  test "status/0 reports server info" do
+    assert {:ok, %{"serverInfo" => server_info}} = Administration.status() |> arango()
+    assert is_map(server_info)
+  end
+
+  test "mode/0 returns default in a fresh container" do
+    assert {:ok, %{"mode" => "default"}} = Administration.mode() |> arango()
+  end
+
+  test "availability/0 returns ok when the server is ready" do
+    assert {:ok, _} = Administration.availability() |> arango()
+  end
+
+  test "support_info/0 returns a diagnostics bundle" do
+    assert {:ok, info} = Administration.support_info() |> arango()
+    assert is_map(info)
+  end
+
+  test "log_level/0 returns a topic-keyed map" do
+    assert {:ok, levels} = Administration.log_level() |> arango()
+    assert is_map(levels)
+    assert map_size(levels) > 0
+  end
+
+  test "log_entries/1 returns structured entries" do
+    assert {:ok, %{"messages" => messages}} = Administration.log_entries() |> arango()
+    assert is_list(messages)
+  end
+
+  @tag :skip
+  # /_admin/compact requires JWT-authenticated *superuser*; basic-auth root
+  # gets 403 "compaction is only allowed for superusers". Run against a JWT
+  # session to verify.
+  test "compact/1 succeeds on a fresh database" do
+    assert {:ok, _} = Administration.compact() |> arango()
+  end
+
+  # Pure body-shape tests for state-changing endpoints (avoid touching
+  # server-wide settings during the integration suite).
+
+  test "set_mode/1 builds a PUT with mode in the body" do
+    op = Administration.set_mode("readonly")
+    assert op.http_method == :put
+    assert op.body == %{mode: "readonly"}
+    assert op.path == "/_admin/server/mode"
+  end
+
+  test "set_log_level/1 builds a PUT with the topic map as the body" do
+    op = Administration.set_log_level(%{"agency" => "DEBUG"})
+    assert op.http_method == :put
+    assert op.body == %{"agency" => "DEBUG"}
+    assert op.path == "/_admin/log/level"
+  end
 end

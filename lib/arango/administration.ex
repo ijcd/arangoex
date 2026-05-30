@@ -191,4 +191,144 @@ defmodule Arango.Administration do
       path: "version"
     )
   end
+
+  @doc """
+  Return the storage engine info (e.g. `name: "rocksdb"`).
+
+  GET /_api/engine
+  """
+  @spec engine() :: Arango.ok_error(map)
+  def engine() do
+    request(method: :get, system_only: true, path: "engine")
+  end
+
+  @doc """
+  Return engine-internal counters.
+
+  GET /_api/engine/stats
+  """
+  @spec engine_stats() :: Arango.ok_error(map)
+  def engine_stats() do
+    request(method: :get, system_only: true, path: "engine/stats")
+  end
+
+  @doc """
+  Return Prometheus-formatted server metrics.
+
+  GET /_admin/metrics/v2
+
+  Replaces `statistics/0` and `statistics_description/0` in v1/4.0. The
+  response is `text/plain`, so the body comes through the request layer
+  as a raw string — no `ok_decoder` needed.
+  """
+  @spec metrics() :: Arango.ok_error(String.t)
+  def metrics() do
+    request(method: :get, path: "/_admin/metrics/v2")
+  end
+
+  @doc """
+  Return server boot / process status.
+
+  GET /_admin/status
+  """
+  @spec status() :: Arango.ok_error(map)
+  def status() do
+    request(method: :get, path: "/_admin/status")
+  end
+
+  @doc """
+  Return current server mode (`"default"` or `"readonly"`).
+
+  GET /_admin/server/mode
+  """
+  @spec mode() :: Arango.ok_error(map)
+  def mode() do
+    request(method: :get, path: "/_admin/server/mode")
+  end
+
+  @doc """
+  Set the server mode.
+
+  PUT /_admin/server/mode
+
+  `mode_value` is `"default"` or `"readonly"`.
+  """
+  @spec set_mode(String.t) :: Arango.ok_error(map)
+  def set_mode(mode_value) do
+    request(method: :put, path: "/_admin/server/mode", body: %{mode: mode_value})
+  end
+
+  @doc """
+  Return whether the server is ready to serve requests.
+
+  GET /_admin/server/availability
+  """
+  @spec availability() :: Arango.ok_error(map)
+  def availability() do
+    request(method: :get, path: "/_admin/server/availability")
+  end
+
+  @doc """
+  Return a diagnostics bundle.
+
+  GET /_admin/support-info
+  """
+  @spec support_info() :: Arango.ok_error(map)
+  def support_info() do
+    request(method: :get, path: "/_admin/support-info")
+  end
+
+  @doc """
+  Return per-topic log levels.
+
+  GET /_admin/log/level
+  """
+  @spec log_level() :: Arango.ok_error(map)
+  def log_level() do
+    request(method: :get, path: "/_admin/log/level")
+  end
+
+  @doc """
+  Set per-topic log levels.
+
+  PUT /_admin/log/level
+
+  `levels` is a map of topic → level, e.g. `%{"agency" => "DEBUG"}`.
+  """
+  @spec set_log_level(map) :: Arango.ok_error(map)
+  def set_log_level(levels) do
+    request(method: :put, path: "/_admin/log/level", body: levels)
+  end
+
+  @doc """
+  Return structured log entries.
+
+  GET /_admin/log/entries
+
+  Same filtering options as `log/1` but returns a `messages` array of
+  per-entry maps instead of the legacy parallel-arrays shape.
+  """
+  @spec log_entries(keyword) :: Arango.ok_error(map)
+  def log_entries(opts \\ []) do
+    query = Utils.opts_to_query(opts, [:upto, :level, :start, :size, :offset, :search, :sort])
+    request(method: :get, path: "/_admin/log/entries", query: query)
+  end
+
+  @doc """
+  Compact the database.
+
+  PUT /_admin/compact
+
+  Options: `:changeLevel` (boolean), `:compactBottomMostLevel` (boolean).
+  """
+  @spec compact(keyword) :: Arango.ok_error(map)
+  def compact(opts \\ []) do
+    body =
+      Utils.compact(%{
+        "changeLevel" => Keyword.get(opts, :changeLevel),
+        "compactBottomMostLevel" => Keyword.get(opts, :compactBottomMostLevel)
+      })
+
+    request(method: :put, path: "/_admin/compact", body: body)
+  end
 end
