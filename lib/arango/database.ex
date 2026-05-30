@@ -26,7 +26,7 @@ defmodule Arango.Database do
   POST /_api/database
   """
   @type create_database_user_opts :: [{:username, String.t} | {:passwd, String.t} | {:active, boolean} | {:extra, Map.t}]
-  @type create_database_opts :: [{:name, String.t} | {:users, [create_database_user_opts]}]
+  @type create_database_opts :: [{:name, String.t} | {:users, [create_database_user_opts]} | {:sharding, String.t} | {:replicationFactor, pos_integer | String.t} | {:writeConcern, pos_integer}]
   @spec create(create_database_opts) :: Arango.ok_error(any())
   def create(database \\ [])
   def create(%__MODULE__{name: name}), do: create(name: name)
