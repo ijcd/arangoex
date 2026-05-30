@@ -266,6 +266,44 @@ defmodule CursorTest do
     } = Cursor.cursor_delete(id) |> on_db(ctx)
   end
 
+  test "cursor_next/1 uses POST (3.12 documented form)" do
+    op = Cursor.cursor_next("abc123")
+    assert op.http_method == :post
+    assert op.path == "cursor/abc123"
+  end
+
+  test "cursor_create wires ttl at the top level" do
+    op = Cursor.cursor_create(%Cursor.Cursor{query: "RETURN 1", ttl: 60})
+    assert op.body["ttl"] == 60
+  end
+
+  test "cursor_create wires stream into options" do
+    op = Cursor.cursor_create(%Cursor.Cursor{query: "RETURN 1", stream: true})
+    assert op.body["options"]["stream"] == true
+  end
+
+  test "cursor_create wires allow_retry into options as allowRetry" do
+    op = Cursor.cursor_create(%Cursor.Cursor{query: "RETURN 1", allow_retry: true})
+    assert op.body["options"]["allowRetry"] == true
+  end
+
+  test "cursor_next_batch/2 re-fetches a batch when allowRetry is set", ctx do
+    cursor = %Cursor.Cursor{
+      query: "FOR p IN products SORT p.age RETURN p",
+      batch_size: 2,
+      allow_retry: true
+    }
+
+    {:ok, %{"id" => id, "nextBatchId" => next_id}} =
+      Cursor.cursor_create(cursor) |> on_db(ctx)
+
+    {:ok, b1} = Cursor.cursor_next_batch(id, next_id) |> on_db(ctx)
+    {:ok, b2} = Cursor.cursor_next_batch(id, next_id) |> on_db(ctx)
+
+    assert length(b1["result"]) == 2
+    assert b1["result"] == b2["result"]
+  end
+
   test "Read next batch from cursor", ctx do
     cursor = %Cursor.Cursor{
       query: "FOR p IN products LIMIT 5 RETURN p",
