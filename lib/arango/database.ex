@@ -26,16 +26,27 @@ defmodule Arango.Database do
   POST /_api/database
   """
   @type create_database_user_opts :: [{:username, String.t} | {:passwd, String.t} | {:active, boolean} | {:extra, Map.t}]
-  @type create_database_opts :: [{:name, String.t} | {:users, [create_database_user_opts]}]
+  @type create_database_opts :: [{:name, String.t} | {:users, [create_database_user_opts]} | {:sharding, String.t} | {:replicationFactor, pos_integer | String.t} | {:writeConcern, pos_integer}]
   @spec create(create_database_opts) :: Arango.ok_error(any())
   def create(database \\ [])
   def create(%__MODULE__{name: name}), do: create(name: name)
   def create(opts) do
+    top = opts |> Keyword.take([:name, :users]) |> Enum.into(%{})
+
+    options =
+      Utils.compact(%{
+        "sharding" => Keyword.get(opts, :sharding),
+        "replicationFactor" => Keyword.get(opts, :replicationFactor),
+        "writeConcern" => Keyword.get(opts, :writeConcern)
+      })
+
+    body = if map_size(options) > 0, do: Map.put(top, "options", options), else: top
+
     request(
       method: :post,
       system_only: true,
       path: "database",
-      body: opts |> Keyword.take([:name, :users]) |> Enum.into(%{}),
+      body: body,
       ok_decoder: __MODULE__.PlainDecoder
     )
   end
