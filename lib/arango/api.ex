@@ -32,19 +32,25 @@ defmodule Arango.API do
   @doc """
   Build an `%Arango.Request{}` with the module's `@endpoint` pre-filled.
 
-  Accepts any `Arango.Request` field. Use `:method` as shorthand for
-  `:http_method`.
+  Expands at compile time to a struct literal so unknown field names fail
+  to compile (typo-hider gone). Accepts any `Arango.Request` field. Use
+  `:method` as shorthand for `:http_method`.
   """
   defmacro request(opts) do
-    quote do
-      Arango.API.__build__(@endpoint, unquote(opts))
+    unless Keyword.keyword?(opts) do
+      raise ArgumentError,
+            "request/1 requires a literal keyword list, got: #{Macro.to_string(opts)}"
     end
-  end
 
-  @doc false
-  def __build__(endpoint, opts) do
-    {method, opts} = Keyword.pop(opts, :method)
-    fields = [endpoint: endpoint] ++ if(method, do: [http_method: method], else: []) ++ opts
-    struct(Arango.Request, fields)
+    {method, rest} = Keyword.pop(opts, :method)
+
+    fields =
+      [endpoint: quote(do: @endpoint)] ++
+        if(method, do: [http_method: method], else: []) ++
+        rest
+
+    quote do
+      %Arango.Request{unquote_splicing(fields)}
+    end
   end
 end
