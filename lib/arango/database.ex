@@ -31,11 +31,22 @@ defmodule Arango.Database do
   def create(database \\ [])
   def create(%__MODULE__{name: name}), do: create(name: name)
   def create(opts) do
+    top = opts |> Keyword.take([:name, :users]) |> Enum.into(%{})
+
+    options =
+      Utils.compact(%{
+        "sharding" => Keyword.get(opts, :sharding),
+        "replicationFactor" => Keyword.get(opts, :replicationFactor),
+        "writeConcern" => Keyword.get(opts, :writeConcern)
+      })
+
+    body = if map_size(options) > 0, do: Map.put(top, "options", options), else: top
+
     request(
       method: :post,
       system_only: true,
       path: "database",
-      body: opts |> Keyword.take([:name, :users]) |> Enum.into(%{}),
+      body: body,
       ok_decoder: __MODULE__.PlainDecoder
     )
   end

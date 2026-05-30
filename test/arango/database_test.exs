@@ -89,5 +89,30 @@ defmodule DatabaseTest do
     assert is_list(dbs)
     assert "_system" in dbs
     assert new_dbname in dbs
-  end  
+  end
+
+  # === Phase 4 additions ===
+  # Pure body-shape tests: single-server silently ignores these cluster
+  # options, so an integration test would pass even when the option is
+  # being dropped by the wrapper. Assert the request body directly.
+
+  test "create/1 places sharding under the options sub-object" do
+    op = Database.create(name: "x", sharding: "single")
+    assert op.body["options"]["sharding"] == "single"
+  end
+
+  test "create/1 places replicationFactor under the options sub-object" do
+    op = Database.create(name: "x", replicationFactor: 2)
+    assert op.body["options"]["replicationFactor"] == 2
+  end
+
+  test "create/1 places writeConcern under the options sub-object" do
+    op = Database.create(name: "x", writeConcern: 1)
+    assert op.body["options"]["writeConcern"] == 1
+  end
+
+  test "create/1 omits options sub-object when no cluster opts are set" do
+    op = Database.create(name: "x")
+    refute Map.has_key?(op.body, "options")
+  end
 end
