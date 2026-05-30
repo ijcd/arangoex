@@ -25,7 +25,7 @@ defmodule Arango.Document do
   """
   @spec create(Collection.t, map | [map]) :: Arango.ok_error(map | [map])
   def create(collection, document, opts \\ []) do
-    query = Utils.opts_to_query(opts, [:waitForSync, :returnNew])
+    query = Utils.opts_to_query(opts, [:waitForSync, :returnNew, :refillIndexCaches, :versionAttribute])
 
     request(
       method: :post,
@@ -100,7 +100,7 @@ defmodule Arango.Document do
 
   @spec update(Collection.t, [map], keyword) :: Arango.ok_error([map])
   def update(collection, new_docs, opts) when is_list(new_docs) do
-    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
+    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
 
     request(
       method: :patch,
@@ -115,7 +115,7 @@ defmodule Arango.Document do
   def update(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
-    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
+    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
 
     request(
       method: :patch,
@@ -136,7 +136,7 @@ defmodule Arango.Document do
 
   @spec replace(Collection.t, [map], keyword) :: Arango.ok_error([map])
   def replace(collection, new_docs, opts) when is_list(new_docs) do
-    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
+    query = Utils.opts_to_query(opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
 
     request(
       method: :put,
@@ -151,7 +151,7 @@ defmodule Arango.Document do
   def replace(document, new_document, opts) do
     {header_opts, query_opts} = Keyword.split(opts, [:ifMatch])
     headers = Utils.opts_to_headers(header_opts, [:ifMatch])
-    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew])
+    query = Utils.opts_to_query(query_opts, [:keepNull, :mergeObjects, :waitForSync, :ignoreRevs, :returnOld, :returnNew, :refillIndexCaches, :versionAttribute])
 
     request(
       method: :put,

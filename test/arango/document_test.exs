@@ -938,4 +938,39 @@ defmodule DocumentTest do
       assert {:ok, _} = Document.document(dref3) |> on_db(ctx)
     end
   end
+
+  describe "Phase 4 option additions" do
+    test "create/3 accepts refillIndexCaches", ctx do
+      assert {:ok, _} =
+               Document.create(ctx.coll, %{"x" => 1}, refillIndexCaches: true)
+               |> on_db(ctx)
+    end
+
+    test "create/3 (multi) accepts refillIndexCaches", ctx do
+      assert [{:ok, _}, {:ok, _}] =
+               Document.create(
+                 ctx.coll,
+                 [%{"x" => 1}, %{"x" => 2}],
+                 refillIndexCaches: true
+               )
+               |> on_db(ctx)
+    end
+
+    test "update/3 with versionAttribute skips when the incoming version is not newer", ctx do
+      {:ok, dref} = Document.create(ctx.coll, %{"v" => 1, "data" => "first"}) |> on_db(ctx)
+
+      # v 1 -> 2 succeeds; stored version becomes 2.
+      {:ok, _} =
+        Document.update(dref, %{"v" => 2, "data" => "second"}, versionAttribute: "v")
+        |> on_db(ctx)
+
+      # Stale attempt: incoming v=1 is not greater than stored v=2 -> server skips.
+      Document.update(dref, %{"v" => 1, "data" => "stale"}, versionAttribute: "v")
+      |> on_db(ctx)
+
+      {:ok, current} = Document.document(dref) |> on_db(ctx)
+      assert current["v"] == 2
+      assert current["data"] == "second"
+    end
+  end
 end
