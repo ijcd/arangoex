@@ -2,12 +2,12 @@ import Config
 
 config :tesla, disable_deprecated_builder_warning: true
 
-if Mix.env == :dev do
+if Mix.env() == :dev do
   config :mix_test_watch,
     tasks: [
       "test",
       "credo",
-      "dialyzer",
+      "dialyzer"
     ]
 end
 

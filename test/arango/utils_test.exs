@@ -8,9 +8,13 @@ defmodule UtilsTest do
     assert %{} = Utils.opts_to_headers([], [])
     assert %{} = Utils.opts_to_headers([], [:foo])
     assert %{"Foo" => 1} = Utils.opts_to_headers([foo: 1], [:foo, :bar, :baz])
-    assert %{"Foo" => 1, "Bar" => 2, "Baz" => 3} = Utils.opts_to_headers([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
+    assert %{"Foo" => 1, "Bar" => 2, "Baz" => 3} =
+             Utils.opts_to_headers([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
     assert %{"Foo" => 1, "Bingo-Boo" => 2} = Utils.opts_to_headers([foo: 1, bingo_boo: 2], [:foo, :bingo_boo])
     assert %{"Foo" => 1, "Bingo-Boo" => 2} = Utils.opts_to_headers([foo: 1, bingoBoo: 2], [:foo, :bingoBoo])
+
     assert_raise RuntimeError, "unknown key: bar", fn ->
       Utils.opts_to_headers([foo: 1, bar: 2, baz: 3], [:foo, :baz])
     end
@@ -21,9 +25,13 @@ defmodule UtilsTest do
     assert %{} = Utils.opts_to_query([], [:foo])
     assert %{} = Utils.opts_to_query([foo: nil, bar: nil], [:foo, :bar])
     assert %{"foo" => 1} = Utils.opts_to_query([foo: 1], [:foo, :bar, :baz])
-    assert %{"bar" => 2, "baz" => 3, "foo" => 1} = Utils.opts_to_query([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
+    assert %{"bar" => 2, "baz" => 3, "foo" => 1} =
+             Utils.opts_to_query([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
     assert %{"foo" => 1, "bingo_boo" => 2} = Utils.opts_to_query([foo: 1, bingo_boo: 2], [:foo, :bingo_boo])
     assert %{"foo" => 1, "bingoBoo" => 2} = Utils.opts_to_query([foo: 1, bingoBoo: 2], [:foo, :bingoBoo])
+
     assert_raise RuntimeError, "unknown key: bar", fn ->
       Utils.opts_to_query([foo: 1, bar: 2, baz: 3], [:foo, :baz])
     end
@@ -34,7 +42,10 @@ defmodule UtilsTest do
     assert %{} = Utils.opts_to_vars([], [:foo])
     assert %{} = Utils.opts_to_vars([foo: nil, bar: nil], [:foo, :bar])
     assert %{"foo" => 1} = Utils.opts_to_vars([foo: 1], [:foo, :bar, :baz])
-    assert %{"foo" => 1, "bar" => 2, "baz" => 3} = Utils.opts_to_vars([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
+    assert %{"foo" => 1, "bar" => 2, "baz" => 3} =
+             Utils.opts_to_vars([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
     assert_raise RuntimeError, "unknown key: bar", fn ->
       Utils.opts_to_vars([foo: 1, bar: 2, baz: 3], [:foo, :baz])
     end
@@ -46,6 +57,7 @@ defmodule UtilsTest do
     assert [] = Utils.ensure_permitted([foo: nil, bar: nil], [:foo, :bar])
     assert [foo: 1] = Utils.ensure_permitted([foo: 1], [:foo, :bar, :baz])
     assert [foo: 1, bar: 2, baz: 3] = Utils.ensure_permitted([foo: 1, bar: 2, baz: 3], [:foo, :bar, :baz])
+
     assert_raise RuntimeError, "unknown key: bar", fn ->
       Utils.ensure_permitted([foo: 1, bar: 2, baz: 3], [:foo, :baz])
     end

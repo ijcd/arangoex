@@ -7,7 +7,7 @@ defmodule Arango.TestHelper do
       host: System.get_env("ARANGO_HOST"),
       username: System.get_env("ARANGO_USER"),
       password: System.get_env("ARANGO_PASSWORD"),
-      use_auth: :basic,
+      use_auth: :basic
     }
   end
 
@@ -61,28 +61,31 @@ defmodule Arango.TestCase do
     {:ok, %{"result" => original_funcs}} = Aql.functions() |> arango()
     {:ok, original_tasks} = Task.tasks() |> arango()
 
-    new_db_name = "test_#{Faker.Lorem.word}_#{System.unique_integer([:positive])}"
-    new_coll_name = "test_#{Faker.Lorem.word}_#{System.unique_integer([:positive])}"
+    new_db_name = "test_#{Faker.Lorem.word()}_#{System.unique_integer([:positive])}"
+    new_coll_name = "test_#{Faker.Lorem.word()}_#{System.unique_integer([:positive])}"
 
     {:ok, _} = Database.create(name: new_db_name) |> arango()
     {:ok, coll} = Collection.create(new_coll_name) |> arango(database_name: new_db_name)
 
-    on_exit fn ->
+    on_exit(fn ->
       # cleanup any new dbs that have appeared
       {:ok, after_dbs} = Database.databases() |> arango()
-      for db_name <- (after_dbs -- original_dbs) do
+
+      for db_name <- after_dbs -- original_dbs do
         {:ok, _} = Database.drop(db_name) |> arango()
       end
 
       # cleanup any new users that have appeared
       {:ok, after_users} = User.users() |> arango()
-      for user <- (after_users -- original_users) do
+
+      for user <- after_users -- original_users do
         {:ok, _} = User.remove(user) |> arango()
       end
 
       # cleanup any new functions that have appeared
       {:ok, %{"result" => after_funcs}} = Aql.functions() |> arango()
       original_func_names = original_funcs |> Enum.map(& &1["name"])
+
       for function <- after_funcs, function["name"] not in original_func_names do
         {:ok, _} = Aql.delete_function(function["name"]) |> arango()
       end
@@ -91,14 +94,15 @@ defmodule Arango.TestCase do
       {:ok, after_tasks} = Task.tasks() |> arango()
       original_task_ids = original_tasks |> Enum.map(& &1["id"])
       after_task_ids = after_tasks |> Enum.map(& &1["id"])
-      for task_id <- (after_task_ids -- original_task_ids) do
+
+      for task_id <- after_task_ids -- original_task_ids do
         {:ok, _} = Task.delete(task_id) |> arango()
       end
-    end
+    end)
 
     %{
       coll: coll,
-      db_name: new_db_name,
+      db_name: new_db_name
     }
   end
 end

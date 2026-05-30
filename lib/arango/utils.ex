@@ -16,7 +16,7 @@ defmodule Arango.Utils do
     |> Enum.into(%{})
   end
 
-  @spec opts_to_query(keyword, [atom]) :: String.t
+  @spec opts_to_query(keyword, [atom]) :: String.t()
   def opts_to_query(opts, permitted \\ []) do
     opts_to_vars(opts, permitted)
   end
@@ -36,21 +36,25 @@ defmodule Arango.Utils do
   """
   @spec ensure_permitted(keyword, [atom]) :: keyword
   def ensure_permitted(opts, [:*]), do: opts
+
   def ensure_permitted(opts, permitted) do
-    extra = Keyword.keys(opts) -- permitted
-    Enum.any?(extra, &(raise "unknown key: #{&1}"))
+    case Keyword.keys(opts) -- permitted do
+      [] -> :ok
+      [k | _] -> raise "unknown key: #{k}"
+    end
+
     opts
     |> Enum.reject(fn {_, v} -> v == nil end)
     |> Keyword.take(permitted)
   end
 
-  @spec to_header_name(atom | String.t) :: String.t
+  @spec to_header_name(atom | String.t()) :: String.t()
   def to_header_name(a) when is_atom(a), do: to_header_name(Atom.to_string(a))
+
   def to_header_name(a) do
     a
-    |> Macro.underscore
+    |> Macro.underscore()
     |> String.split("_")
-    |> Enum.map(&String.capitalize/1)
-    |> Enum.join("-")
+    |> Enum.map_join("-", &String.capitalize/1)
   end
 end

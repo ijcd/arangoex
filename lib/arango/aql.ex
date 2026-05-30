@@ -17,26 +17,24 @@ defmodule Arango.Aql do
     @moduledoc false
 
     @enforce_keys [:code, :name]
-    defstruct [
-      name: nil,
-      code: nil,
-      isDeterministic: true
-    ]
+    defstruct name: nil,
+              code: nil,
+              isDeterministic: true
 
     @type t :: %__MODULE__{
-      # the fully qualified name of the user functions.
-      name: String.t,
+            # the fully qualified name of the user functions.
+            name: String.t(),
 
-      # a string representation of the function body.
-      code: String.t,
+            # a string representation of the function body.
+            code: String.t(),
 
-      # an optional boolean value to indicate that the function
-      # results are fully deterministic (function return value solely
-      # depends on the input value and return value is the same for
-      # repeated calls with same input). The isDeterministic attribute
-      # is currently not used but may be used later for optimisations.
-      isDeterministic: boolean
-    }
+            # an optional boolean value to indicate that the function
+            # results are fully deterministic (function return value solely
+            # depends on the input value and return value is the same for
+            # repeated calls with same input). The isDeterministic attribute
+            # is currently not used but may be used later for optimisations.
+            isDeterministic: boolean
+          }
   end
 
   defmodule ExplainRequest do
@@ -52,33 +50,33 @@ defmodule Arango.Aql do
     ]
 
     @type t :: %__MODULE__{
-      # the query which you want explained; If the query
-      # references any bind variables, these must also be passed in the
-      # attribute bindVars. Additional options for the query can be passed
-      # in the options attribute.
-      query: String.t,
+            # the query which you want explained; If the query
+            # references any bind variables, these must also be passed in the
+            # attribute bindVars. Additional options for the query can be passed
+            # in the options attribute.
+            query: String.t(),
 
-      # optimizer_rules (string): an array of to-be-included or
-      # to-be-excluded optimizer rules can be put into this attribute,
-      # telling the optimizer to include or exclude specific rules. To
-      # disable a rule, prefix its name with a -, to enable a rule,
-      # prefix it with a +. There is also a pseudo-rule all, which
-      # will match all optimizer rules.
-      optimizer_rules: [String.t],
+            # optimizer_rules (string): an array of to-be-included or
+            # to-be-excluded optimizer rules can be put into this attribute,
+            # telling the optimizer to include or exclude specific rules. To
+            # disable a rule, prefix its name with a -, to enable a rule,
+            # prefix it with a +. There is also a pseudo-rule all, which
+            # will match all optimizer rules.
+            optimizer_rules: [String.t()],
 
-      # maximum number of plans that the optimizer is allowed to
-      # generate. Setting this attribute to a low value allows to put
-      # a cap on the amount of work the optimizer does.
-      max_number_of_plans: pos_integer,
+            # maximum number of plans that the optimizer is allowed to
+            # generate. Setting this attribute to a low value allows to put
+            # a cap on the amount of work the optimizer does.
+            max_number_of_plans: pos_integer,
 
-      # if set to true, all possible execution plans will be
-      # returned. The default is false, meaning only the optimal plan will
-      # be returned.
-      all_plans: boolean,
+            # if set to true, all possible execution plans will be
+            # returned. The default is false, meaning only the optimal plan will
+            # be returned.
+            all_plans: boolean,
 
-      # key/value pairs representing the bind parameters.
-      bind_vars: map
-    }
+            # key/value pairs representing the bind parameters.
+            bind_vars: map
+          }
   end
 
   @doc """
@@ -102,7 +100,7 @@ defmodule Arango.Aql do
   POST /_api/aqlfunction
   """
   @deprecated @aql_function_deprecation
-  @spec create_function(Function.t) :: Arango.ok_error(map)
+  @spec create_function(Function.t()) :: Arango.ok_error(map)
   def create_function(function) do
     request(
       system_only: true,
@@ -118,7 +116,7 @@ defmodule Arango.Aql do
   DELETE /_api/aqlfunction/{name}
   """
   @deprecated @aql_function_deprecation
-  @spec delete_function(String.t) :: Arango.ok_error(map)
+  @spec delete_function(String.t()) :: Arango.ok_error(map)
   def delete_function(name) do
     request(
       system_only: true,
@@ -132,7 +130,7 @@ defmodule Arango.Aql do
 
   POST /_api/explain
   """
-  @spec explain_query(Keyword.t) :: Arango.ok_error(map)
+  @spec explain_query(Keyword.t()) :: Arango.ok_error(map)
   def explain_query(query, options \\ %{}) do
     options = Enum.into(options, %{})
     optimizer_rules = Map.get(options, :optimizer_rules)
@@ -155,7 +153,7 @@ defmodule Arango.Aql do
 
   POST /_api/query
   """
-  @spec validate_query(String.t) :: Arango.ok_error(map)
+  @spec validate_query(String.t()) :: Arango.ok_error(map)
   def validate_query(query) do
     request(
       method: :post,
@@ -195,7 +193,7 @@ defmodule Arango.Aql do
 
   PUT /_api/query-cache/properties
   """
-  @spec set_query_cache_properties(Keyword.t) :: Arango.ok_error(map)
+  @spec set_query_cache_properties(Keyword.t()) :: Arango.ok_error(map)
   def set_query_cache_properties(options \\ %{}) do
     options = Enum.into(options, %{})
 
@@ -239,7 +237,7 @@ defmodule Arango.Aql do
 
   PUT /_api/query/properties
   """
-  @spec set_query_properties(Keyword.t) :: Arango.ok_error(map)
+  @spec set_query_properties(Keyword.t()) :: Arango.ok_error(map)
   def set_query_properties(options \\ %{}) do
     options = Enum.into(options, %{})
 
@@ -286,7 +284,7 @@ defmodule Arango.Aql do
 
   DELETE /_api/query/{query-id}
   """
-  @spec kill_query(String.t) :: Arango.ok_error(map)
+  @spec kill_query(String.t()) :: Arango.ok_error(map)
   def kill_query(query_id) do
     request(
       method: :delete,

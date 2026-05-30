@@ -24,6 +24,7 @@ defmodule WalTest do
       throttleWait: 14_890,
       throttleWhenPending: 2
     }
+
     {:ok, _} = Wal.set_properties(expected_wal) |> arango()
 
     assert {:ok, expected_wal} == Wal.properties() |> arango()

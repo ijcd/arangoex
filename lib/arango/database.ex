@@ -10,26 +10,36 @@ defmodule Arango.Database do
     :path,
     :users
   ]
+
   use ExConstructor
 
   @type t :: %__MODULE__{
-    id: String.t,
-    name: String.t,
-    isSystem: boolean,
-    path: String.t,
-    users: [String.t],
-  }
+          id: String.t(),
+          name: String.t(),
+          isSystem: boolean,
+          path: String.t(),
+          users: [String.t()]
+        }
 
   @doc """
   Create database
 
   POST /_api/database
   """
-  @type create_database_user_opts :: [{:username, String.t} | {:passwd, String.t} | {:active, boolean} | {:extra, Map.t}]
-  @type create_database_opts :: [{:name, String.t} | {:users, [create_database_user_opts]} | {:sharding, String.t} | {:replicationFactor, pos_integer | String.t} | {:writeConcern, pos_integer}]
+  @type create_database_user_opts :: [
+          {:username, String.t()} | {:passwd, String.t()} | {:active, boolean} | {:extra, map()}
+        ]
+  @type create_database_opts :: [
+          {:name, String.t()}
+          | {:users, [create_database_user_opts]}
+          | {:sharding, String.t()}
+          | {:replicationFactor, pos_integer | String.t()}
+          | {:writeConcern, pos_integer}
+        ]
   @spec create(create_database_opts) :: Arango.ok_error(any())
   def create(database \\ [])
   def create(%__MODULE__{name: name}), do: create(name: name)
+
   def create(opts) do
     top = opts |> Keyword.take([:name, :users]) |> Enum.into(%{})
 
@@ -56,7 +66,7 @@ defmodule Arango.Database do
 
   DELETE /_api/database/{database-name}
   """
-  @spec drop(String.t) :: Arango.ok_error(true)
+  @spec drop(String.t()) :: Arango.ok_error(true)
   def drop(db_name) do
     request(
       method: :delete,
@@ -86,7 +96,7 @@ defmodule Arango.Database do
 
   GET /_api/database
   """
-  @spec databases() :: Arango.ok_error([String.t])
+  @spec databases() :: Arango.ok_error([String.t()])
   def databases() do
     request(
       method: :get,
@@ -101,7 +111,7 @@ defmodule Arango.Database do
 
   GET /_api/database/user
   """
-  @spec user_databases() :: Arango.ok_error([String.t])
+  @spec user_databases() :: Arango.ok_error([String.t()])
   def user_databases() do
     request(
       method: :get,
@@ -112,6 +122,7 @@ defmodule Arango.Database do
   end
 
   defmodule DatabaseDecoder do
+    @moduledoc false
     alias Arango.Database
 
     @spec decode_ok(any()) :: Arango.ok_error(any())
@@ -119,6 +130,7 @@ defmodule Arango.Database do
   end
 
   defmodule PlainDecoder do
+    @moduledoc false
     @spec decode_ok(any()) :: Arango.ok_error(any())
     def decode_ok(%{"result" => result}), do: {:ok, result}
   end

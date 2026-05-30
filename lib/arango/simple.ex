@@ -20,7 +20,7 @@ defmodule Arango.Simple do
   PUT /_api/simple/all
   """
   @deprecated @deprecation
-  @spec all(Collection.t, keyword) :: Arango.ok_error(map)
+  @spec all(Collection.t(), keyword) :: Arango.ok_error(map)
   def all(collection, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit])
     body = Map.merge(%{collection: collection.name}, vars)
@@ -34,7 +34,7 @@ defmodule Arango.Simple do
   PUT /_api/simple/any
   """
   @deprecated @deprecation
-  @spec any(Collection.t) :: Arango.ok_error(map)
+  @spec any(Collection.t()) :: Arango.ok_error(map)
   def any(collection) do
     request(method: :put, path: "simple/any", body: %{collection: collection.name})
   end
@@ -45,7 +45,7 @@ defmodule Arango.Simple do
   PUT /_api/simple/by-example
   """
   @deprecated @deprecation
-  @spec query_by_example(Collection.t, map, keyword) :: Arango.ok_error(map)
+  @spec query_by_example(Collection.t(), map, keyword) :: Arango.ok_error(map)
   def query_by_example(collection, example, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit])
     body = Map.merge(%{collection: collection.name, example: example}, vars)
@@ -59,7 +59,7 @@ defmodule Arango.Simple do
   PUT /_api/simple/first-example
   """
   @deprecated @deprecation
-  @spec find_by_example(Collection.t, map) :: Arango.ok_error(map)
+  @spec find_by_example(Collection.t(), map) :: Arango.ok_error(map)
   def find_by_example(collection, example) do
     request(
       method: :put,
@@ -74,14 +74,20 @@ defmodule Arango.Simple do
   PUT /_api/simple/fulltext
   """
   @deprecated @deprecation
-  @spec query_fulltext(Collection.t, String.t, String.t, keyword) :: Arango.ok_error(map)
+  @spec query_fulltext(Collection.t(), String.t(), String.t(), keyword) :: Arango.ok_error(map)
   def query_fulltext(collection, attribute_name, query, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :index])
-    body = Map.merge(%{
-      "collection" => collection.name,
-      "attribute" => attribute_name,     # not strictly necessary if you have :index
-      "query" => query
-    }, vars)
+
+    body =
+      Map.merge(
+        %{
+          "collection" => collection.name,
+          # not strictly necessary if you have :index
+          "attribute" => attribute_name,
+          "query" => query
+        },
+        vars
+      )
 
     request(method: :put, path: "simple/fulltext", body: body)
   end
@@ -92,7 +98,7 @@ defmodule Arango.Simple do
   PUT /_api/simple/lookup-by-keys
   """
   @deprecated @deprecation
-  @spec lookup_by_keys(Collection.t, [String.t]) :: Arango.ok_error(map)
+  @spec lookup_by_keys(Collection.t(), [String.t()]) :: Arango.ok_error(map)
   def lookup_by_keys(collection, keys) do
     body = %{
       "collection" => collection.name,
@@ -109,15 +115,20 @@ defmodule Arango.Simple do
   """
   @deprecated @deprecation
   # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
-  @spec range(Collection.t, String.t, float, float, keyword) :: Arango.ok_error(map)
+  @spec range(Collection.t(), String.t(), float, float, keyword) :: Arango.ok_error(map)
   def range(collection, attribute_name, left, right, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :closed])
-    body = Map.merge(%{
-      "collection" => collection.name,
-      "attribute" => attribute_name,
-      "left" => left,
-      "right" => right,
-    }, vars)
+
+    body =
+      Map.merge(
+        %{
+          "collection" => collection.name,
+          "attribute" => attribute_name,
+          "left" => left,
+          "right" => right
+        },
+        vars
+      )
 
     request(method: :put, path: "simple/range", body: body)
   end
@@ -128,9 +139,10 @@ defmodule Arango.Simple do
   PUT /_api/simple/remove-by-example
   """
   @deprecated @deprecation
-  @spec remove_by_example(Collection.t, map) :: Arango.ok_error(map)
+  @spec remove_by_example(Collection.t(), map) :: Arango.ok_error(map)
   def remove_by_example(collection, example, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:limit, :waitForSync])
+
     body = %{
       "collection" => collection.name,
       "example" => example,
@@ -146,9 +158,10 @@ defmodule Arango.Simple do
   PUT /_api/simple/remove-by-keys
   """
   @deprecated @deprecation
-  @spec remove_by_keys(Collection.t, [String.t], keyword) :: Arango.ok_error(map)
+  @spec remove_by_keys(Collection.t(), [String.t()], keyword) :: Arango.ok_error(map)
   def remove_by_keys(collection, keys, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:returnOld, :silent, :waitForSync])
+
     body = %{
       "collection" => collection.name,
       "keys" => keys,
@@ -164,9 +177,10 @@ defmodule Arango.Simple do
   PUT /_api/simple/replace-by-example
   """
   @deprecated @deprecation
-  @spec replace_by_example(Collection.t, map, map, keyword) :: Arango.ok_error(map)
+  @spec replace_by_example(Collection.t(), map, map, keyword) :: Arango.ok_error(map)
   def replace_by_example(collection, example, new_value, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:limit, :waitForSync])
+
     body = %{
       "collection" => collection.name,
       "example" => example,
@@ -183,9 +197,10 @@ defmodule Arango.Simple do
   PUT /_api/simple/update-by-example
   """
   @deprecated @deprecation
-  @spec update_by_example(Collection.t, map, map, keyword) :: Arango.ok_error(map)
+  @spec update_by_example(Collection.t(), map, map, keyword) :: Arango.ok_error(map)
   def update_by_example(collection, example, new_value, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:keepNull, :mergeObjects, :limit, :waitForSync])
+
     body = %{
       "collection" => collection.name,
       "example" => example,
@@ -196,21 +211,25 @@ defmodule Arango.Simple do
     request(method: :put, path: "simple/update-by-example", body: body)
   end
 
-
   @doc """
   Returns documents near a coordinate
 
   PUT /_api/simple/near
   """
   @deprecated @deprecation
-  @spec near(Collection.t, float, float, keyword) :: Arango.ok_error(map)
+  @spec near(Collection.t(), float, float, keyword) :: Arango.ok_error(map)
   def near(collection, latitude, longitude, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :distance, :geo])
-    body = Map.merge(%{
-      "collection" => collection.name,
-      "latitude" => latitude,
-      "longitude" => longitude,
-    }, vars)
+
+    body =
+      Map.merge(
+        %{
+          "collection" => collection.name,
+          "latitude" => latitude,
+          "longitude" => longitude
+        },
+        vars
+      )
 
     request(method: :put, path: "simple/near", body: body)
   end
@@ -222,15 +241,20 @@ defmodule Arango.Simple do
   """
   @deprecated @deprecation
   # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
-  @spec within(Collection.t, float, float, float, keyword) :: Arango.ok_error(map)
+  @spec within(Collection.t(), float, float, float, keyword) :: Arango.ok_error(map)
   def within(collection, latitude, longitude, radius, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :distance, :geo])
-    body = Map.merge(%{
-      "collection" => collection.name,
-      "latitude" => latitude,
-      "longitude" => longitude,
-      "radius" => radius,
-    }, vars)
+
+    body =
+      Map.merge(
+        %{
+          "collection" => collection.name,
+          "latitude" => latitude,
+          "longitude" => longitude,
+          "radius" => radius
+        },
+        vars
+      )
 
     request(method: :put, path: "simple/within", body: body)
   end
@@ -242,16 +266,21 @@ defmodule Arango.Simple do
   """
   @deprecated @deprecation
   # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
-  @spec within_rectangle(Collection.t, float, float, float, float, keyword) :: Arango.ok_error(map)
+  @spec within_rectangle(Collection.t(), float, float, float, float, keyword) :: Arango.ok_error(map)
   def within_rectangle(collection, latitude1, longitude1, latitude2, longitude2, opts \\ []) do
     vars = Utils.opts_to_vars(opts, [:skip, :limit, :geo])
-    body = Map.merge(%{
-      "collection" => collection.name,
-      "latitude1" => latitude1,
-      "longitude1" => longitude1,
-      "latitude2" => latitude2,
-      "longitude2" => longitude2,
-    }, vars)
+
+    body =
+      Map.merge(
+        %{
+          "collection" => collection.name,
+          "latitude1" => latitude1,
+          "longitude1" => longitude1,
+          "latitude2" => latitude2,
+          "longitude2" => longitude2
+        },
+        vars
+      )
 
     request(method: :put, path: "simple/within-rectangle", body: body)
   end

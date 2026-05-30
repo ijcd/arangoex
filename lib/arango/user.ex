@@ -3,32 +3,34 @@ defmodule Arango.User do
 
   use Arango.API, endpoint: :user
 
-  defstruct [
-    user: nil,
-    active: nil,
-    extra: nil,
-    changePassword: nil,
-    passwd: nil,
-  ]
+  defstruct user: nil,
+            active: nil,
+            extra: nil,
+            changePassword: nil,
+            passwd: nil
+
   use ExConstructor
 
   @type t :: %__MODULE__{
-    user: String.t,
-    active: boolean,
-    extra: map,
-    changePassword: boolean,
-    passwd: String.t,
-  }
+          user: String.t(),
+          active: boolean,
+          extra: map,
+          changePassword: boolean,
+          passwd: String.t()
+        }
 
   @doc """
   Create User
 
   POST /_api/user
   """
-  @type create_user_opts :: [{:user, String.t} | {:passwd, String.t} | {:active, boolean} | {:extra, Map.t}]
+  @type create_user_opts :: [
+          {:user, String.t()} | {:passwd, String.t()} | {:active, boolean} | {:extra, map()}
+        ]
   @spec create(create_user_opts | t) :: Arango.ok_error(t)
   def create(user \\ [])
   def create(%__MODULE__{user: name}), do: create(user: name)
+
   def create(opts) do
     request(
       method: :post,
@@ -44,8 +46,9 @@ defmodule Arango.User do
 
   DELETE /_api/user/{user}
   """
-  @spec remove(t | String.t) :: Arango.ok_error(map)
+  @spec remove(t | String.t()) :: Arango.ok_error(map)
   def remove(%__MODULE__{user: name}), do: remove(name)
+
   def remove(name) do
     request(
       method: :delete,
@@ -74,8 +77,9 @@ defmodule Arango.User do
 
   GET /_api/user/{user}
   """
-  @spec user(String.t | t) :: Arango.ok_error(t)
+  @spec user(String.t() | t) :: Arango.ok_error(t)
   def user(%__MODULE__{user: name}), do: user(name)
+
   def user(name) do
     request(
       method: :get,
@@ -126,8 +130,9 @@ defmodule Arango.User do
 
   GET /_api/user/{user}/database
   """
-  @spec databases(String.t | t) :: Arango.ok_error([String.t])
+  @spec databases(String.t() | t) :: Arango.ok_error([String.t()])
   def databases(%__MODULE__{user: name}), do: databases(name)
+
   def databases(user_name) do
     request(
       method: :get,
@@ -142,8 +147,9 @@ defmodule Arango.User do
 
   PUT /_api/user/{user}/database/{dbname}
   """
-  @spec grant(t, Database.t) :: Arango.ok_error([String.t])
+  @spec grant(t, Arango.Database.t()) :: Arango.ok_error([String.t()])
   def grant(%__MODULE__{user: user_name}, database_name), do: grant(user_name, database_name)
+
   def grant(user_name, database_name) do
     request(
       method: :put,
@@ -158,8 +164,9 @@ defmodule Arango.User do
 
   PUT /_api/user/{user}/database/{dbname}
   """
-  @spec revoke(t, Database.t) :: Arango.ok_error([String.t])
+  @spec revoke(t, Arango.Database.t()) :: Arango.ok_error([String.t()])
   def revoke(%__MODULE__{user: user_name}, database_name), do: revoke(user_name, database_name)
+
   def revoke(user_name, database_name) do
     request(
       method: :put,
@@ -170,14 +177,16 @@ defmodule Arango.User do
   end
 
   defmodule UserDecoder do
+    @moduledoc false
     alias Arango.User
 
-    @spec decode_ok(Map.t) :: Arango.ok_error(User.t)
+    @spec decode_ok(map()) :: Arango.ok_error(User.t())
     def decode_ok(%{"result" => result}) when is_list(result), do: {:ok, Enum.map(result, &User.new(&1))}
     def decode_ok(result), do: {:ok, User.new(result)}
   end
 
   defmodule PlainDecoder do
+    @moduledoc false
     @spec decode_ok(any()) :: Arango.ok_error(any())
     def decode_ok(%{"result" => %{} = result}), do: {:ok, result}
     def decode_ok(%{"result" => result}), do: {:ok, result}

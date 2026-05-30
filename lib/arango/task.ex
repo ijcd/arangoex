@@ -19,24 +19,25 @@ defmodule Arango.Task do
     :period,
     :offset
   ]
+
   use ExConstructor
 
   @type t :: %__MODULE__{
-    # The name of the task
-    name: String.t,
+          # The name of the task
+          name: String.t(),
 
-    # The JavaScript code to be executed
-    command: String.t,
+          # The JavaScript code to be executed
+          command: String.t(),
 
-    # The parameters to be passed into command
-    params: map,
+          # The parameters to be passed into command
+          params: map,
 
-    # Number of seconds between the executions
-    period: non_neg_integer,
+          # Number of seconds between the executions
+          period: non_neg_integer,
 
-    # Number of seconds initial delay
-    offset: nil | non_neg_integer,
-  }
+          # Number of seconds initial delay
+          offset: nil | non_neg_integer
+        }
 
   @doc """
   Creates a task
@@ -75,7 +76,7 @@ defmodule Arango.Task do
   DELETE /_api/tasks/{id}
   """
   @deprecated @deprecation
-  @spec delete(String.t) :: Arango.ok_error(map)
+  @spec delete(String.t()) :: Arango.ok_error(map)
   def delete(task_id) do
     request(
       system_only: true,
@@ -90,7 +91,7 @@ defmodule Arango.Task do
   GET /_api/tasks/{id}
   """
   @deprecated @deprecation
-  @spec task(String.t) :: Arango.ok_error(map)
+  @spec task(String.t()) :: Arango.ok_error(map)
   def task(task_id) do
     request(
       system_only: true,
@@ -105,7 +106,7 @@ defmodule Arango.Task do
   PUT /_api/tasks/{id}
   """
   @deprecated @deprecation
-  @spec create_with_id(String.t, Task.t) :: Arango.ok_error(map)
+  @spec create_with_id(String.t(), Task.t()) :: Arango.ok_error(map)
   def create_with_id(task_id, task) do
     request(
       system_only: true,

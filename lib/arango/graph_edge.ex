@@ -8,12 +8,16 @@ defmodule Arango.GraphEdge do
 
   GET /_api/edges/{collection-id}
   """
-  @spec edges(String.t, String.t, String.t) :: Arango.ok_error(map)
+  @spec edges(String.t(), String.t(), String.t()) :: Arango.ok_error(map)
   def edges(collection_name, vertex_id, direction \\ nil) do
-    query = case direction do
-              d when d in ["in", "out"] -> Utils.opts_to_query([vertex: vertex_id, direction: d], [:vertex, :direction])
-              nil -> Utils.opts_to_query([vertex: vertex_id], [:vertex])
-            end
+    query =
+      case direction do
+        d when d in ["in", "out"] ->
+          Utils.opts_to_query([vertex: vertex_id, direction: d], [:vertex, :direction])
+
+        nil ->
+          Utils.opts_to_query([vertex: vertex_id], [:vertex])
+      end
 
     request(
       method: :get,

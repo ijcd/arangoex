@@ -3,49 +3,48 @@ defmodule Arango.Collection do
 
   use Arango.API, endpoint: :collection
 
-  defstruct [
-    id: nil,
-    name: nil,
-    journalSize: nil,
-    replicationFactor: 1,
-    keyOptions: nil,
-    waitForSync: false,
-    doCompact: true,
-    isVolatile: false,
-    shardKeys: ["_key"],
-    numberOfShards: 1,
-    isSystem: false,
-    type: 2,
-    indexBuckets: 16,
-    schema: nil,
-    computedValues: nil,
-    cacheEnabled: nil,
-  ]
+  defstruct id: nil,
+            name: nil,
+            journalSize: nil,
+            replicationFactor: 1,
+            keyOptions: nil,
+            waitForSync: false,
+            doCompact: true,
+            isVolatile: false,
+            shardKeys: ["_key"],
+            numberOfShards: 1,
+            isSystem: false,
+            type: 2,
+            indexBuckets: 16,
+            schema: nil,
+            computedValues: nil,
+            cacheEnabled: nil
+
   use ExConstructor
 
   @type t :: %__MODULE__{
-    id: nil | pos_integer(),
-    name: String.t,
-    journalSize: nil | pos_integer(),
-    replicationFactor: nil | pos_integer(),
-    keyOptions: %{
-      optional(:allowUserKeys) => boolean,
-      optional(:type) => String.t,
-      optional(:increment) => pos_integer(),
-      optional(:offset) => pos_integer(),
-    },
-    waitForSync: nil | boolean,
-    doCompact: nil | boolean,
-    isVolatile: nil | boolean,
-    shardKeys: [String.t],
-    numberOfShards: nil | pos_integer(),
-    isSystem: nil | boolean,
-    type: nil | 2 | 3,
-    indexBuckets: nil | pos_integer(),
-    schema: nil | map,
-    computedValues: nil | [map],
-    cacheEnabled: nil | boolean,
-  }
+          id: nil | pos_integer(),
+          name: String.t(),
+          journalSize: nil | pos_integer(),
+          replicationFactor: nil | pos_integer(),
+          keyOptions: %{
+            optional(:allowUserKeys) => boolean,
+            optional(:type) => String.t(),
+            optional(:increment) => pos_integer(),
+            optional(:offset) => pos_integer()
+          },
+          waitForSync: nil | boolean,
+          doCompact: nil | boolean,
+          isVolatile: nil | boolean,
+          shardKeys: [String.t()],
+          numberOfShards: nil | pos_integer(),
+          isSystem: nil | boolean,
+          type: nil | 2 | 3,
+          indexBuckets: nil | pos_integer(),
+          schema: nil | map,
+          computedValues: nil | [map],
+          cacheEnabled: nil | boolean
+        }
 
   @doc """
   Reads all collections
@@ -62,8 +61,9 @@ defmodule Arango.Collection do
 
   POST /_api/collection
   """
-  @spec create(t | String.t) :: Arango.ok_error(t)
+  @spec create(t | String.t()) :: Arango.ok_error(t)
   def create(name) when is_binary(name), do: create(%__MODULE__{name: name})
+
   def create(collection) do
     request(method: :post, path: "collection", body: collection, ok_decoder: __MODULE__.CollectionDecoder)
   end
@@ -178,7 +178,7 @@ defmodule Arango.Collection do
 
   PUT /_api/collection/{collection-name}/rename
   """
-  @spec rename(t, String.t) :: Arango.ok_error(map)
+  @spec rename(t, String.t()) :: Arango.ok_error(map)
   def rename(collection, new_name) do
     request(method: :put, path: "collection/#{collection.name}/rename", body: %{name: new_name})
   end
@@ -249,10 +249,13 @@ defmodule Arango.Collection do
   end
 
   defmodule CollectionDecoder do
+    @moduledoc false
     alias Arango.Collection
 
-    @spec decode_ok(Map.t) :: Arango.ok_error(Collection.t)
-    def decode_ok(%{"result" => result}) when is_list(result), do: {:ok, Enum.map(result, &Collection.new(&1))}
+    @spec decode_ok(map()) :: Arango.ok_error(Collection.t())
+    def decode_ok(%{"result" => result}) when is_list(result),
+      do: {:ok, Enum.map(result, &Collection.new(&1))}
+
     def decode_ok(result), do: {:ok, Collection.new(result)}
   end
 end

@@ -1,5 +1,4 @@
 defmodule Arango.Config do
-
   @moduledoc false
 
   # Generates the configuration for an endpoint.
@@ -15,7 +14,7 @@ defmodule Arango.Config do
     :host
   ]
 
-  @type t :: %{} | Keyword.t
+  @type t :: %{} | Keyword.t()
 
   @doc """
   Builds a complete set of config for an operation.
@@ -35,8 +34,8 @@ defmodule Arango.Config do
 
   def build_base(endpoint, overrides \\ %{}) do
     defaults = Arango.Config.Defaults.get(endpoint)
-    common_config = Application.get_all_env(:arango) |> Map.new |> Map.take(@common_config)
-    endpoint_config = Application.get_env(:arango, endpoint, []) |> Map.new
+    common_config = Application.get_all_env(:arango) |> Map.new() |> Map.take(@common_config)
+    endpoint_config = Application.get_env(:arango, endpoint, []) |> Map.new()
 
     defaults
     |> Map.merge(common_config)
@@ -48,10 +47,13 @@ defmodule Arango.Config do
     Enum.reduce(config, config, fn
       {:host, host}, config ->
         Map.put(config, :host, retrieve_runtime_value(host, config))
+
       {:retries, retries}, config ->
         Map.put(config, :retries, retries)
+
       {:http_opts, http_opts}, config ->
         Map.put(config, :http_opts, http_opts)
+
       {k, v}, config ->
         case retrieve_runtime_value(v, config) do
           %{} = result -> Map.merge(config, result)
@@ -63,11 +65,13 @@ defmodule Arango.Config do
   def retrieve_runtime_value({:system, env_key}, _) do
     System.get_env(env_key)
   end
+
   def retrieve_runtime_value(values, config) when is_list(values) do
     values
     |> Stream.map(&retrieve_runtime_value(&1, config))
-    |> Enum.find(&(&1))
+    |> Enum.find(& &1)
   end
+
   def retrieve_runtime_value(value, _), do: value
 
   defmodule Defaults do
@@ -79,12 +83,10 @@ defmodule Arango.Config do
       scheme: "http",
       host: "localhost",
       port: 8529,
-
       username: nil,
       password: nil,
       use_auth: :basic,
-
-      headers: %{"Accept" => "*/*"},
+      headers: %{"Accept" => "*/*"}
 
       # # TODO: use these
       # retries: [
@@ -109,7 +111,7 @@ defmodule Arango.Config do
       task: %{},
       transaction: %{},
       user: %{},
-      wal: %{},
+      wal: %{}
     }
 
     @doc """

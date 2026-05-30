@@ -18,7 +18,12 @@ defmodule Arango.Mixfile do
       name: "Arango",
       source_url: @source_url,
       package: package(),
-      dialyzer: [flags: "--fullpath"],
+      aliases: aliases(),
+      dialyzer: [
+        plt_local_path: "priv/plts/project.plt",
+        plt_core_path: "priv/plts/core.plt",
+        ignore_warnings: ".dialyzer_ignore.exs"
+      ],
       docs: [
         main: "readme",
         source_ref: "v#{@version}",
@@ -47,7 +52,7 @@ defmodule Arango.Mixfile do
       {:mix_test_watch, "~> 1.0", only: :dev},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end
 
@@ -58,6 +63,19 @@ defmodule Arango.Mixfile do
       maintainers: ["Ian Duggan"],
       licenses: ["Apache-2.0"],
       links: %{GitHub: @source_url}
+    ]
+  end
+
+  # `mix verify` runs every static gate the CI workflow runs except the
+  # integration tests (which require ArangoDB). Useful before pushing.
+  defp aliases do
+    [
+      verify: [
+        "format --check-formatted",
+        "compile --warnings-as-errors",
+        "credo",
+        "dialyzer"
+      ]
     ]
   end
 end
