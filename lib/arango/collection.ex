@@ -17,6 +17,9 @@ defmodule Arango.Collection do
     isSystem: false,
     type: 2,
     indexBuckets: 16,
+    schema: nil,
+    computedValues: nil,
+    cacheEnabled: nil,
   ]
   use ExConstructor
 
@@ -39,6 +42,9 @@ defmodule Arango.Collection do
     isSystem: nil | boolean,
     type: nil | 2 | 3,
     indexBuckets: nil | pos_integer(),
+    schema: nil | map,
+    computedValues: nil | [map],
+    cacheEnabled: nil | boolean,
   }
 
   @doc """
@@ -151,7 +157,14 @@ defmodule Arango.Collection do
   """
   @spec set_properties(t, keyword) :: Arango.ok_error(map)
   def set_properties(collection, opts \\ []) do
-    properties = Utils.opts_to_vars(opts, [:waitForSync, :journalSize])
+    properties =
+      Utils.opts_to_vars(opts, [
+        :waitForSync,
+        :journalSize,
+        :cacheEnabled,
+        :schema,
+        :computedValues
+      ])
 
     request(
       method: :put,
@@ -198,6 +211,41 @@ defmodule Arango.Collection do
   @spec truncate(t) :: Arango.ok_error(map)
   def truncate(collection) do
     request(method: :put, path: "collection/#{collection.name}/truncate")
+  end
+
+  @doc """
+  Compact a collection (3.12)
+
+  PUT /_api/collection/{collection-name}/compact
+  """
+  @spec compact(t) :: Arango.ok_error(map)
+  def compact(collection) do
+    request(method: :put, path: "collection/#{collection.name}/compact")
+  end
+
+  @doc """
+  Return shards for a collection (cluster mode only).
+
+  GET /_api/collection/{collection-name}/shards
+
+  Returns 400 on single-server deployments.
+  """
+  @spec shards(t) :: Arango.ok_error(map)
+  def shards(collection) do
+    request(method: :get, path: "collection/#{collection.name}/shards")
+  end
+
+  @doc """
+  Return the shard responsible for a document (cluster mode only).
+
+  PUT /_api/collection/{collection-name}/responsibleShard
+
+  `document` must include the collection's shard-key fields. Returns
+  400 on single-server deployments.
+  """
+  @spec responsible_shard(t, map) :: Arango.ok_error(map)
+  def responsible_shard(collection, document) do
+    request(method: :put, path: "collection/#{collection.name}/responsibleShard", body: document)
   end
 
   defmodule CollectionDecoder do

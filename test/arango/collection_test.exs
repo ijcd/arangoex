@@ -148,4 +148,75 @@ defmodule CollectionTest do
 
     assert %{"name" => ^coll_name, "error" => false} = truncate
   end
+
+  # === Phase 4 additions ===
+
+  test "create/2 with schema rejects invalid documents", ctx do
+    schema = %{
+      "rule" => %{
+        "type" => "object",
+        "properties" => %{"name" => %{"type" => "string"}},
+        "required" => ["name"]
+      },
+      "level" => "strict",
+      "message" => "name is required"
+    }
+
+    {:ok, _} =
+      Collection.create(%Collection{name: "validated", schema: schema}) |> on_db(ctx)
+
+    c = %Collection{name: "validated"}
+    {:ok, _} = Document.create(c, %{"name" => "Alice"}) |> on_db(ctx)
+    assert {:error, %{"code" => 400}} = Document.create(c, %{}) |> on_db(ctx)
+  end
+
+  test "create/2 with computedValues echoes the definition in properties", ctx do
+    computed = [
+      %{
+        "name" => "x2",
+        "expression" => "RETURN @doc.x * 2",
+        "computeOn" => ["insert"],
+        "overwrite" => true
+      }
+    ]
+
+    {:ok, _} =
+      Collection.create(%Collection{name: "with_cv", computedValues: computed})
+      |> on_db(ctx)
+
+    {:ok, props} = Collection.properties(%Collection{name: "with_cv"}) |> on_db(ctx)
+    assert is_list(props["computedValues"])
+    assert hd(props["computedValues"])["name"] == "x2"
+  end
+
+  test "create/2 with cacheEnabled echoes the flag in properties", ctx do
+    {:ok, _} =
+      Collection.create(%Collection{name: "cached", cacheEnabled: true}) |> on_db(ctx)
+
+    {:ok, props} = Collection.properties(%Collection{name: "cached"}) |> on_db(ctx)
+    assert props["cacheEnabled"] == true
+  end
+
+  test "set_properties/2 toggles cacheEnabled", ctx do
+    {:ok, _} = Collection.set_properties(ctx.coll, cacheEnabled: true) |> on_db(ctx)
+    {:ok, props} = Collection.properties(ctx.coll) |> on_db(ctx)
+    assert props["cacheEnabled"] == true
+  end
+
+  test "compact/1 succeeds on a populated collection", ctx do
+    for i <- 1..100, do: {:ok, _} = Document.create(ctx.coll, %{"i" => i}) |> on_db(ctx)
+    assert {:ok, _} = Collection.compact(ctx.coll) |> on_db(ctx)
+  end
+
+  @tag :skip
+  # Cluster-only: single-server ArangoDB returns 400. Run against a cluster
+  # deployment to verify.
+  test "shards/1 returns the shard list in cluster mode", ctx do
+    assert {:ok, _} = Collection.shards(ctx.coll) |> on_db(ctx)
+  end
+
+  @tag :skip
+  test "responsible_shard/2 returns the shard id for a document", ctx do
+    assert {:ok, _} = Collection.responsible_shard(ctx.coll, %{"_key" => "any"}) |> on_db(ctx)
+  end
 end
