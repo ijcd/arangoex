@@ -233,6 +233,80 @@ defmodule IndexTest do
     } = Index.create_skiplist(ctx.coll.name, ["foo", "bar", "bang"], unique: true, sparse: true) |> on_db(ctx)
   end
 
+  test "Create inverted index", ctx do
+    assert {
+      :ok, %{
+        "code" => 201,
+        "error" => false,
+        "type" => "inverted",
+        "id" => _,
+        "isNewlyCreated" => true,
+      }
+    } = Index.create_inverted(ctx.coll.name, ["foo", "bar"]) |> on_db(ctx)
+  end
+
+  test "Create TTL index", ctx do
+    assert {
+      :ok, %{
+        "code" => 201,
+        "error" => false,
+        "type" => "ttl",
+        "fields" => ["createdAt"],
+        "expireAfter" => 3600,
+        "id" => _,
+        "isNewlyCreated" => true,
+      }
+    } = Index.create_ttl(ctx.coll.name, "createdAt", 3600) |> on_db(ctx)
+  end
+
+  test "Create MDI index", ctx do
+    assert {
+      :ok, %{
+        "code" => 201,
+        "error" => false,
+        "type" => "mdi",
+        "fields" => ["x", "y"],
+        "fieldValueTypes" => "double",
+        "id" => _,
+        "isNewlyCreated" => true,
+      }
+    } = Index.create_mdi(ctx.coll.name, ["x", "y"], "double") |> on_db(ctx)
+  end
+
+  @tag :skip
+  # Vector indexes require a build with vector support enabled AND training
+  # data inserted before index creation. Documented for completeness; run
+  # against an enabled deployment to verify.
+  test "Create vector index", ctx do
+    assert {
+      :ok, %{
+        "code" => 201,
+        "error" => false,
+        "type" => "vector",
+        "fields" => ["embedding"],
+        "id" => _,
+        "isNewlyCreated" => true,
+      }
+    } = Index.create_vector(ctx.coll.name, "embedding", %{
+      "metric" => "l2",
+      "dimension" => 4,
+      "nLists" => 1
+    }) |> on_db(ctx)
+  end
+
+  test "indexes/1 lists created custom index types", ctx do
+    {:ok, _} = Index.create_inverted(ctx.coll.name, ["a"]) |> on_db(ctx)
+    {:ok, _} = Index.create_ttl(ctx.coll.name, "t", 60) |> on_db(ctx)
+    {:ok, _} = Index.create_mdi(ctx.coll.name, ["x", "y"], "double") |> on_db(ctx)
+
+    {:ok, %{"indexes" => indexes}} = Index.indexes(ctx.coll.name) |> on_db(ctx)
+    types = Enum.map(indexes, & &1["type"])
+    assert "inverted" in types
+    assert "ttl" in types
+    assert "mdi" in types
+    assert "primary" in types
+  end
+
   test "Delete index", ctx do
     {:ok, %{"id" => id}} = Index.create_fulltext(ctx.coll.name, "foo") |> on_db(ctx)
 

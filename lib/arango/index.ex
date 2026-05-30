@@ -124,6 +124,90 @@ defmodule Arango.Index do
   end
 
   @doc """
+  Create inverted index (ArangoSearch)
+
+  POST /_api/index#inverted
+
+  `fields` is a list of either bare field names (`["foo", "bar"]`) or
+  per-field option maps (`[%{"name" => "foo", "analyzer" => "text_en"}]`).
+  """
+  @spec create_inverted(String.t, [String.t | map], keyword) :: Arango.ok_error(map)
+  def create_inverted(collection_name, fields, opts \\ []) when is_list(fields) do
+    query = Utils.opts_to_query([collection: collection_name], [:collection])
+    body =
+      opts
+      |> Utils.opts_to_vars([
+        :name, :analyzer, :features, :includeAllFields, :searchField,
+        :trackListPositions, :parallelism, :consolidationIntervalMsec,
+        :commitIntervalMsec, :cleanupIntervalStep, :primarySort,
+        :storedValues, :inBackground, :cache, :primaryKeyCache,
+        :optimizeTopK, :writebufferActive, :writebufferIdle,
+        :writebufferSizeMax, :consolidationPolicy
+      ])
+      |> Map.merge(%{"type" => "inverted", "fields" => fields})
+
+    request(method: :post, path: "index/", query: query, body: body)
+  end
+
+  @doc """
+  Create TTL (time-to-live) index
+
+  POST /_api/index#ttl
+
+  `expire_after` is in seconds. Documents whose `field` is more than
+  `expire_after` seconds older than now become eligible for removal.
+  """
+  @spec create_ttl(String.t, String.t, integer, keyword) :: Arango.ok_error(map)
+  def create_ttl(collection_name, field, expire_after, opts \\ []) do
+    query = Utils.opts_to_query([collection: collection_name], [:collection])
+    body =
+      opts
+      |> Utils.opts_to_vars([:name, :inBackground])
+      |> Map.merge(%{"type" => "ttl", "fields" => [field], "expireAfter" => expire_after})
+
+    request(method: :post, path: "index/", query: query, body: body)
+  end
+
+  @doc """
+  Create multi-dimensional index (replaces zkd in 3.12)
+
+  POST /_api/index#mdi
+
+  `field_value_types` is currently only `"double"`.
+  """
+  @spec create_mdi(String.t, [String.t], String.t, keyword) :: Arango.ok_error(map)
+  def create_mdi(collection_name, fields, field_value_types, opts \\ []) when is_list(fields) do
+    query = Utils.opts_to_query([collection: collection_name], [:collection])
+    body =
+      opts
+      |> Utils.opts_to_vars([:name, :unique, :sparse, :storedValues, :inBackground, :estimates, :prefixFields])
+      |> Map.merge(%{"type" => "mdi", "fields" => fields, "fieldValueTypes" => field_value_types})
+
+    request(method: :post, path: "index/", query: query, body: body)
+  end
+
+  @doc """
+  Create vector index
+
+  POST /_api/index#vector
+
+  `params` is a required map; ArangoDB requires `metric` (`"l2"` or
+  `"cosine"`), `dimension` (positive integer), and `nLists` (positive integer).
+  Requires a build with vector index support and sufficient training data
+  in the collection before creation.
+  """
+  @spec create_vector(String.t, String.t, map, keyword) :: Arango.ok_error(map)
+  def create_vector(collection_name, field, params, opts \\ []) do
+    query = Utils.opts_to_query([collection: collection_name], [:collection])
+    body =
+      opts
+      |> Utils.opts_to_vars([:name, :inBackground, :storedValues, :parallelism, :sparse])
+      |> Map.merge(%{"type" => "vector", "fields" => [field], "params" => params})
+
+    request(method: :post, path: "index/", query: query, body: body)
+  end
+
+  @doc """
   Delete index
 
   DELETE /_api/index/{index-handle}
