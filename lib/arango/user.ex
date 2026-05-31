@@ -176,6 +176,92 @@ defmodule Arango.User do
     )
   end
 
+  @doc """
+  Grant collection-level access.
+
+  PUT /_api/user/{user}/database/{dbname}/{collection}
+
+  `level` is `"rw" | "ro" | "none"` and defaults to `"rw"` to match
+  `grant/2`. Use `revoke/3` (DELETE) to remove the collection-level
+  override entirely so the user falls back to the database-level grant.
+  """
+  @spec grant(t() | String.t(), String.t(), String.t(), String.t()) :: Arango.Request.t()
+  def grant(user, database_name, collection, level \\ "rw")
+
+  def grant(%__MODULE__{user: user_name}, database_name, collection, level),
+    do: grant(user_name, database_name, collection, level)
+
+  def grant(user_name, database_name, collection, level) when is_binary(user_name) do
+    request(
+      method: :put,
+      system_only: true,
+      path: "user/#{user_name}/database/#{database_name}/#{collection}",
+      body: %{grant: level}
+    )
+  end
+
+  @doc """
+  Revoke a collection-level grant. Removes the override entirely;
+  effective permission falls back to the database-level default.
+
+  DELETE /_api/user/{user}/database/{dbname}/{collection}
+  """
+  @spec revoke(t() | String.t(), String.t(), String.t()) :: Arango.Request.t()
+  def revoke(%__MODULE__{user: user_name}, database_name, collection),
+    do: revoke(user_name, database_name, collection)
+
+  def revoke(user_name, database_name, collection) when is_binary(user_name) do
+    request(
+      method: :delete,
+      system_only: true,
+      path: "user/#{user_name}/database/#{database_name}/#{collection}"
+    )
+  end
+
+  @doc """
+  List a user's database permissions.
+
+  GET /_api/user/{user}/database
+
+  Alias for `databases/1` under the permissions/permission family.
+  """
+  @spec permissions(t() | String.t()) :: Arango.Request.t()
+  def permissions(user), do: databases(user)
+
+  @doc """
+  Effective database-level permission for a user.
+
+  GET /_api/user/{user}/database/{dbname}
+  """
+  @spec permissions(t() | String.t(), String.t()) :: Arango.Request.t()
+  def permissions(%__MODULE__{user: user_name}, database_name),
+    do: permissions(user_name, database_name)
+
+  def permissions(user_name, database_name) when is_binary(user_name) do
+    request(
+      method: :get,
+      system_only: true,
+      path: "user/#{user_name}/database/#{database_name}"
+    )
+  end
+
+  @doc """
+  Effective collection-level permission for a user.
+
+  GET /_api/user/{user}/database/{dbname}/{collection}
+  """
+  @spec permission(t() | String.t(), String.t(), String.t()) :: Arango.Request.t()
+  def permission(%__MODULE__{user: user_name}, database_name, collection),
+    do: permission(user_name, database_name, collection)
+
+  def permission(user_name, database_name, collection) when is_binary(user_name) do
+    request(
+      method: :get,
+      system_only: true,
+      path: "user/#{user_name}/database/#{database_name}/#{collection}"
+    )
+  end
+
   defmodule UserDecoder do
     @moduledoc false
     alias Arango.User
