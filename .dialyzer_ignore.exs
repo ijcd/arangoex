@@ -31,5 +31,6 @@
   {"lib/arango/transaction.ex", :invalid_contract},
   {"lib/arango/user.ex", :invalid_contract},
   {"lib/arango/utils.ex", :invalid_contract},
+  {"lib/arango/view.ex", :invalid_contract},
   {"lib/arango/wal.ex", :invalid_contract}
 ]

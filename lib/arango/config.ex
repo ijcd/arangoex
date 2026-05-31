@@ -111,6 +111,7 @@ defmodule Arango.Config do
       task: %{},
       transaction: %{},
       user: %{},
+      view: %{},
       wal: %{}
     }
 
