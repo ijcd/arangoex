@@ -110,39 +110,18 @@ defmodule AdministrationTest do
     assert is_list(timestamp)
   end
 
-  @tag :skip
-  # times out
-  test "returns long_echo" do
-    assert {
-             :ok,
-             %{
-               "client" => _,
-               "cookies" => %{},
-               "database" => "_system",
-               "headers" => %{
-                 "accept" => "*/*",
-                 "authorization" => _,
-                 "content-length" => "0",
-                 "host" => _,
-                 "user-agent" => _,
-                 "my-header" => "3",
-                 "your-header" => "4"
-               },
-               "internals" => %{},
-               "parameters" => %{"bar" => "2", "foo" => "1"},
-               "path" => "/",
-               "prefix" => "/",
-               "protocol" => "http",
-               "rawRequestBody" => [],
-               "requestType" => "GET",
-               "server" => _,
-               "suffix" => [],
-               "url" => "/_admin/long_echo?bar=2&foo=1",
-               "user" => "root"
-             }
-           } =
-             Administration.long_echo(%{"foo" => 1, "bar" => 2}, %{"myHeader" => 3, "yourHeader" => 4})
-             |> arango()
+  test "long_echo/2 builds a GET with query + headers from the opts" do
+    # Calling the endpoint hangs (it's a long-poll); assert the request shape.
+    op =
+      Administration.long_echo(
+        %{"foo" => 1, "bar" => 2},
+        %{"myHeader" => 3, "yourHeader" => 4}
+      )
+
+    assert op.http_method == :get
+    assert op.path == "/_admin/long_echo"
+    assert op.query == %{"bar" => 2, "foo" => 1}
+    assert op.headers == %{"My-Header" => 3, "Your-Header" => 4}
   end
 
   test "reloads routing" do
@@ -167,15 +146,6 @@ defmodule AdministrationTest do
     #   :ok, "OK"
     # } == Administration.shutdown() |> arango()
     assert {ctx, "It's hard to test this since it shuts down the server..."}
-  end
-
-  @tag :skip
-  # sleep endpoint was removed in ArangoDB 3.12
-  test "sleep" do
-    assert {
-             :ok,
-             %{"code" => 200, "duration" => 0.1, "error" => false}
-           } = Administration.sleep(duration: 0.1) |> arango()
   end
 
   test "statistics" do
@@ -254,20 +224,6 @@ defmodule AdministrationTest do
     end
   end
 
-  @tag :skip
-  # test endpoint was removed in ArangoDB 3.12
-  test "runs tests on the server" do
-    assert {
-             :error,
-             %{
-               "code" => 400,
-               "error" => true,
-               "errorNum" => 400,
-               "errorMessage" => "expected attribute 'tests' is missing"
-             }
-           } == Administration.test() |> arango()
-  end
-
   test "returns the system time" do
     assert {
              :ok,
@@ -336,12 +292,14 @@ defmodule AdministrationTest do
     assert is_list(messages)
   end
 
-  @tag :skip
-  # /_admin/compact requires JWT-authenticated *superuser*; basic-auth root
-  # gets 403 "compaction is only allowed for superusers". Run against a JWT
-  # session to verify.
-  test "compact/1 succeeds on a fresh database" do
-    assert {:ok, _} = Administration.compact() |> arango()
+  test "compact/1 builds a PUT with the requested compaction options" do
+    # /_admin/compact requires a JWT-authenticated superuser; basic-auth
+    # root gets 403. Asserting the request shape, which is what the
+    # wrapper actually produces.
+    op = Administration.compact(changeLevel: true, compactBottomMostLevel: false)
+    assert op.http_method == :put
+    assert op.path == "/_admin/compact"
+    assert op.body == %{"changeLevel" => true, "compactBottomMostLevel" => false}
   end
 
   # Pure body-shape tests for state-changing endpoints (avoid touching

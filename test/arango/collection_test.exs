@@ -4,7 +4,6 @@ defmodule CollectionTest do
 
   alias Arango.Collection
   alias Arango.Document
-  alias Arango.Wal
 
   test "lists collections" do
     {:ok, collections} = Collection.collections() |> arango(database_name: "_system")
@@ -135,16 +134,6 @@ defmodule CollectionTest do
     assert Map.has_key?(revision, "revision")
   end
 
-  @tag :skip
-  # rotate was removed in ArangoDB 3.12
-  test "rotates a collection journal", ctx do
-    {:ok, _} = Document.create(ctx.coll, %{name: "RotateMe"}) |> on_db(ctx)
-    {:ok, _} = Wal.flush(waitForSync: true, waitForCollector: true) |> on_db(ctx)
-
-    assert {:ok, %{"result" => true, "error" => false, "code" => 200}} =
-             Collection.rotate(ctx.coll) |> on_db(ctx)
-  end
-
   test "truncates a collection", ctx do
     coll_name = ctx.coll.name
     {:ok, truncate} = Collection.truncate(ctx.coll) |> on_db(ctx)
@@ -211,15 +200,18 @@ defmodule CollectionTest do
     assert {:ok, _} = Collection.compact(ctx.coll) |> on_db(ctx)
   end
 
-  @tag :skip
-  # Cluster-only: single-server ArangoDB returns 400. Run against a cluster
-  # deployment to verify.
-  test "shards/1 returns the shard list in cluster mode", ctx do
-    assert {:ok, _} = Collection.shards(ctx.coll) |> on_db(ctx)
+  test "shards/1 builds a GET on the shards endpoint" do
+    # Server-side behavior is cluster-only (single-server returns 400);
+    # assert the wrapper produces the right request.
+    op = Collection.shards(%Collection{name: "foo"})
+    assert op.http_method == :get
+    assert op.path == "collection/foo/shards"
   end
 
-  @tag :skip
-  test "responsible_shard/2 returns the shard id for a document", ctx do
-    assert {:ok, _} = Collection.responsible_shard(ctx.coll, %{"_key" => "any"}) |> on_db(ctx)
+  test "responsible_shard/2 builds a PUT with the document as body" do
+    op = Collection.responsible_shard(%Collection{name: "foo"}, %{"_key" => "abc"})
+    assert op.http_method == :put
+    assert op.path == "collection/foo/responsibleShard"
+    assert op.body == %{"_key" => "abc"}
   end
 end

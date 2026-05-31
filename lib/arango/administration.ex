@@ -107,22 +107,6 @@ defmodule Arango.Administration do
   end
 
   @doc """
-  Sleep for a specified amount of seconds
-
-  GET /_admin/sleep
-  """
-  @spec sleep(keyword) :: Arango.ok_error(map)
-  def sleep(opts \\ []) do
-    query = Utils.opts_to_query(opts, [:duration])
-
-    request(
-      method: :get,
-      path: "/_admin/sleep",
-      query: query
-    )
-  end
-
-  @doc """
   Read the statistics
 
   GET /_admin/statistics
@@ -142,16 +126,6 @@ defmodule Arango.Administration do
   @spec statistics_description() :: Arango.ok_error(map)
   def statistics_description() do
     request(method: :get, path: "/_admin/statistics-description")
-  end
-
-  @doc """
-  Runs tests on server
-
-  POST /_admin/test
-  """
-  @spec test() :: Arango.ok_error(map)
-  def test() do
-    request(method: :post, path: "/_admin/test")
   end
 
   @doc """

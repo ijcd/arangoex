@@ -966,56 +966,24 @@ defmodule SimpleTest do
     # } = Simple.within(ctx.coll, 0, 0, 250_000, geo: id2)
   end
 
-  @tag :skip
-  test "Within rectangle query", ctx do
-    {:ok, _} = Document.create(ctx.coll, %{"lat" => 0, "long" => 0, "lat2" => 4, "long2" => 8}) |> on_db(ctx)
-    {:ok, _} = Document.create(ctx.coll, %{"lat" => 1, "long" => 2, "lat2" => 3, "long2" => 6}) |> on_db(ctx)
-    {:ok, _} = Document.create(ctx.coll, %{"lat" => 2, "long" => 4, "lat2" => 2, "long2" => 4}) |> on_db(ctx)
-    {:ok, _} = Document.create(ctx.coll, %{"lat" => 3, "long" => 6, "lat2" => 1, "long2" => 2}) |> on_db(ctx)
-    {:ok, _} = Document.create(ctx.coll, %{"lat" => 4, "long" => 8, "lat2" => 0, "long2" => 0}) |> on_db(ctx)
-    {:ok, %{"id" => _id1}} = Index.create_geo(ctx.coll.name, ["lat", "long"]) |> on_db(ctx)
-    {:ok, %{"id" => _id2}} = Index.create_geo(ctx.coll.name, ["lat2", "long2"]) |> on_db(ctx)
+  test "within_rectangle/6 builds a PUT with collection + corners in the body" do
+    # Pre-existing :skip for a flaky integration test; Simple module is
+    # @deprecated and will be removed at v1/4.0. Pure body-shape asserts
+    # the wrapper produces the right request.
+    coll = %Arango.Collection{name: "places"}
+    op = Simple.within_rectangle(coll, 1.0, 2.0, 3.0, 4.0, skip: 5, limit: 10)
 
-    assert {
-             :ok,
-             %{
-               "code" => 201,
-               "count" => 2,
-               "error" => false,
-               "hasMore" => false,
-               "result" => [
-                 %{"_id" => _, "_key" => _, "_rev" => _, "lat" => 1, "long" => 2},
-                 %{"_id" => _, "_key" => _, "_rev" => _, "lat" => 0, "long" => 0}
-               ]
-             }
-           } = Simple.within_rectangle(ctx.coll, 0, 0, 3, 3) |> on_db(ctx)
+    assert op.http_method == :put
+    assert op.path == "simple/within-rectangle"
 
-    assert {
-             :ok,
-             %{
-               "code" => 201,
-               "count" => 2,
-               "error" => false,
-               "hasMore" => false,
-               "result" => [
-                 %{"_id" => _, "_key" => _, "_rev" => _, "lat" => 2, "long" => 4},
-                 %{"_id" => _, "_key" => _, "_rev" => _, "lat" => 1, "long" => 2}
-               ]
-             }
-           } = Simple.within_rectangle(ctx.coll, 0, 0, 10, 10, skip: 2, limit: 2) |> on_db(ctx)
-
-    # This seems to be broken...
-    # assert {
-    #   :ok, %{
-    #     "code" => 201,
-    #     "count" => 2,
-    #     "error" => false,
-    #     "hasMore" => false,
-    #     "result" => [
-    #       %{"_id" => _, "_key" => _, "_rev" => _, "lat2" => 0, "long2" => 0},
-    #       %{"_id" => _, "_key" => _, "_rev" => _, "lat2" => 1, "long2" => 2},
-    #     ]
-    #   }
-    # } = Simple.within_rectangle(ctx.coll, 0, 0, 250_000, geo: id2)
+    assert op.body == %{
+             "collection" => "places",
+             "latitude1" => 1.0,
+             "longitude1" => 2.0,
+             "latitude2" => 3.0,
+             "longitude2" => 4.0,
+             "skip" => 5,
+             "limit" => 10
+           }
   end
 end

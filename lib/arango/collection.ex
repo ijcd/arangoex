@@ -194,16 +194,6 @@ defmodule Arango.Collection do
   end
 
   @doc """
-  Rotate journal of a collection
-
-  PUT /_api/collection/{collection-name}/rotate
-  """
-  @spec rotate(t) :: Arango.ok_error(map)
-  def rotate(collection) do
-    request(method: :put, path: "collection/#{collection.name}/rotate")
-  end
-
-  @doc """
   Truncate collection
 
   PUT /_api/collection/{collection-name}/truncate
