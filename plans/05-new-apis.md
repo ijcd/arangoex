@@ -66,7 +66,7 @@ Spec endpoints (8):
 - `properties/1 returns full block` — assert `consolidationIntervalMsec` numeric.
 - `update_properties/2 patches arangosearch view` — round-trip assertion.
 - `replace_properties/2 replaces an arangosearch view` — set links, replace with empty, assert empty.
-- `rename/2 renames in single-server (skip on 501 in cluster)` — tag/skip on 501.
+- `rename/2 renames the view (or surfaces 501 on cluster)` — `:skip` is banned (see #18); assert on the response shape. Accept either `{:ok, %{"name" => new_name}}` (single-server) or `{:error, %{"code" => 501}}` (cluster). Alternative: pure body-shape test asserting the request struct, leaving server-side coverage to whichever deployment runs CI.
 - `drop/1 removes a view` — subsequent `view/1` returns 404.
 
 ---
@@ -216,8 +216,9 @@ Auto-refresh on 401 is **Phase 6**. This PR ships the explicit call only — use
 ### Tests
 - `login/2 returns a JWT for valid credentials` — assert string starts with `eyJ` (JWS prefix).
 - `login/2 with bad password returns 401` — error tuple.
-- `login/1 with an access token returns JWT` — depends on Token PR landed; if not, skip with TODO note.
 - Integration: login, then use jwt to call `Arango.Database.databases/0` via `use_auth: :bearer` — assert ok.
+
+Note: the access-token variant (`login/1 with an access token returns JWT`) lives in the **Token PR**, not here — adding it to the Auth PR would either force a skip or require Token to land first. Keep Auth runnable standalone.
 
 ---
 
@@ -303,6 +304,6 @@ Coverage: ~150 endpoints of ~155 in-demand v0 endpoints (~97%). Remaining ~80 en
 - Import: NDJSON vs JSON-array — separate funs or one `format:` opt? Prop: separate funs.
 - Import content-type override: confirm `Tesla.Middleware.Headers` is overridable per-call before committing. Spike inside Import PR.
 - Naming: `Arango.Transaction.Stream` (nested) vs `Arango.StreamTransaction` (flat)? Prop: nested.
-- View rename in cluster: `:skip` tag or runtime cluster detection? Prop: catch 501, skip with clear message.
+- View rename in cluster: how does the test handle the cluster-only 501? `:skip` is banned (#18). Prop: assert the response matches `{:ok, _}` OR `{:error, %{"code" => 501}}` — both are valid outcomes, the wrapper is correct either way. Same pattern as the Phase 4 body-shape conversions.
 - 3.a + 3.b as two PRs or one? Prop: two — keeps Cursor/Document churn separable from new module.
 - Auth boundary: should `login/2` flip the request layer's bearer mode automatically, or return JWT only? Prop: return only; flipping is Phase 6.
