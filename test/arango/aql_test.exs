@@ -311,4 +311,24 @@ defmodule AqlTest do
     assert {:error, %{"error" => true, "errorNum" => 1591}} =
              Aql.kill_query("somequery") |> on_db(ctx)
   end
+
+  # === Phase 4 additions ===
+
+  test "query_rules/0 lists optimizer rules", ctx do
+    assert {:ok, rules} = Aql.query_rules() |> on_db(ctx)
+    assert is_list(rules)
+    refute Enum.empty?(rules)
+    assert is_binary(hd(rules)["name"])
+    assert is_map(hd(rules)["flags"])
+  end
+
+  test "clear_plan_cache/0 succeeds", ctx do
+    assert {:ok, %{"code" => 200, "error" => false}} =
+             Aql.clear_plan_cache() |> on_db(ctx)
+  end
+
+  test "plan_cache_entries/0 returns a list", ctx do
+    assert {:ok, entries} = Aql.plan_cache_entries() |> on_db(ctx)
+    assert is_list(entries)
+  end
 end

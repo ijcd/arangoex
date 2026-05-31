@@ -291,4 +291,34 @@ defmodule Arango.Aql do
       path: "query/#{query_id}"
     )
   end
+
+  @doc """
+  List available AQL optimizer rules and their default state.
+
+  GET /_api/query/rules
+  """
+  @spec query_rules() :: Arango.Request.t()
+  def query_rules() do
+    request(method: :get, path: "query/rules")
+  end
+
+  @doc """
+  Clear the AQL query plan cache.
+
+  DELETE /_api/query-plan-cache
+  """
+  @spec clear_plan_cache() :: Arango.Request.t()
+  def clear_plan_cache() do
+    request(method: :delete, path: "query-plan-cache")
+  end
+
+  @doc """
+  List entries in the AQL query plan cache.
+
+  GET /_api/query-plan-cache
+  """
+  @spec plan_cache_entries() :: Arango.Request.t()
+  def plan_cache_entries() do
+    request(method: :get, path: "query-plan-cache")
+  end
 end
