@@ -175,6 +175,21 @@ defmodule Arango.Request do
     end)
   end
 
+  # On non-JSON 2xx responses the fallback depends on what the body
+  # actually carries:
+  #   - empty body (HEAD requests) → surface response headers so callers
+  #     like Document.header can read the etag.
+  #   - non-empty non-JSON body (NDJSON from Wal.tail, raw text without
+  #     Content-Type) → pass through unchanged.
+  defp decode_json_or_fallback(body, headers) do
+    {:ok, Jason.decode!(body)}
+  rescue
+    _ -> {:ok, fallback_body(body, headers)}
+  end
+
+  defp fallback_body(body, headers) when body in [nil, ""], do: decode_headers(headers)
+  defp fallback_body(body, _headers), do: body
+
   defp decode_headers(headers) do
     case List.keyfind(headers, "etag", 0) do
       {"etag", etag} ->
@@ -199,15 +214,7 @@ defmodule Arango.Request do
     case response do
       {:ok, %ApiConn.Response{status: status, headers: headers, body: body}}
       when status >= 200 and status < 300 ->
-        if text_content_type?(headers) do
-          {:ok, body}
-        else
-          try do
-            {:ok, Jason.decode!(body)}
-          rescue
-            _ -> {:ok, decode_headers(headers)}
-          end
-        end
+        if text_content_type?(headers), do: {:ok, body}, else: decode_json_or_fallback(body, headers)
 
       {:ok, %ApiConn.Response{status: status, headers: headers, body: body}} ->
         try do
