@@ -323,7 +323,8 @@ defmodule AqlTest do
   end
 
   test "clear_plan_cache/0 succeeds", ctx do
-    assert {:ok, _} = Aql.clear_plan_cache() |> on_db(ctx)
+    assert {:ok, %{"code" => 200, "error" => false}} =
+             Aql.clear_plan_cache() |> on_db(ctx)
   end
 
   test "plan_cache_entries/0 returns a list", ctx do
