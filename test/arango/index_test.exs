@@ -309,28 +309,18 @@ defmodule IndexTest do
            } = Index.create_mdi(ctx.coll.name, ["x", "y"], "double") |> on_db(ctx)
   end
 
-  @tag :skip
-  # Vector indexes require a build with vector support enabled AND training
-  # data inserted before index creation. Documented for completeness; run
-  # against an enabled deployment to verify.
-  test "Create vector index", ctx do
-    assert {
-             :ok,
-             %{
-               "code" => 201,
-               "error" => false,
-               "type" => "vector",
-               "fields" => ["embedding"],
-               "id" => _,
-               "isNewlyCreated" => true
-             }
-           } =
-             Index.create_vector(ctx.coll.name, "embedding", %{
-               "metric" => "l2",
-               "dimension" => 4,
-               "nLists" => 1
-             })
-             |> on_db(ctx)
+  test "create_vector/4 builds a POST with vector type and required params" do
+    # Server-side creation needs a build with vector support and training
+    # data in the collection; assert the wrapper produces the right request.
+    params = %{"metric" => "l2", "dimension" => 4, "nLists" => 1}
+    op = Index.create_vector("foo", "embedding", params)
+
+    assert op.http_method == :post
+    assert op.path == "index/"
+    assert op.query == %{"collection" => "foo"}
+    assert op.body["type"] == "vector"
+    assert op.body["fields"] == ["embedding"]
+    assert op.body["params"] == params
   end
 
   test "indexes/1 lists created custom index types", ctx do

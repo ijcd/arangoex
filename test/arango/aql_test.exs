@@ -235,15 +235,6 @@ defmodule AqlTest do
            } == Aql.current_queries() |> on_db(ctx)
   end
 
-  @tag :skip
-  test "Returns the currently running AQL queries (some queries)", ctx do
-    # run some queries and check
-    assert {
-             :ok,
-             []
-           } == Aql.current_queries() |> on_db(ctx)
-  end
-
   test "Returns the properties for the AQL query tracking", ctx do
     # with no queries running
     assert {:ok,
@@ -297,14 +288,6 @@ defmodule AqlTest do
              :ok,
              []
            } == Aql.slow_queries() |> on_db(ctx)
-  end
-
-  @tag :skip
-  test "Kills a running AQL query (valid query)", ctx do
-    assert {
-             :ok,
-             %{}
-           } == Aql.kill_query("somequery") |> on_db(ctx)
   end
 
   test "Kills a running AQL query (invalid query)", ctx do
