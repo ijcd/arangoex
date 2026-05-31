@@ -88,9 +88,13 @@ defmodule Arango.View do
 
   POST /_api/view
 
-  `indexes` is a list of `%{"collection" => name, "index" => id_or_name}`.
+  `indexes` is a list of `%{"collection" => name, "index" => index_name}`.
   Build the underlying inverted indexes first with
-  `Arango.Index.create_inverted/3`.
+  `Arango.Index.create_inverted/3` and pass them an explicit `name:` opt
+  so you can reference them here.
+
+  Note: the server resolves search-alias indexes by **name only** — passing
+  a full `collection/id` path returns `errorNum: 10 "Cannot find index"`.
   """
   @spec create_search_alias(String.t(), [map]) :: Arango.Request.t()
   def create_search_alias(name, indexes) when is_list(indexes) do
