@@ -293,17 +293,19 @@ Coverage: ~150 endpoints of ~155 in-demand v0 endpoints (~97%). Remaining ~80 en
 
 ---
 
-## Unresolved questions
+## Decisions
 
-- Stream Tx 3.a: opt-on-builder vs higher-level wrapper (`Arango.in_transaction(trx, fn -> ... end)`)? Prop: opt-on-builder Phase 5; wrapper Phase 6.
-- View: arangosearch vs search-alias — one module two `create_*`, or split (`Arango.View.ArangoSearch` / `SearchAlias`)? Prop: single module, two funs.
-- Analyzer: `type` as atom enum or pass-through string? Prop: string — server adds new types fast, server validates.
-- Job: "wait until done" — polling helper now or Phase 6? Prop: punt; tests poll inline with a 5s budget. Also: harness needs a way to expose response status (204 vs 200); flag.
-- Auth: cache JWT in-process, or each call returns it? Prop: return only; caching is Phase 6.
-- Token: `valid_until` as `DateTime` or Unix integer? Prop: pass-through integer.
-- Import: NDJSON vs JSON-array — separate funs or one `format:` opt? Prop: separate funs.
-- Import content-type override: confirm `Tesla.Middleware.Headers` is overridable per-call before committing. Spike inside Import PR.
-- Naming: `Arango.Transaction.Stream` (nested) vs `Arango.StreamTransaction` (flat)? Prop: nested.
-- View rename in cluster: how does the test handle the cluster-only 501? `:skip` is banned (#18). Prop: assert the response matches `{:ok, _}` OR `{:error, %{"code" => 501}}` — both are valid outcomes, the wrapper is correct either way. Same pattern as the Phase 4 body-shape conversions.
-- 3.a + 3.b as two PRs or one? Prop: two — keeps Cursor/Document churn separable from new module.
-- Auth boundary: should `login/2` flip the request layer's bearer mode automatically, or return JWT only? Prop: return only; flipping is Phase 6.
+All twelve open questions resolved during plan review. Recording them here so the sub-PRs land without re-litigating.
+
+- **Stream Tx ergonomics**: opt-on-builder this phase; the higher-level wrapper (`Arango.in_transaction(opts, fn -> ... end)`, Ecto-style with process-dict-tracked trx id) lands in **Phase 6**. The wrapper builds on the opt — not parallel work. Cross-driver reference: Ecto uses process-dict; python-arango uses a stateful `TransactionDatabase` wrapper; go-driver v2 uses per-call `.WithTransaction(tx)`.
+- **Stream Tx PR split**: two PRs. 3.a = `:transaction_id` opt + `x-arango-trx-id` header threaded through every existing builder (Document/Cursor/Collection/Graph). 3.b = new `Arango.Transaction.Stream` module (`begin`/`commit`/`abort`/`status`/`transactions`).
+- **Stream Tx naming**: nested `Arango.Transaction.Stream`. The existing JS `Arango.Transaction.transaction/1` is `@deprecated` and going away in v1; stream is its successor.
+- **View module shape**: single `Arango.View` module with `create_arangosearch/2` + `create_search_alias/2`. The shared half (`views/0`, `view/1`, `properties/1`, `drop/1`) is genuinely shared. Matches python-arango's choice (single `views.py` with `ArangoSearch` + `SearchAlias` sharing a base).
+- **View rename cluster handling**: accept either `{:ok, _}` OR `{:error, %{"code" => 501}}` in the test — both are valid outcomes, the wrapper is correct either way. No `:skip` (banned by #18).
+- **Analyzer `type`**: pass-through string. Spec just says `"type": "string"` with no enum; server validates. ArangoDB ships 1–3 new analyzer types per minor release (~12 cumulative since 3.7), so an atom enum is recurring maintenance for marginal user benefit.
+- **Auth `login/2`**: returns the JWT as a plain value. No in-process cache, no auto-flip of the Request layer's bearer mode. Both deferred to Phase 6 (managed-auth construct).
+- **Token `valid_until`**: integer pass-through (Unix seconds, matches the server wire format). Users call `DateTime.from_unix!/1` if they want. python-arango has no token module yet, so no precedent — server-shape wins.
+- **Import format API**: separate functions (`Arango.Import.documents/2` for NDJSON, `Arango.Import.array/2` for JSON array). Body shape + serialization differ enough that one polymorphic function would obscure more than it'd share. Mirrors python-arango's split.
+- **Import content-type override**: spike inside the Import PR — confirm `Tesla.Middleware.Headers` allows per-call override of the globally-pinned `application/json`; if not, lift the header out of `Arango.Request.ApiConn` middleware. Either path is local to that PR.
+- **Job polling**: punt the `wait_for_job/1` helper to Phase 6 (alongside the QoL retry mechanism — same backoff/timeout design). Phase 5 tests poll inline with a 5s budget.
+- **View `arangosearch` vs `search-alias` domain context**: arangosearch view is server-managed (links + analyzer pipeline; server builds indexes); search-alias view is a thin facade over manually-built inverted indexes (from `Index.create_inverted/3` in Phase 4). Different ownership models, shared query surface — hence one module with two creates.
