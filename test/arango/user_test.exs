@@ -98,4 +98,63 @@ defmodule UserTest do
     {:ok, dbs} = User.databases(johnny) |> arango()
     assert Map.get(dbs, db_name, "none") == "none"
   end
+
+  # === Phase 4 additions ===
+
+  test "permissions/1 is an alias for databases/1" do
+    {:ok, dbs} = User.permissions(%User{user: "root"}) |> arango()
+    assert is_map(dbs)
+    assert Map.has_key?(dbs, "_system")
+  end
+
+  test "permissions/2 returns the effective database permission", ctx do
+    user = "user_perm_#{System.unique_integer([:positive])}"
+    {:ok, _} = User.create(user: user) |> arango()
+    {:ok, _} = User.grant(user, ctx.db_name) |> arango()
+
+    assert {:ok, %{"result" => "rw"}} =
+             User.permissions(user, ctx.db_name) |> arango()
+  end
+
+  test "grant/4 grants ro on a collection", ctx do
+    user = "user_coll_ro_#{System.unique_integer([:positive])}"
+    {:ok, _} = User.create(user: user) |> arango()
+    {:ok, _} = User.grant(user, ctx.db_name) |> arango()
+    {:ok, _} = User.grant(user, ctx.db_name, ctx.coll.name, "ro") |> arango()
+
+    assert {:ok, %{"result" => "ro"}} =
+             User.permission(user, ctx.db_name, ctx.coll.name) |> arango()
+  end
+
+  test "revoke/3 removes the collection-level grant (db-level remains)", ctx do
+    user = "user_coll_rev_#{System.unique_integer([:positive])}"
+    {:ok, _} = User.create(user: user) |> arango()
+    {:ok, _} = User.grant(user, ctx.db_name) |> arango()
+    # Pin collection to none, distinct from the db-level "rw"
+    {:ok, _} = User.grant(user, ctx.db_name, ctx.coll.name, "none") |> arango()
+
+    assert {:ok, %{"result" => "none"}} =
+             User.permission(user, ctx.db_name, ctx.coll.name) |> arango()
+
+    # Remove the collection-level grant → falls back to db-level default
+    {:ok, _} = User.revoke(user, ctx.db_name, ctx.coll.name) |> arango()
+
+    {:ok, %{"result" => level}} =
+      User.permission(user, ctx.db_name, ctx.coll.name) |> arango()
+
+    # After revoke, the collection-level entry is gone; effective grant
+    # is the db-level "rw" (3.12 returns either the inherited value or
+    # "undefined" depending on server config — accept both).
+    assert level in ["rw", "undefined"]
+  end
+
+  test "permission/3 returns the effective collection grant", ctx do
+    user = "user_coll_eff_#{System.unique_integer([:positive])}"
+    {:ok, _} = User.create(user: user) |> arango()
+    {:ok, _} = User.grant(user, ctx.db_name) |> arango()
+    {:ok, _} = User.grant(user, ctx.db_name, ctx.coll.name, "rw") |> arango()
+
+    assert {:ok, %{"result" => "rw"}} =
+             User.permission(user, ctx.db_name, ctx.coll.name) |> arango()
+  end
 end
